@@ -1,4 +1,4 @@
-# gets papers from url (tagged in subset)
+# gets papers from url (tagged with the given subset)
 # uses resumptionTokens to get all the papers
 # puts each response in a separate xml file
 
@@ -9,35 +9,6 @@ import time
 
 url = "http://eprints.gla.ac.uk/cgi/oai2"
 #sub_set = "7375626A656374733D51:5141:51413735"
-
-def get_it(response, l, i, filename):
-	print response.content
-	print "ABOVE IS THE SUPPOSED FIRST RESPONSE"
-	i += 1
-	token = ""
-	#root = ET.fromstring(response.text.encode("utf-8"))
-	print "looking for token in " + str(i-1)
-	root = ET.fromstring(response.content)
-	for child in root[2]:
-		if 'resumptionToken' in child.tag:
-			token = child.text
-			print "token for " + str(i-1) + " is " + token
-		else:
-			print "no token found in " + str(i-1)
-
-	if token:
-		newresponse = requests.get(url + "?verb=ListRecords&resumptionToken=" + token)
-		#fl.write(newresponse.text.encode("utf-8"))
-		#fl.write(newresponse.content)
-		#xml_string += newresponse.text.encode("utf-8")
-		l.append(newresponse.content)
-		with open("xmlfile" + filename + str(i) + ".xml", 'w') as f:
-			f.write(newresponse.content)
-
-		get_it(newresponse, l, i, filename)
-	else:
-		print "no resumption token, returning..."
-		return
 		
 
 def get_xml_list(sub_set, filename):
@@ -45,30 +16,63 @@ def get_xml_list(sub_set, filename):
 	xml_list = []
 	index = 1
 	
+	# use the OAI-PMH ListRecords verb for the given set to get the first response
 	response = requests.get(url + "?verb=ListRecords&set=%s&metadataPrefix=oai_dc" % sub_set)
+	# Add the xml response to the list of responses
 	xml_list.append(response.content)
+
+
 	print response.text.encode("utf-8")
-	with open("xmlfile" + filename + str(index) + ".xml", 'w') as f:
+	# Write response to file TODO for testing purposes
+	with open("../xml_files/" + filename + str(index) + ".xml", 'w') as f:
 		f.write(response.content)
 
-	get_it(response, xml_list, index, filename)
+	has_resumption_token = True
+	while has_resumption_token:
+		index += 1
+		
+		token = check_for_res_token(response)
+
+		if token:
+			# Make new OAI-PMH request using resumption token
+			response = requests.get(url + "?verb=ListRecords&resumptionToken=" + token)
+			print response.text.encode("utf-8")
+			# append the response to the list of xml responses
+			xml_list.append(response.content)
+			# Write response to file
+			# TODO this is mostly for testing purposes
+			with open("../xml_files/" + filename + str(index) + ".xml", 'w') as f:
+				f.write(response.content)
+		# If token was not found, change has_resumption_token to false to exit loop
+		else:
+			has_resumption_token = False
 	
+	# Print out the time taken to get all the OAI responses
+	# TODO this is for testing
 	time_taken = time.time() - start_time
 	print "time taken was %f seconds so around %f minutes" % (time_taken, time_taken/60)
 
 	return xml_list
 
+def check_for_res_token(xml_response):
+	res_token = ""
+	# get the xml root element from response
+	root = ET.fromstring(xml_response.content)
+		# root[2] is <ListRecords> element - if a resumption token is present it is in a child
+		# element of this element, so loop through child elements to look for resumption token
+	for child in root[2]:
+		# Check if tag contains 'resumptionToken' string
+		if 'resumptionToken' in child.tag:
+			# If so, assign it's text to token
+			res_token = child.text
+			break
+
+	return res_token
 
 
-subjects = [()]
 
-#glafile = open('cs_test.xml', 'a')
-#glafile.write(response.text.encode("utf-8"))
-#glafile.write(response.content)
-#get_it(response, glafile)	
-#print xml_string
 
-#get_xml_list()	
+
 
 
 
