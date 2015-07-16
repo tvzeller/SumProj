@@ -49,9 +49,9 @@ def get_names(url):
 	last_names = tree.xpath('//*[@id="research-teachinglist"]/li/a/strong/text()')
 	# get list of (titled) first names
 	titled_first_names = tree.xpath('//*[@id="research-teachinglist"]/li/a/text()')
-	# make list of (last name, first name) tuples
+	# make list of "Last Name, Title First Name" strings
 	full_names = ["%s%s" % (first, last) for first, last in zip(last_names, titled_first_names)]
-	#name_tups = zip(last_names, titled_first_names)
+
 	print full_names
 	return full_names
 
