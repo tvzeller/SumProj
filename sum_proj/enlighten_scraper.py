@@ -16,6 +16,10 @@ import operator
 
 
 def get_tree(url):
+	"""
+	Takes a url and returns an html tree object to be parsed using
+	lxml
+	"""
 	while True:
 		try:
 			page = requests.get(url, timeout=10)
@@ -35,9 +39,8 @@ def get_tree(url):
 def get_names(url):
 	
 	""" 
-	returns list of name tuples in form [("last name", ", "title first name"), etc]
-	e.g. [("Manlove", ", Dr David")]
-	So join 2 together to get Manlove, Dr David 
+	returns list of names in form "Last Name, Title First Name"
+	e.g. "Manlove, Dr David"
 	"""
 
 	# get html element tree
@@ -53,64 +56,80 @@ def get_names(url):
 	return full_names
 
 
+# TODO make this whole function about strings, not names - generalise it
 def get_author_url(author_list_url, author_name):
 	""" 
-	takes the base url for lists of Glasgow authors, and last and first name,
-	returns the url for the page of the author with that name
+	takes the base url for the list of authors on Enlighten, 
+	and the name of the target author, in the form "Last Name, Title First Name"
+	returns a list of (name, url) tuples for the authors whose name matched parameter
+	the url returned in the tuple is the author's page on Enlighten
 	"""
 
 	print "getting url for" + author_name
 	# create full url based on the first initial of the author's last name
-	# TODO consider doing this outside this method and just taking the full url as a parameter
+	# TODO consider doing this outside this method and just taking the full url as a parameter, 
+	# so this function won't depend on name being passed in the right format
 	full_url = author_list_url + "index."+ author_name.split(" ")[0][0] + ".html"
 	# get the html tree for the relevant author list page
 	tree = get_tree(full_url)
 	
-	# concatenate last and first names and convert to lower case
-	full_name = author_name.lower()
+	# Convert name to lower case - this will be searched against lower case text on the Enlighten page
+	lower_name = author_name.lower()
 	
-	# used to convert text in <a> tags to lower case in paths before checking if equals the name provided
+	# Used to convert text in <a> tags to lower case in paths before checking if matches the name provided
 	case = 'translate(text(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")'
-	# uses full first name
-	path = '//table/tr/td/ul/li/a[contains(%s, \"%s\")]' % (case, full_name)
-
-	# get list of <a> elements whose text matches the name
+	# This is the path to look for <a> tags which contain the target name as text
+	# N.B. contains() is used rather than equals as it can catch more cases - e.g. we could pass just a last name
+	path = '//table/tr/td/ul/li/a[contains(%s, \"%s\")]' % (case, lower_name)
+	# get the list of <a> elements whose text contains the name
 	elements = tree.xpath(path)
 
 	# this means that the name was found more than once on the page
 	if len(elements) > 1:
 		print "MORE THAN ONE ELEMENT"
 	
-	urls = []
-	# if name was found, concatenate the href attribute obtained to the base url and return
+	# If target string was found, for each <a> element that contains it, make a
+	# (text, url) tuple and create a list out of the resulting tuples
+	# N.B. the href obtained from the element is concatenated to the base url as it is relative
 	if elements:
 		# have to concatenate as href is given as relative path
-		urls = [(elem.text, author_list_url + elem.get("href")) for elem in elements]
-		#url = author_list_url + elements[0].get("href")
+		text_url_tups = [(elem.text, author_list_url + elem.get("href")) for elem in elements]
 		print urls
-		print "GOT HERE"
 	else:
 		# create file of names that were not found to check for reasons why
 		with open("unfound_names.txt", 'a') as f:
 			f.write(author_name)
 
-	return urls
+	return text_url_tups
 		
 
 def sort_name_urls(name_url_list, schl_name):
-	# TODO this function should be called count school matches?
+	"""
+	Takes a list of (author name, author page url) tuples and the name of the school the author is
+	supposed to be in.
+	Returns a list of (name, url) tuples sorted by the amount of papers each author has that is
+	associated to the given school
+	"""
+
+	# A dict to have (name, url) tuples as keys and the amount of papers in the relevant school
+	# as values
 	school_matches = {}
+
 	for name_url in name_url_list: # for each author page
 		school_matches[name_url] = 0
-		a_elems = get_a_elems(name_url[1]) # get paper <a> elements
-		for a in a_elems:
+		# get the <a> elements for each paper on the author's page
+		a_elems = get_a_elems_for_papers(name_url[1])
+		for a in a_elems: # for each paper
+			# from the paper's Enlighten page, get a string indicating what school it is associated to
 			schl_info = get_paper_school_info(a.get("href"))
 			# TODO do this by percentage of papers matching school instead of absolute value?
+			# If the relevant school is found in the school info string, increment the value
+			# of this (name, url) key
 			if schl_name in schl_info:
 				school_matches[name_url] += 1
 
-	# Get list of (name, url) tuples sorted by number of matches
-	# First Sort a list of (key, value) tuples ordered by item at index 1 (the value, i.e. the num of matches)
+	# From dict, create list of (name, url) tuples sorted by value
+	# First sort a list of (key, value) tuples ordered by item at index 1 (the value, i.e. the num of matches)
 	# N.B. use reverse flag so that key with highest value goes first
 	sorted_schl_matches = sorted(school_matches.items(), key=operator.itemgetter(1), reverse=True)
 	# Then make list from just the keys (the (name, url) tuples)
@@ -119,13 +138,23 @@ def sort_name_urls(name_url_list, schl_name):
 	return sorted_name_urls
 
 def check_if_in_dept(author_url, schl_name):
-	a_elems = get_a_elems(author_url)
+	"""
+	Takes the url for an author page on Enlighten and the name of a school and 
+	checks if author has at least one paper associated to the given school 
+	"""
+	# Get list of the <a> elements linking to all the papers on the author's page
+	a_elems = get_a_elems_for_papers(author_url)
 	in_dept = False
 	i = 0
+
 	while not in_dept and i < len(a_elems):
+		# For each paper, get the school info for that paper
 		schl_info = get_paper_school_info(a_elems[i].get("href"))
+		# If the given school name is in the school info string, make in_dept True
+		# and exit loop
 		if schl_name in schl_info:
 			in_dept = True
+		# Otherwise, check next paper
 		else:
 			i += 1
 
@@ -133,19 +162,30 @@ def check_if_in_dept(author_url, schl_name):
 
 
 def get_paper_school_info(paper_url):
+	"""
+	Each paper on Enlighten is associated to one or more schools within the University.
+	This function takes the url for the paper page and returns a string indicating
+	which school(s) the paper is associated to
+	"""
 	paper_tree = get_tree(paper_url)
+	# XPath to extract the school info
 	path = '//table/tr/th[text() = "College/School:"]/following-sibling::td/a/text()'
+	# This gives us a list of strings with school info (a paper may be associated to more than one school)
 	school_info = paper_tree.xpath(path)
-	# here have to check if schl_name is in any of the items of school_info (which may be more than one,
-	# if paper is associated to more than one school)
+	# Join list to return the information as a single string string
 	schl_info_string = "\n".join(school_info)
 
 	return schl_info_string
 
 
 
-def get_a_elems(url):
-	tree = get_tree(url)
+def get_a_elems_for_papers(author_page_url):
+	"""
+	Takes the url for an Enlighten author page and extracts the <a> elements which link
+	to the papers on that page
+	Returns list of those <a> elements
+	"""
+	tree = get_tree(author_page_url)
 	ns = 'http://exslt.org/regular-expressions'
 	path = '//a[re:match(@href, "http://eprints.gla.ac.uk/[0-9]+/")]'
 	a_elems = tree.xpath(path, namespaces={'re':ns})
@@ -158,49 +198,28 @@ def initialise_first_name(name):
 	takes full name in the form "Last Name, Title First Name" and returns 
 	full name with the first name as an initial
 	"""
-	#tokens = first.split(" ")
-	#first_tokens[2] = first_tokens[2][:1]
-	#initial_first = " ".join(first_tokens)
-	#return (last + initial_first)
-
+	# Split name on the comma and space
 	tokens = name.split(", ")
 	last_name = tokens[0]
+	# Split tokens[1] which is a "Title First Name" string
 	first_tokens = tokens[1].split(" ")
+	# Replace the first name with just the first initial
 	first_tokens[1] = first_tokens[1][0]
+	# Concatenate everything back together and return
 	return last_name + ', ' + " ".join(first_tokens)
 
 
+# TODO maybe there should be a function to return just a list of all the titles as well
 def get_author_titles(author_url):
 	"""
 	Takes url of author page and returns a tuple with 2 elements.
 	The first is a list of all the titles on the author's page, the second is
-	a list of just the titles that have been tagged with a subject
+	a list of just the titles that have been tagged with a subject, so
+	([all_titles][tagged_titles])
 	"""
 
-	#tree = get_tree(author_url)
-	#print "got here at least"
-
-	# namespace for use with xpath regular expressions
-	#ns = 'http://exslt.org/regular-expressions'
-
-	# NOTE: THE BELOW HAS ALL BEEN FIXED BY USING TEXT_CONTENT()
-	# n.b. double // before text() - this is to account for cases where the text is not directly
-	# between the <a> tags, but has something in between like <strong> or <em>
-	# AKA the Tango with Django exception
-	# TODO TODO TODO http://stackoverflow.com/questions/10424117/xpath-expression-for-selecting-all-text-in-a-given-node-and-the-text-of-its-chl
-	# because this doesn't work with <i> tags apparently see "Athorne, C" exception in maths
-	# text_path = '//a[re:match(@href, "http://eprints.gla.ac.uk/[0-9]+/")]//text()'
-	# all_titles = tree.xpath(text_path, namespaces={'re':ns})
-
-	# href_path = '//a[re:match(@href, "http://eprints.gla.ac.uk/[0-9]+/")]/@href'
-	# links = tree.xpath(href_path, namespaces={'re':ns})
-
-	# instead of parsing once for the text and again for the hrefs
-	# parse once only for the a elements, then extract the text and the href from the a elements
-	#path = '//a[re:match(@href, "http://eprints.gla.ac.uk/[0-9]+/")]'
-	#a_elems = tree.xpath(path, namespaces={'re':ns})
-
-	a_elems = get_a_elems(author_url)
+	# Get the <a> elements for the papers on the author's page
+	a_elems = get_a_elems_for_papers(author_url)
 
 	all_titles = []
 	links = []
@@ -214,47 +233,30 @@ def get_author_titles(author_url):
 	# Get the list of titles of papers that have been tagged with a subject
 	tagged_titles = get_tagged_titles(titles_links)
 
-	#datestrings = tree.xpath('//div[@class="ep_view_page ep_view_page_view_author"]/p/text()[2]')
-	# date will be in text at either at position 1 or 2 - this depends on whether authors include
-	# a Glasgow author - if so, the author names will be in a <span> and will not be counted as p/text()
-	# but will act as a delimiter - so what comes after it (in this case the date) is in position 2
-	# otherwise, the authors will be text and so the date will be in position 1, as they come before any delimiter 
-	#datestrings = tree.xpath('//div[@class="ep_view_page ep_view_page_view_author"]/p/text()[position() = 1 or position() = 2]')
-
-	# OK this is the correct one for now
-	# looks for the link to the paper then gets the text in the immediately preceding sibling node
-	# should work as the date is always right before the title of the paper
-	# datestrings = tree.xpath('//div[@class="ep_view_page ep_view_page_view_author"]/p/a[re:match(@href, "http://eprints.gla.ac.uk/[0-9]+/")]/preceding-sibling::text()[1]', 
-	# 				namespaces={'re':ns})
-	# dates = []
-	# for datestring in datestrings:
-	# 	date = re.findall('[0-9]+', datestring)
-	# 	# findall returns list of strings that match pattern (i.e. numbers)
-	# 	if date:
-	# 		dates.append(date[0])
-
 	# Remove full stops from end of titles
 	all_titles = [title[:-1] if title[-1] == '.' else title for title in all_titles]
 	tagged_titles = [title[:-1] if title[-1] == '.' else title for title in tagged_titles]
 	# use loop instead of list comprehension?
 	# TODO or get rid of this since we are now comparing titles from same data set?
 
-	#title_dates = zip(titles, dates)
-
 	return (all_titles, tagged_titles)
-	#return all_titles
 
 def get_tagged_titles(ttls_lnks):
 	"""
-	Given a list of titles and urls, returns a list with the titles of just the
+	Given a list of (title, url) tuples, returns a list with the titles of just
 	those papers which have been tagged with a subject
+	Checks for tag by checking if the paper's page has a Subject row in information table
 	"""
 	tagged_titles = []
 	for title, link in ttls_lnks:
+		# TODO for testing, remove this later
 		print "checking" + title.encode("utf-8")
+		# get the html tree for the paper's page
 		paper_tree = get_tree(link)
 		path = '//table/tr/th[text() = "Subjects:"]'
+		# Check if html contains the table header "Subjects:"
 		subject_th = paper_tree.xpath(path)
+		# If it does, this means paper is tagged so add to the list to be returned
 		if subject_th:
 			tagged_titles.append(title)
 
@@ -269,14 +271,16 @@ def get_scrape_dict(dept_url, dept_name):
 	"""
 
 	# Change to "School of Humanities" to match the name used in Enlighten
+	# Done because the string obtained from http://www.gla.ac.uk/schools/ contains the Gaelic
+	# name as well
 	if "Humanities" in dept_name:
 		dept_name = "School of Humanities"
 
 	search_url = "http://eprints.gla.ac.uk/cgi/search"
-
-	# TODO should this be a global variable?
+	# TODO should this be a global/instance variable?
 	author_list_base = "http://eprints.gla.ac.uk/view/author/"
 
+	# Dict to contain (author name, author page url) as keys and a tuple of ([all_titles][tagged_titles]) as values
 	bib_dict = {}
 
 	# get list of names of researchers in department
@@ -284,12 +288,17 @@ def get_scrape_dict(dept_url, dept_name):
 
 	# loop through each name
 	for name in names:
+		# get the first ranked (name, url) tuple for the target name
 		name_url = get_winning_url(author_list_base, name, bib_dict.keys(), dept_name)
+		# if a (name, url) tuple was returned, add to dict as key, and get the author's titles
+		# to add as the value
 		if name_url:
 			titles = get_author_titles(name_url[1])
 			bib_dict[name_url] = titles
 
 
+	# write json representation of dictionary to a file
+	# TODO this might be a bit of a hack
 	with open('subj_dicts/' + dept_name + ".txt", 'w') as f:
 		json.dump(bib_dict.items(), f)
 
@@ -335,20 +344,20 @@ def get_scrape_dict(dept_url, dept_name):
 def get_winning_url(authors_base_url, name, existing_authors, school):
 	# abbreviate name
 	abbr_name = initialise_first_name(name)
-	# Get all the urls which match the author's name
-	urls = get_author_url(authors_base_url, abbr_name)
+	# Get all the (name, url) tuples for names which match the target name
+	name_urls = get_author_url(authors_base_url, abbr_name)
 	
 	# If urls were found, remove the (name, url) pairs that are already present in the dict
 	if urls:
-		for name_url in urls:
+		for name_url in name_urls:
 			if name_url in existing_authors:
-				urls.remove(name_url)
+				name_urls.remove(name_url)
 
 	# There is still more than one possible author so have to pick one of them
 	# Pick the one with most papers associated to the relevant school
-	if len(urls) > 1:
+	if len(name_urls) > 1:
 		# Sort (name, url) pairs by number of papers in relevant school
-		sorted_urls = sort_name_urls(urls, school)
+		sorted_urls = sort_name_urls(name_urls, school)
 		# The first one in the list is chosen 
 		# TODO FIRST CHECK IF SOMEONE ACTUALLY HAS PAPERS ASSOCIATED - BECAUSE MAYBE NONE OF THEM ARE IN DEPT
 		# THIS IS IMPORTANT
@@ -359,15 +368,16 @@ def get_winning_url(authors_base_url, name, existing_authors, school):
 	# If match has been made with abbreviated first name, there is a chance that the author we were looking
 	# for is not present in Enlighten, and we have someone not in the right dept, so check if they are in the
 	# right dept before accepting them
-	elif len(urls) == 1:
+	elif len(name_urls) == 1:
 		print "WAIT...checking if in the right department"
 		# Check their papers to see if associated to right department
 		# TODO is this step necessary? More accurate results but adds quite a bit of time as more
 		# requests have to be made
-		is_in_dept = check_if_in_dept(urls[0][1], school)
+		is_in_dept = check_if_in_dept(name_urls[0][1], school)
 		if is_in_dept:
+			# TODO testing purposes, remove later
 			print "yes, proceed"
-			winning_name_url = urls[0]
+			winning_name_url = name_urls[0]
 		# Probably not in right department, reject
 		else:
 			winning_name_url = None
@@ -380,7 +390,9 @@ def get_winning_url(authors_base_url, name, existing_authors, school):
 	print "name is " + name + " now returning"
 	return winning_name_url
 
-
+# Just a way of finding what the (name, url) key is if we know an
+# author's name
+# TODO mainly for testing
 def getKeys(d, last_name):
 	keys = []
 	for key in d.keys():
