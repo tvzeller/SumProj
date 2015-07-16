@@ -1,3 +1,4 @@
+# testing out networkx
 # TODO decouple this from the xml parsing
 # e.g. have it receive names from another module
 from lxml import etree

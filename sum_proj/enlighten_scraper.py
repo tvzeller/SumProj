@@ -1,5 +1,5 @@
 # gets urls for enlighten author pages
-# visits urls and makes dict with author: [titles]
+# visits urls and makes dict with author: ([all_titles][tagged_titles])
 
 # TODO consider making this a class to avoid passing around variables
 # e.g. the name of the School, stafflist base URL could be instance variables
@@ -276,16 +276,13 @@ def get_scrape_dict(dept_url, dept_name):
 	if "Humanities" in dept_name:
 		dept_name = "School of Humanities"
 
-	search_url = "http://eprints.gla.ac.uk/cgi/search"
 	# TODO should this be a global/instance variable?
 	author_list_base = "http://eprints.gla.ac.uk/view/author/"
 
 	# Dict to contain (author name, author page url) as keys and a tuple of ([all_titles][tagged_titles]) as values
 	bib_dict = {}
-
 	# get list of names of researchers in department
 	names = get_names(dept_url)
-
 	# loop through each name
 	for name in names:
 		# get the first ranked (name, url) tuple for the target name
@@ -348,8 +345,11 @@ def get_winning_url(authors_base_url, name, existing_authors, school):
 	name_urls = get_author_url(authors_base_url, abbr_name)
 	
 	# If urls were found, remove the (name, url) pairs that are already present in the dict
-	if urls:
+	if name_urls:
 		for name_url in name_urls:
+			# TODO hmmm this is searching in a list (existing_authors) but could be doing so in a dict (bib_dict), more efficiently...
+			# How about we do this step in get_scrape_dict instead..
+			# e.g. call get_author_url, do this, then pass name_urls to this method
 			if name_url in existing_authors:
 				name_urls.remove(name_url)
 
