@@ -13,7 +13,7 @@ import re
 import json
 import operator
 
-
+author_list_base = "http://eprints.gla.ac.uk/view/author/"
 
 def get_tree(url):
 	"""
@@ -56,49 +56,47 @@ def get_names(url):
 	return full_names
 
 
-# TODO make this whole function about strings, not names - generalise it
-def get_author_url(author_list_url, author_name):
-	""" 
-	takes the base url for the list of authors on Enlighten, 
-	and the name of the target author, in the form "Last Name, Title First Name"
-	returns a list of (name, url) tuples for the authors whose name matched parameter
-	the url returned in the tuple is the author's page on Enlighten
-	"""
+# # TODO make this whole function about strings, not names - generalise it
+# def get_author_url(author_list_url, author_name):
+# 	""" 
+# 	takes the base url for the list of authors on Enlighten, 
+# 	and the name of the target author, in the form "Last Name, Title First Name"
+# 	returns a list of (name, url) tuples for the authors whose name matched parameter
+# 	the url returned in the tuple is the author's page on Enlighten
+# 	"""
 
-	print "getting url for" + author_name
-	# create full url based on the first initial of the author's last name
-	# TODO consider doing this outside this method and just taking the full url as a parameter, 
-	# so this function won't depend on name being passed in the right format
-	full_url = author_list_url + "index."+ author_name.split(" ")[0][0] + ".html"
-	# get the html tree for the relevant author list page
-	tree = get_tree(full_url)
+# 	print "getting url for" + author_name
+# 	# create full url based on the first initial of the author's last name
+# 	# TODO consider doing this outside this method and just taking the full url as a parameter, 
+# 	# so this function won't depend on name being passed in the right format
+# 	full_url = author_list_url + "index."+ author_name.split(" ")[0][0] + ".html"
+# 	# get the html tree for the relevant author list page
+# 	tree = get_tree(full_url)
 	
+	
+def get_name_url_matches(author_name, html_tree):
 	# Convert name to lower case - this will be searched against lower case text on the Enlighten page
 	lower_name = author_name.lower()
-	
 	# Used to convert text in <a> tags to lower case in paths before checking if matches the name provided
 	case = 'translate(text(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")'
 	# This is the path to look for <a> tags which contain the target name as text
 	# N.B. contains() is used rather than equals as it can catch more cases - e.g. we could pass just a last name
 	path = '//table/tr/td/ul/li/a[contains(%s, \"%s\")]' % (case, lower_name)
 	# get the list of <a> elements whose text contains the name
-	elements = tree.xpath(path)
-
-	# this means that the name was found more than once on the page
-	if len(elements) > 1:
-		print "MORE THAN ONE ELEMENT"
-	
+	elements = html_tree.xpath(path)
 	# If target string was found, for each <a> element that contains it, make a
 	# (text, url) tuple and create a list out of the resulting tuples
 	# N.B. the href obtained from the element is concatenated to the base url as it is relative
 	if elements:
 		# have to concatenate as href is given as relative path
-		text_url_tups = [(elem.text, author_list_url + elem.get("href")) for elem in elements]
-		print urls
+		text_url_tups = [(elem.text, author_list_base + elem.get("href")) for elem in elements]
+		print text_url_tups
 	else:
-		# create file of names that were not found to check for reasons why
-		with open("unfound_names.txt", 'a') as f:
-			f.write(author_name)
+		text_url_tups = None
+
+	# 	# create file of names that were not found to check for reasons why
+	# 	with open("unfound_names.txt", 'a') as f:
+	# 		f.write(author_name)
 
 	return text_url_tups
 		
@@ -269,15 +267,11 @@ def get_scrape_dict(dept_url, dept_name):
 	and 2-element tuples as values. The first element is a list of all
 	the papers, the second is a list of just the papers that have been tagged 
 	"""
-
 	# Change to "School of Humanities" to match the name used in Enlighten
-	# Done because the string obtained from http://www.gla.ac.uk/schools/ contains the Gaelic
-	# name as well
+	# Done because the string obtained from http://www.gla.ac.uk/schools/ contains the Gaelic name as well
 	if "Humanities" in dept_name:
 		dept_name = "School of Humanities"
 
-	# TODO should this be a global/instance variable?
-	author_list_base = "http://eprints.gla.ac.uk/view/author/"
 
 	# Dict to contain (author name, author page url) as keys and a tuple of ([all_titles][tagged_titles]) as values
 	bib_dict = {}
@@ -285,18 +279,24 @@ def get_scrape_dict(dept_url, dept_name):
 	names = get_names(dept_url)
 	# loop through each name
 	for name in names:
+		name = initialise_first_name(name)
+		full_url = author_list_base + "index."+ name.split(" ")[0][0] + ".html"
+		tree = get_tree(full_url)
+		name_urls = get_name_url_matches(name, tree)
+		
+		name_urls = [name_url for name_url in name_urls if name_url not in bib_dict]
 		# get the first ranked (name, url) tuple for the target name
-		name_url = get_winning_url(author_list_base, name, bib_dict.keys(), dept_name)
+		winning_name_url = get_winning_url(name_urls, dept_name)
 		# if a (name, url) tuple was returned, add to dict as key, and get the author's titles
 		# to add as the value
-		if name_url:
-			titles = get_author_titles(name_url[1])
-			bib_dict[name_url] = titles
+		if winning_name_url:
+			titles = get_author_titles(winning_name_url[1])
+			bib_dict[winning_name_url] = titles
 
 
 	# write json representation of dictionary to a file
 	# TODO this might be a bit of a hack
-	with open('subj_dicts/' + dept_name + ".txt", 'w') as f:
+	with open('../subj_dicts/' + dept_name + ".txt", 'w') as f:
 		json.dump(bib_dict.items(), f)
 
 	# TO RESTORE from JSON
@@ -338,26 +338,12 @@ def get_scrape_dict(dept_url, dept_name):
 # This would avoid some name clashes (which would still happen if people had exact same names) but 
 # would be more complicated.
 
-def get_winning_url(authors_base_url, name, existing_authors, school):
-	# abbreviate name
-	abbr_name = initialise_first_name(name)
-	# Get all the (name, url) tuples for names which match the target name
-	name_urls = get_author_url(authors_base_url, abbr_name)
-	
-	# If urls were found, remove the (name, url) pairs that are already present in the dict
-	if name_urls:
-		for name_url in name_urls:
-			# TODO hmmm this is searching in a list (existing_authors) but could be doing so in a dict (bib_dict), more efficiently...
-			# How about we do this step in get_scrape_dict instead..
-			# e.g. call get_author_url, do this, then pass name_urls to this method
-			if name_url in existing_authors:
-				name_urls.remove(name_url)
-
+def get_winning_url(nm_url_list, school):
 	# There is still more than one possible author so have to pick one of them
 	# Pick the one with most papers associated to the relevant school
-	if len(name_urls) > 1:
+	if len(nm_url_list) > 1:
 		# Sort (name, url) pairs by number of papers in relevant school
-		sorted_urls = sort_name_urls(name_urls, school)
+		sorted_urls = sort_name_urls(nm_url_list, school)
 		# The first one in the list is chosen 
 		# TODO FIRST CHECK IF SOMEONE ACTUALLY HAS PAPERS ASSOCIATED - BECAUSE MAYBE NONE OF THEM ARE IN DEPT
 		# THIS IS IMPORTANT
@@ -368,26 +354,24 @@ def get_winning_url(authors_base_url, name, existing_authors, school):
 	# If match has been made with abbreviated first name, there is a chance that the author we were looking
 	# for is not present in Enlighten, and we have someone not in the right dept, so check if they are in the
 	# right dept before accepting them
-	elif len(name_urls) == 1:
+	elif len(nm_url_list) == 1:
 		print "WAIT...checking if in the right department"
 		# Check their papers to see if associated to right department
 		# TODO is this step necessary? More accurate results but adds quite a bit of time as more
 		# requests have to be made
-		is_in_dept = check_if_in_dept(name_urls[0][1], school)
+		is_in_dept = check_if_in_dept(nm_url_list[0][1], school)
 		if is_in_dept:
 			# TODO testing purposes, remove later
 			print "yes, proceed"
-			winning_name_url = name_urls[0]
+			winning_name_url = nm_url_list[0]
 		# Probably not in right department, reject
 		else:
 			winning_name_url = None
 
 	# No (name, url) pairs returned
 	else:
-		print name + " not found"
 		winning_name_url = None
 
-	print "name is " + name + " now returning"
 	return winning_name_url
 
 # Just a way of finding what the (name, url) key is if we know an

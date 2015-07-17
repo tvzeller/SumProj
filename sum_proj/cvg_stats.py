@@ -6,18 +6,29 @@
 # is an instance variable - this is the justification
 
 class Stats(object):
-	def __init__(self, td, sbj):
+	def __init__(self, td, sbj=None):
 		self.title_dict = td 
-		self.subject = sbj
+		if sbj:
+			self.subject = sbj
+		else:
+			self.subject = "No subject provided"
 
 	
 	def get_cvg_dict(self):
 		cvg_dict = {}
-		for author in self.title_dict:
-			all_titles = self.title_dict[author][0]
-			tagged_titles = self.title_dict[author][1]
-			pct_cvg = (len(tagged_titles) * 1.0) / len(all_titles)
-			cvg_dict[author] = pct_cvg
+		try:
+			for author in self.title_dict:
+				all_titles = self.title_dict[author][0]
+				tagged_titles = self.title_dict[author][1]
+				# avoid division by 0 - is this necessary?
+				if all_titles:
+					pct_cvg = (len(tagged_titles) * 1.0) / len(all_titles)
+					cvg_dict[author] = pct_cvg
+				else:
+					cvg_dict[author] = 0.0
+		except TypeError:
+			cvg_dict = {}
+		
 		return cvg_dict
 
 
@@ -25,30 +36,58 @@ class Stats(object):
 		# TODO what if cvg_dict is empty? i.e. no authors - here would be dividing by 0
 		# fix this and other such potential edge cases
 		cvg_dict = self.get_cvg_dict()
-		mean = (sum(cvg_dict.values()) / len(cvg_dict)) * 100
-		return mean
+		try:
+			if cvg_dict:
+				mean = (sum(cvg_dict.values()) / len(cvg_dict)) * 100
+				mean = round(mean, 2)
+			else:
+				mean = 0.0
+			return mean
+		except TypeError:
+			return 0.0
 
 
 	def get_range(self):
+		# .b. get_cvg_dict will return empty {} if self.title_dict is wrong type
 		cvg_dict = self.get_cvg_dict()
-		max_cvg = max(cvg_dict.values())
-		min_cvg = min(cvg_dict.values())
-		return {'max': max_cvg, 'min': min_cvg}
+		if cvg_dict:
+			max_cvg = max(cvg_dict.values())
+			min_cvg = min(cvg_dict.values())
+			return {'max': max_cvg, 'min': min_cvg}
+		else:
+			return {'max': 0.0, 'min': 0.0}
 
-	def get_author_cvg(self, name):
-		all_titles = self.title_dict[name][0]
-		tagged_titles = self.title_dict[name][1]
-		cvg = (len(tagged_titles) * 1.0) / len(all_titles)
-		return cvg
+	def get_author_cvg(self, key):
+		# Make sure key is in dict
+		try:
+			if key in self.title_dict: 
+				all_titles = self.title_dict[key][0]
+				tagged_titles = self.title_dict[key][1]
+				cvg = (len(tagged_titles) * 1.0) / len(all_titles)
+			else:
+				# TODO what to return here?
+				cvg = None
+
+			return cvg
+		# and what to return here?
+		except TypeError:
+			return None
 
 	def get_total_cvg(self):
 		total_count = 0
 		tagged_count = 0
-		for total, tagged in self.title_dict.values():
-			total_count += len(total)
-			tagged_count += len(tagged)
-		total_cvg = tagged_count * 1.0 / total_count
-		return total_cvg
+		try:
+			for total, tagged in self.title_dict.values():
+				total_count += len(total)
+				tagged_count += len(tagged)
+			if total_count:
+				total_cvg = tagged_count * 1.0 / total_count
+				return total_cvg
+			else:
+				return 0.0
+		# AttributeError != TypeError
+		except AttributeError:
+			return 0.0
 
 	def write_to_file(self, filename):
 		mean = self.get_mean_cvg()
