@@ -5,6 +5,9 @@
 # e.g. the name of the School, stafflist base URL could be instance variables
 # ATTention school of humanities
 
+# TODO write tests for this
+# TODO refactor
+
 import requests
 from lxml import html
 ## TODO try other lxml modules instead of html
@@ -261,7 +264,7 @@ def get_tagged_titles(ttls_lnks):
 	return tagged_titles
 
 
-def get_scrape_dict(dept_url, dept_name):
+def get_author_name_urls(dept_url, dept_name):
 	"""
 	Given a url with staff list, returns a dict with author names as keys
 	and 2-element tuples as values. The first element is a list of all
@@ -274,39 +277,33 @@ def get_scrape_dict(dept_url, dept_name):
 
 
 	# Dict to contain (author name, author page url) as keys and a tuple of ([all_titles][tagged_titles]) as values
-	bib_dict = {}
+	
+	#bib_dict = {}
+	
 	# get list of names of researchers in department
 	names = get_names(dept_url)
 	# loop through each name
+	winning_name_urls = set()
+
 	for name in names:
 		name = initialise_first_name(name)
 		full_url = author_list_base + "index."+ name.split(" ")[0][0] + ".html"
 		tree = get_tree(full_url)
+		# Get all candidate authors which match the name
 		name_urls = get_name_url_matches(name, tree)
-		
-		name_urls = [name_url for name_url in name_urls if name_url not in bib_dict]
-		# get the first ranked (name, url) tuple for the target name
-		winning_name_url = get_winning_url(name_urls, dept_name)
-		# if a (name, url) tuple was returned, add to dict as key, and get the author's titles
-		# to add as the value
-		if winning_name_url:
-			titles = get_author_titles(winning_name_url[1])
-			bib_dict[winning_name_url] = titles
+		# If candidates were found
+		if name_urls:
+			# Filter out authors that have already been scraped
+			name_urls = [name_url for name_url in name_urls if name_url not in winning_name_urls]
+			# get the first ranked (name, url) tuple for the target name from the remaining candidates
+			winning_name_url = get_winning_url(name_urls, dept_name)
+			winning_name_urls.append(winning_name_urls)
+
+	return winning_name_urls
 
 
-	# write json representation of dictionary to a file
-	# TODO this might be a bit of a hack
-	with open('../subj_dicts/' + dept_name + ".txt", 'w') as f:
-		json.dump(bib_dict.items(), f)
 
-	# TO RESTORE from JSON
-	# dict(map(tuple, kv) for kv in json.loads("file"))
-	# converts each element in the JSON list of lists to tuples using map
-	# then converts resulting tuples to dictionary
-	# http://stackoverflow.com/a/12338024
-	# http://stackoverflow.com/questions/12337583/saving-dictionary-whose-keys-are-tuples-with-json-python
 
-	return bib_dict
 
 # There is a list of authors on each school staff page; we are looking for each of their names amongst the names of
 # all the authors on Enlighten (University wide system). One problem is that the name on the staff page
@@ -383,3 +380,59 @@ def getKeys(d, last_name):
 		if last_name in key[0]:
 			keys.append(key)
 	return keys
+
+
+def get_titles_dict(name_url_list):
+	bib_dict = {}
+	
+	for name_url in name_url_list:
+		titles = get_author_titles(name_url[1])
+		bib_dict[name_url] = titles
+
+	# write json representation of dictionary to a file
+	# TODO this might be a bit of a hack
+	#with open('../subj_dicts/' + dept_name + ".txt", 'w') as f:
+	#	json.dump(bib_dict.items(), f)
+
+	# TO RESTORE from JSON
+	# dict(map(tuple, kv) for kv in json.loads("file"))
+	# converts each element in the JSON list of lists to tuples using map
+	# then converts resulting tuples to dictionary
+	# http://stackoverflow.com/a/12338024
+	# http://stackoverflow.com/questions/12337583/saving-dictionary-whose-keys-are-tuples-with-json-python
+
+	return bib_dict
+
+def get_coauthors_dict(name_url_list):
+	co_authors_dict = {}
+
+	for name_url in name_url_list:
+		paper_authors = get_author_dict
+		co_authors_dict.updtate(paper_authors)
+
+	with open('../coauthor_data/' + dept_name + ".txt", 'w') as f:
+		json.dump(paper_info, f)
+
+	return co_authors_dict
+
+# TODO 
+def get_author_dict(author_url):
+	author_dict = {}
+
+	# Get the <a> elements for the papers on the author's page
+	a_elems = get_a_elems_for_papers(author_url)
+
+	for a in a_elems:
+		authors = get_paper_authors(a.get("href"))
+		author_dict[a.text_content()] = authors 
+
+	return author_dict
+
+# N.B. TODO this only returns Glasgow Uni authors, is this what we want here?
+def get_paper_authors(paper_url):
+	tree = get_tree(paper_url)
+	# similar path to when getting school info...
+	path = '//table/tr/th[text() = "Glasgow Author(s) Enlighten ID:"]/following-sibling::td/a/text()'
+	authors = tree.xpath(path)
+
+	return authors

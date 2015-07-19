@@ -19,16 +19,18 @@ for a in a_elems:
 	school_name = a.text
 	names.append(school_name)
 
-names_urls = zip(names, urls)
-print names_urls
+school_names_urls = zip(names, urls)
+print school_names_urls
 
 start_index = int(sys.argv[1])
 end_index = int(sys.argv[2])
 
 # TODO REMOVE SLICING
 # THIS is temporary to just do the schools we haven't done yet
-for name, url in names_urls[start_index:end_index]:
-	authors_dict = es.get_scrape_dict(url, name)
+for schl_name, schl_url in school_names_urls[start_index:end_index]:
+	
+	author_name_urls = es.get_author_name_urls(schl_url, schl_name)
+	titles_dict = es.get_titles_dict(author_name_urls)
 	stats = cs.Stats(authors_dict, name)
 	stats.write_to_file("stats_results/stats_test.txt")
 
