@@ -297,7 +297,7 @@ def get_author_name_urls(dept_url, dept_name):
 			name_urls = [name_url for name_url in name_urls if name_url not in winning_name_urls]
 			# get the first ranked (name, url) tuple for the target name from the remaining candidates
 			winning_name_url = get_winning_url(name_urls, dept_name)
-			winning_name_urls.append(winning_name_urls)
+			winning_name_urls.add(winning_name_url)
 
 	return winning_name_urls
 
@@ -407,23 +407,26 @@ def get_coauthors_dict(name_url_list):
 	co_authors_dict = {}
 
 	for name_url in name_url_list:
-		paper_authors = get_author_dict
-		co_authors_dict.updtate(paper_authors)
+		paper_authors = get_authors_info()
+		co_authors_dict.update(paper_authors)
 
 	with open('../coauthor_data/' + dept_name + ".txt", 'w') as f:
 		json.dump(paper_info, f)
 
 	return co_authors_dict
 
-# TODO 
-def get_author_dict(author_url):
+# TODO avoid getting co-author info for papers that are already in co-authors dict... how? ... pass this method
+# the current keys of co_authors dict...
+def get_authors_info(author_url):
 	author_dict = {}
 
 	# Get the <a> elements for the papers on the author's page
 	a_elems = get_a_elems_for_papers(author_url)
-
+	# Each a is a paper
 	for a in a_elems:
+		# get list of the paper's authors
 		authors = get_paper_authors(a.get("href"))
+		# Add paper to dictionary with title as key and co-authors as value
 		author_dict[a.text_content()] = authors 
 
 	return author_dict
