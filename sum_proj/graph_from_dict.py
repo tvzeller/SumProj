@@ -1,4 +1,6 @@
 import networkx as nx
+from networkx.readwrite import json_graph
+import json
 
 class GraphMaker(object):
 
@@ -32,6 +34,7 @@ class GraphMaker(object):
 	def check_schl_status(self, name):
 		if self.schl_names:
 			# do name abbreviation here to ensure we get everyone?
+			# TODO and lowercase to ensure consistency
 			return name in self.schl_names
 		# If no list of names of school members has been provided (e.g. when data comes from OAI) return false
 		# TODO or do something else??
@@ -41,3 +44,11 @@ class GraphMaker(object):
 	def get_graph(self):
 
 		return self.graph
+
+
+	def write_to_file(self, filename):
+		graph_data = json_graph.node_link_data(self.graph)
+		with open("../d3/" + filename + ".json", 'w') as f:
+			json.dump(graph_data, f)
+
+

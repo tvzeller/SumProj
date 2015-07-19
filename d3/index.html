@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>viz test</title>
+        <!--<link rel="stylesheet" href="tut.css">-->
+        <script type="text/javascript" src="d3/d3.v3.js"></script>
+    </head>
+
+    <body>
+        <script type="text/javascript">
+            
+
+
+            var width = 1300,
+                height = 1000;
+
+            var colors = d3.scale.category10();
+
+            var svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            var force = d3.layout.force()
+                .gravity(.05)
+                //.distance(200)
+                .linkDistance([75])
+                .charge(-100)
+                .size([width, height]);
+
+
+           d3.json("csgraph.json", function(error, graph) {
+              
+              force
+                  .nodes(graph.nodes)
+                  .links(graph.links)
+                  .start();
+
+              var link = svg.selectAll(".link")
+                  .data(graph.links)
+                .enter().append("line")
+                //TODO this is a test
+                .filter(function(d) {
+                  return d.source.in_school && d.target.in_school
+                })
+                  .attr("class", "link")
+                  .style("stroke", "#ccc")
+                  .style("stroke-width", 1);
+
+              var node = svg.selectAll(".node")
+                  .data(graph.nodes)
+                .enter().append("g")
+                  //TODO this is a test
+                  .filter(function(d) {
+                    return d.in_school;
+                  })
+                  .attr("class", "node")
+                  .call(force.drag);
+
+                node.append("circle")
+                    .attr("r", 10)
+                    .style("fill", function(d, i) {
+                        return colors(i);
+                    });
+
+              node.append("text")
+                  .attr("font-size", "10px")
+                  .attr("font-family", "sans-serif")
+                  .text(function(d) { return d.id })
+                  .attr("dy", ".35em")
+                  .attr("text-anchor", "middle");
+
+            // force simulation is running in background, position of things is changing with each tick
+            // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
+              force.on("tick", function() {
+                link.attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+                // same with g elements, but these have no x and y, have to be translated
+                node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+              });  
+
+
+           });
+
+
+
+        </script>
+        <br/>
+        <svg width="500" height="50">
+ 
+        </svg>
+    </body>
+</html>   

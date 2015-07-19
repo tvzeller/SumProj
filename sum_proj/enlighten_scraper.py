@@ -297,7 +297,8 @@ def get_author_name_urls(dept_url, dept_name):
 			name_urls = [name_url for name_url in name_urls if name_url not in winning_name_urls]
 			# get the first ranked (name, url) tuple for the target name from the remaining candidates
 			winning_name_url = get_winning_url(name_urls, dept_name)
-			winning_name_urls.add(winning_name_url)
+			if winning_name_url:
+				winning_name_urls.add(winning_name_url)
 
 	return winning_name_urls
 
