@@ -8,7 +8,7 @@
     </head>
 
     <body>
-        <p id="tog"> click to toggle between school-only and all </p>
+        <p> click to toggle between school-only and all </p>
         <script type="text/javascript">
           
             var width = 1500,
@@ -16,9 +16,16 @@
 
             var colors = d3.scale.category10();
 
-            var svg = d3.select("body").append("svg")
+            var svg = d3.select("body")
+                .append("svg")
                 .attr("width", width)
                 .attr("height", height);
+
+            // svg elements to hold links and nodes respectively
+            // the link group is appended first so that the visual circle elements will cover the line elements
+            // that way the edges connect to the outside of the nodes rather than the centre
+            var linkGroup = svg.append("g").attr("id", "link_display");
+            var nodeGroup = svg.append("g").attr("id", "node_display");
 
             var force = d3.layout.force()
                 .gravity(.05)
@@ -29,8 +36,8 @@
 
             var just_school = true;
 
-
-            d3.json("csgraph.json", function(error, graph) {
+  
+            d3.json("csgraph.json", function(error, graph)  {
               
               //var all_data = graph
 
@@ -44,14 +51,12 @@
                 graph.links[i].source = graph.nodes[graph.links[i].source];
                 graph.links[i].target = graph.nodes[graph.links[i].target];
               }
-              console.log("printing graph.links")
-              console.log(graph.links)
-
-              var displayedLink;
-              var displayedNode;
 
               var allLinks = graph.links
               var allNodes = graph.nodes
+
+              var link
+              var node
 
               // NB this is the JS array filter() not the d3 filter being used here
               // This gets just the links whose nodes both represent authors belonging to the school being displayed
@@ -60,99 +65,165 @@
                 if(good)
                   console.log("ok", l);
                 return good;
-              });
+              })
               // This gets just the nodes that represent authors belonging to the school being displayed
               var filteredNodes = graph.nodes.filter(function(n) {
                 return n.in_school;
               });
 
 
+              for(var i=0; i<allLinks.length; i++) {
+                if(allLinks[i].source.id == "Calder, Professor Muffy" || allLinks[i].target.id == "Calder, Professor Muffy") 
+                    console.log(allLinks[i].source.id + ", " + allLinks[i].target.id)
+              }
+
+              // Create a map indicating whether 2 nodes are adjacent, to make it faster to check this when necessary
+              // idea from Mike Bostock - http://stackoverflow.com/a/8780277
+              var neighboursMap = {}
+              for(var i=0; i < allLinks.length; i++) {
+                neighboursMap[allLinks[i].source.id + "," + allLinks[i].target.id] = 1;
+                neighboursMap[allLinks[i].target.id + "," + allLinks[i].source.id] = 1;
+              }
+
+              // Add the node and link data to the layout and start the simulation
               function startForce(nodes, links) {
                 force.nodes(nodes)
                       .links(links)
                       .start();  
               }
 
+              // Used to bind new link data to visual elements and display
               function updateLinks(links) {
-                var linkClass = svg.selectAll(".link")
-                    .data(links)
-                  
-                var newLinks = linkClass.enter()
+                link = linkGroup.selectAll(".link")
+                      .data(links)   
+                      
+                link.enter()
                       .append("line")
-                    //TODO this is a test
-                  /*  .filter(function(l) {
-                    keep = l.source.in_school && l.target.in_school
-                    if(keep)
-                      console.log("kepto", l)
-                    else
-                      console.log("nota", l)
-                    return keep
-                  })*/
-                    .attr("class", "link")
-                    .style("stroke", "black")
-                    .style("stroke-width", 1);
+                      .attr("class", "link")
+                      .style("stroke", "black")
+                      .style("stroke-width", 1);
 
-                linkClass.exit().remove();
+                console.log("PRINTING NEW links")
+                for(var i=0; i<link.enter().length; i++) {
+                  console.log(link.enter()[i])
+                }
 
-                displayedLink = svg.selectAll(".link")
+                link.exit().remove()
+
+                //link = svg.selectAll(".link")
               }
 
+              // Used to bind new node data to visual elements and display
               function updateNodes(nodes) {
-                var nodeClass = svg.selectAll(".node")
-                    .data(nodes)
+                node = nodeGroup.selectAll(".node")
+                    /* second argument to data() is a d3 "key function", used to join data to visual elements by the return value (a unique string,
+                     in this case the id)
+                     The default behaviour is joining by index - data is joined to elements in order. That wouldn't work here because we are using
+                     2 different sets of data (all the nodes and just the filtered nodes), so we need to associate elements to datums by their id.
+                     Example problem - we have an initial nodeset [a, b, c, d, e] they will be linked to node elements by index like so:
+                     a --> 0
+                     b --> 1
+                     c --> 2
+                     d --> 3
+                     e --> 4
+                     Then we filter the dataset to [b, d, e]
+                     b --> 0
+                     d --> 1
+                     e --> 2
+                     Because the new dataset is size 3, elements (0, 1, 2), previously linked to other data, remain, the others are discarded
+                     But the elements will still be displaying the names of nodes [a, b, c]
+                     If we associate data to elements by a key, then when [b, d, e] come in they will remain linked to their original elements:
+                     b --> 1
+                     d --> 3
+                     e --> 4  
+                    */
+                    .data(nodes, function(d) {
+                      return d.id;
+                    })
 
-                var newNodes = nodeClass.enter()
-                        .append("g")
-                 /*   .filter(function(d) {
-                      return d.in_school;
-                    })*/
-                      .attr("class", "node")
-                      .call(force.drag);
+                // New nodes - we get these the first time the page is loaded and when we go from displaying filtered nodes to all nodes
+                nodeG = node.enter()
+                    .append("g")
+                    .attr("class", "node")
+                    .call(force.drag);
 
-                    newNodes.append("circle")
-                      .attr("r", 10)
-                      .style("fill", function(d, i) {
-                          return colors(i);
-                      });
+                  nodeG.append("circle")
+                    .attr("r", 10)
+                    .style("fill", function(d, i) {
+                        return colors(i);
+                    });
 
-                  newNodes.append("text")
+                  nodeG.append("text")
                     .attr("font-size", "10px")
                     .attr("font-family", "sans-serif")
-                    .text(function(d) { return d.id })
+                    .text(function(d) { 
+                      console.log("new node, id is " + d.id)
+                      return d.id })
                     .attr("dy", ".35em")
                     .attr("text-anchor", "middle");
 
-                nodeClass.exit().remove();
-                // Not sure if necessary to do selection again but seems to break if not
-                displayedNode = svg.selectAll(".node");   
+                    // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
+                    node.exit().remove();
+
+                    // attach event listeners here so they get attached to new nodes as well
+                    node.on("mouseover", highlight)
+                    node.on("mouseout", lowlight)
+              }
+
+              var highlight = function(d) {
+                //alert("hey");
+                link.style("stroke", function(l) {
+                  if (l.source == d || l.target == d)
+                    return "red";
+                  else
+                    return "black";
+                })
+                .style("opacity", function(l) {
+                  if (l.source == d || l.target == d)
+                    return 1.0
+                  else
+                    return 0.1
+                });
+
+                node.style("opacity", function(o) {
+                  if (neighbours(d, o))
+                    return 1.0
+                  else
+                    return 0.1
+                });
+                d3.select(this).style("opacity", 1.0);
+              }
+
+              var lowlight = function(d) {
+                link.style("stroke", "black")
+                .style("opacity", 1.0);
+
+                node.style("opacity", 1.0);
               }
 
 
-              function highlightAuthor(authorId) {
-
+              function neighbours(n1, n2) {
+                return neighboursMap[n1.id + "," + n2.id]
               }
 
 
               startForce(filteredNodes, filteredLinks);
               updateLinks(filteredLinks);
-              updateNodes(filteredNodes)
-
+              updateNodes(filteredNodes); 
 
               // force simulation is running in background, position of things is changing with each tick
               // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
               force.on("tick", function() {
-                displayedLink.attr("x1", function(d) { return d.source.x; })
+               link.attr("x1", function(d) { return d.source.x; })
                     .attr("y1", function(d) { return d.source.y; })
                     .attr("x2", function(d) { return d.target.x; })
                     .attr("y2", function(d) { return d.target.y; });
                 // same with g elements, but these have no x and y, have to be translated
-                displayedNode.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+                node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
               });  
 
 
-              d3.select("p").on("click", function() {
-                alert("hello node");
-                
+              d3.select("p").on("click", function() {                
                 if(just_school) {
                   startForce(allNodes, allLinks);
                   updateLinks(allLinks);
@@ -167,34 +238,6 @@
 
                   just_school = true;
                 }
-              });
-
-              displayedNode.on("mouseover", function(n) {
-                //alert(n.id);
-                displayedLink.style("stroke", function(l) {
-                  if (l.source == n || l.target == n)
-                    return "red";
-                  else
-                    return "black";
-                })
-                
-                .style("opacity", function(l) {
-                  if (l.source == n || l.target == n)
-                    return 1.0
-                  else
-                    return 0.5
-                });
-
-                displayedNode.style("opacity", 0.5);
-                d3.select(this).style("opacity", 1.0);
-              });
-
-
-              displayedNode.on("mouseout", function(n) {
-                displayedLink.style("stroke", "black")
-                .style("opacity", 1.0);
-                
-                displayedNode.style("opacity", 1.0);
               });
 
            });

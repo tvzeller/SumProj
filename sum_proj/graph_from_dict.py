@@ -8,8 +8,16 @@ class GraphMaker(object):
 		self.data_dict = dd
 		self.schl_names = sn
 		self.graph = nx.Graph()
+		self.harmonise_names()
 		self.populate_graph()
 
+
+	def harmonise_names(self):
+		self.schl_names = [(name.split(", ")[1] + " " + name.split(", ")[0]).lower() for name in self.schl_names]
+		
+		for title, authors in self.data_dict.items():
+			authors = [author.split(", ")[1] + " " + author.split(", ")[0] for author in authors]
+			self.data_dict[title] = authors
 
 	def populate_graph(self):
 		for title, authors in self.data_dict.items():
@@ -35,7 +43,7 @@ class GraphMaker(object):
 		if self.schl_names:
 			# do name abbreviation here to ensure we get everyone?
 			# TODO and lowercase to ensure consistency
-			return name in self.schl_names
+			return name.lower() in self.schl_names
 		# If no list of names of school members has been provided (e.g. when data comes from OAI) return false
 		# TODO or do something else??
 		else:
