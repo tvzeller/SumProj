@@ -8,12 +8,11 @@
     </head>
 
     <body>
+        <p id="tog"> click to toggle between school-only and all </p>
         <script type="text/javascript">
-            
-
-
-            var width = 1300,
-                height = 1000;
+          
+            var width = 1500,
+                height = 1300;
 
             var colors = d3.scale.category10();
 
@@ -24,72 +23,182 @@
             var force = d3.layout.force()
                 .gravity(.05)
                 //.distance(200)
-                .linkDistance([75])
-                .charge(-100)
+                .linkDistance([175])
+                .charge(-150)
                 .size([width, height]);
 
+            var just_school = true;
 
-           d3.json("csgraph.json", function(error, graph) {
+
+            d3.json("csgraph.json", function(error, graph) {
               
-              force
-                  .nodes(graph.nodes)
-                  .links(graph.links)
-                  .start();
+              //var all_data = graph
 
-              var link = svg.selectAll(".link")
-                  .data(graph.links)
-                .enter().append("line")
-                //TODO this is a test
-                .filter(function(d) {
-                  return d.source.in_school && d.target.in_school
-                })
-                  .attr("class", "link")
-                  .style("stroke", "#ccc")
-                  .style("stroke-width", 1);
+              // for d3 force layout to work, the links can reference the actual source and target node objects
+              // or they can reference the index of the objects in the nodes array
+              // networkx's json string uses the index referencing
+              // however if we want to add or remove nodes from the array (to filter the data that we want to
+              // see), the index referencing will not work, as nodes will not be in the positions referenced by the links
+              // so here we replace the references to indices with the references to the objects themselves
+              for(var i=0; i < graph.links.length; i++) {
+                graph.links[i].source = graph.nodes[graph.links[i].source];
+                graph.links[i].target = graph.nodes[graph.links[i].target];
+              }
+              console.log("printing graph.links")
+              console.log(graph.links)
 
-              var node = svg.selectAll(".node")
-                  .data(graph.nodes)
-                .enter().append("g")
-                  //TODO this is a test
-                  .filter(function(d) {
-                    return d.in_school;
-                  })
-                  .attr("class", "node")
-                  .call(force.drag);
+              var displayedLink;
+              var displayedNode;
 
-                node.append("circle")
-                    .attr("r", 10)
-                    .style("fill", function(d, i) {
-                        return colors(i);
-                    });
+              var allLinks = graph.links
+              var allNodes = graph.nodes
 
-              node.append("text")
-                  .attr("font-size", "10px")
-                  .attr("font-family", "sans-serif")
-                  .text(function(d) { return d.id })
-                  .attr("dy", ".35em")
-                  .attr("text-anchor", "middle");
+              // NB this is the JS array filter() not the d3 filter being used here
+              // This gets just the links whose nodes both represent authors belonging to the school being displayed
+              var filteredLinks = graph.links.filter(function(l) {
+                good = l.source.in_school && l.target.in_school;
+                if(good)
+                  console.log("ok", l);
+                return good;
+              });
+              // This gets just the nodes that represent authors belonging to the school being displayed
+              var filteredNodes = graph.nodes.filter(function(n) {
+                return n.in_school;
+              });
 
-            // force simulation is running in background, position of things is changing with each tick
-            // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
+
+              function startForce(nodes, links) {
+                force.nodes(nodes)
+                      .links(links)
+                      .start();  
+              }
+
+              function updateLinks(links) {
+                var linkClass = svg.selectAll(".link")
+                    .data(links)
+                  
+                var newLinks = linkClass.enter()
+                      .append("line")
+                    //TODO this is a test
+                  /*  .filter(function(l) {
+                    keep = l.source.in_school && l.target.in_school
+                    if(keep)
+                      console.log("kepto", l)
+                    else
+                      console.log("nota", l)
+                    return keep
+                  })*/
+                    .attr("class", "link")
+                    .style("stroke", "black")
+                    .style("stroke-width", 1);
+
+                linkClass.exit().remove();
+
+                displayedLink = svg.selectAll(".link")
+              }
+
+              function updateNodes(nodes) {
+                var nodeClass = svg.selectAll(".node")
+                    .data(nodes)
+
+                var newNodes = nodeClass.enter()
+                        .append("g")
+                 /*   .filter(function(d) {
+                      return d.in_school;
+                    })*/
+                      .attr("class", "node")
+                      .call(force.drag);
+
+                    newNodes.append("circle")
+                      .attr("r", 10)
+                      .style("fill", function(d, i) {
+                          return colors(i);
+                      });
+
+                  newNodes.append("text")
+                    .attr("font-size", "10px")
+                    .attr("font-family", "sans-serif")
+                    .text(function(d) { return d.id })
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "middle");
+
+                nodeClass.exit().remove();
+                // Not sure if necessary to do selection again but seems to break if not
+                displayedNode = svg.selectAll(".node");   
+              }
+
+
+              function highlightAuthor(authorId) {
+
+              }
+
+
+              startForce(filteredNodes, filteredLinks);
+              updateLinks(filteredLinks);
+              updateNodes(filteredNodes)
+
+
+              // force simulation is running in background, position of things is changing with each tick
+              // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
               force.on("tick", function() {
-                link.attr("x1", function(d) { return d.source.x; })
+                displayedLink.attr("x1", function(d) { return d.source.x; })
                     .attr("y1", function(d) { return d.source.y; })
                     .attr("x2", function(d) { return d.target.x; })
                     .attr("y2", function(d) { return d.target.y; });
                 // same with g elements, but these have no x and y, have to be translated
-                node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+                displayedNode.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
               });  
 
 
+              d3.select("p").on("click", function() {
+                alert("hello node");
+                
+                if(just_school) {
+                  startForce(allNodes, allLinks);
+                  updateLinks(allLinks);
+                  updateNodes(allNodes);
+
+                  just_school = false;
+                }
+                else {
+                  startForce(filteredNodes, filteredLinks);
+                  updateLinks(filteredLinks);
+                  updateNodes(filteredNodes);
+
+                  just_school = true;
+                }
+              });
+
+              displayedNode.on("mouseover", function(n) {
+                //alert(n.id);
+                displayedLink.style("stroke", function(l) {
+                  if (l.source == n || l.target == n)
+                    return "red";
+                  else
+                    return "black";
+                })
+                
+                .style("opacity", function(l) {
+                  if (l.source == n || l.target == n)
+                    return 1.0
+                  else
+                    return 0.5
+                });
+
+                displayedNode.style("opacity", 0.5);
+                d3.select(this).style("opacity", 1.0);
+              });
+
+
+              displayedNode.on("mouseout", function(n) {
+                displayedLink.style("stroke", "black")
+                .style("opacity", 1.0);
+                
+                displayedNode.style("opacity", 1.0);
+              });
+
            });
 
-
-
         </script>
-        <br/>
-        <svg width="500" height="50">
- 
-        </svg>
     </body>
 </html>   
