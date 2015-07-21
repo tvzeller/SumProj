@@ -8,7 +8,11 @@
     </head>
 
     <body>
-        <p> click to toggle between school-only and everybody </p>
+        <p id="filter"> click to toggle between school-only and everybody </p>
+        </br>
+        </br>
+        <p id="freeze"> click to freeze </p>
+
         <script type="text/javascript">
           
             var width = 1500,
@@ -35,6 +39,7 @@
                 .size([width, height]);
 
             var just_school = true;
+            var frozen = false;
 
             //var scale = d3.scale.log().base([2]);
             //console.log(scale.base());
@@ -85,6 +90,15 @@
                     console.log(allLinks[i].source.id + ", " + allLinks[i].target.id)
               }
 
+              // custom drag behaviour for use in frozen mode
+              // doesn't use force.drag as that reactivates force automatically
+              var staticDrag = d3.behavior.drag()
+                      .on("dragstart", dragstart)
+                      .on("drag", dragmove)
+                      .on("dragend", dragend);
+
+
+
               // Create a map indicating whether 2 nodes are adjacent, to make it faster to check this when necessary
               // idea from Mike Bostock - http://stackoverflow.com/a/8780277
               var neighboursMap = {}
@@ -115,6 +129,24 @@
                 link.exit().remove()
 
                 //link = svg.selectAll(".link")
+              }
+
+              // In static mode, disable highlighting when dragging a node
+              function dragstart(d, i) {
+                node.on("mouseover", null);
+              }
+
+              function dragmove(d, i) {
+                d.px += d3.event.dx;
+                d.py += d3.event.dy;
+                d.x += d3.event.dx;
+                d.y += d3.event.dy;
+                tick();
+              }
+
+              // reenable highlighting when finished dragging node
+              function dragend(d, i) {
+                node.on("mouseover", highlight)
               }
 
               // Used to bind new node data to visual elements and display
@@ -150,6 +182,7 @@
                     .append("g")
                     .attr("class", "node")
                     .call(force.drag);
+                    //.call(drag);
 
                   nodeG.append("circle")
                     .attr("r", function(d) {
@@ -218,6 +251,23 @@
                 return neighboursMap[n1.id + "," + n2.id]
               }
 
+              // Make graph static by stopping the force simulation
+              // Attach drag event listener to nodes so they can be moved around in static mode
+              function freeze() {
+                force.stop();
+                node.call(staticDrag);
+              }
+
+              // Restart simulation
+              // Remove the static drag listener and reattach the normal force.drag listener
+              function defrost() {
+                node.on(".drag", null)
+                node.call(force.drag);
+                force.resume();
+              }
+
+
+
 
               startForce(filteredNodes, filteredLinks);
               updateLinks(filteredLinks);
@@ -225,17 +275,19 @@
 
               // force simulation is running in background, position of things is changing with each tick
               // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
-              force.on("tick", function() {
+              force.on("tick", tick);
+
+              function tick() {
                link.attr("x1", function(d) { return d.source.x; })
                     .attr("y1", function(d) { return d.source.y; })
                     .attr("x2", function(d) { return d.target.x; })
                     .attr("y2", function(d) { return d.target.y; });
                 // same with g elements, but these have no x and y, have to be translated
                 node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-              });  
+              }  
 
 
-              d3.select("p").on("click", function() {                
+              d3.select("#filter").on("click", function() {                
                 if(just_school) {
                   startForce(allNodes, allLinks);
                   updateLinks(allLinks);
@@ -251,6 +303,17 @@
                   //force.start();
 
                   just_school = true;
+                }
+              });
+
+              d3.select("#freeze").on("click", function() {
+                if(frozen) {
+                  defrost();
+                  frozen = false;
+                }
+                else {
+                  freeze()
+                  frozen = true;
                 }
               });
 
