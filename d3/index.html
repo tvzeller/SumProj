@@ -9,14 +9,13 @@
 
     <body>
         <p id="filter"> click to toggle between school-only and everybody </p>
-        </br>
-        </br>
-        <p id="freeze"> click to freeze </p>
+        <p id="freeze"> click to freeze / defrost </p>
+        <p id="labels"> click to remove / add labels </p>
 
         <script type="text/javascript">
           
             var width = 1500,
-                height = 1300;
+                height = 600;
 
             var colors = d3.scale.category10();
 
@@ -40,6 +39,7 @@
 
             var just_school = true;
             var frozen = false;
+            var labeled = true;
 
             //var scale = d3.scale.log().base([2]);
             //console.log(scale.base());
@@ -50,7 +50,7 @@
             var linkColour = "#ddd"
 
   
-            d3.json("csgraph2.json", function(error, graph)  {
+            d3.json("School of Chemistry graph.json", function(error, graph)  {
               
               //var all_data = graph
 
@@ -197,22 +197,28 @@
                           return "blue";
                     });
 
-                  nodeG.append("text")
-                    .attr("font-size", "10px")
-                    .attr("font-family", "sans-serif")
-                    .text(function(d) { 
-                      console.log("new node, id is " + d.id)
-                      return d.id })
-                    .attr("dy", ".35em")
-                    .attr("text-anchor", "middle")
-                    .attr("font-weight", "bold");
+                    if(labeled)
+                      addLabels(nodeG);
 
                     // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
                     node.exit().remove();
 
                     // attach event listeners here so they get attached to new nodes as well
-                    node.on("mouseover", highlight)
-                    node.on("mouseout", lowlight)
+                    node.on("mouseover", highlight);
+                    node.on("mouseout", lowlight);
+                    node.on("dblclick", showCount);
+              }
+
+              var addLabels = function(sel) {
+                sel.append("text")
+                  .attr("font-size", "10px")
+                  .attr("font-family", "sans-serif")
+                  .text(function(d) { 
+                    console.log("new node, id is " + d.id)
+                    return d.id })
+                  .attr("dy", ".35em")
+                  .attr("text-anchor", "middle")
+                  .attr("font-weight", "bold");
               }
 
               var highlight = function(d) {
@@ -244,6 +250,10 @@
                 .style("opacity", 1.0);
 
                 node.style("opacity", 1.0);
+              }
+
+              var showCount = function(d) {
+                alert(d.paper_count)
               }
 
 
@@ -314,6 +324,18 @@
                 else {
                   freeze()
                   frozen = true;
+                }
+              });
+
+              d3.select('#labels').on("click", function(d) {
+                if(labeled) {
+                  svg.selectAll("text").remove();
+                  labeled = false;
+                }
+                else {
+                  addLabels(node);
+
+                  labeled = true;
                 }
               });
 
