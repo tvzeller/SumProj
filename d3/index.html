@@ -8,7 +8,7 @@
     </head>
 
     <body>
-        <p> click to toggle between school-only and all </p>
+        <p> click to toggle between school-only and everybody </p>
         <script type="text/javascript">
           
             var width = 1500,
@@ -28,16 +28,24 @@
             var nodeGroup = svg.append("g").attr("id", "node_display");
 
             var force = d3.layout.force()
-                .gravity(.05)
+                .gravity(.1)
                 //.distance(200)
-                .linkDistance([175])
-                .charge(-150)
+                .linkDistance([125])
+                .charge(-100)
                 .size([width, height]);
 
             var just_school = true;
 
+            //var scale = d3.scale.log().base([2]);
+            //console.log(scale.base());
+            var nodeScale = d3.scale.linear();
+            nodeScale.domain([1, 200]);
+            nodeScale.range([5, 25])
+
+            var linkColour = "#ddd"
+
   
-            d3.json("csgraph.json", function(error, graph)  {
+            d3.json("csgraph2.json", function(error, graph)  {
               
               //var all_data = graph
 
@@ -86,6 +94,7 @@
               }
 
               // Add the node and link data to the layout and start the simulation
+              // NB apparently should not be passing nodes and links again - just change variable?
               function startForce(nodes, links) {
                 force.nodes(nodes)
                       .links(links)
@@ -100,13 +109,8 @@
                 link.enter()
                       .append("line")
                       .attr("class", "link")
-                      .style("stroke", "black")
+                      .style("stroke", linkColour)
                       .style("stroke-width", 1);
-
-                console.log("PRINTING NEW links")
-                for(var i=0; i<link.enter().length; i++) {
-                  console.log(link.enter()[i])
-                }
 
                 link.exit().remove()
 
@@ -148,9 +152,16 @@
                     .call(force.drag);
 
                   nodeG.append("circle")
-                    .attr("r", 10)
+                    .attr("r", function(d) {
+                      return nodeScale(d.paper_count);
+                      //return 10;
+                    })
                     .style("fill", function(d, i) {
-                        return colors(i);
+                        //return colors(i);
+                        if(d.in_school)
+                          return "green";
+                        else
+                          return "blue";
                     });
 
                   nodeG.append("text")
@@ -160,7 +171,8 @@
                       console.log("new node, id is " + d.id)
                       return d.id })
                     .attr("dy", ".35em")
-                    .attr("text-anchor", "middle");
+                    .attr("text-anchor", "middle")
+                    .attr("font-weight", "bold");
 
                     // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
                     node.exit().remove();
@@ -171,7 +183,7 @@
               }
 
               var highlight = function(d) {
-                //alert("hey");
+               // alert(d.paper_count)
                 link.style("stroke", function(l) {
                   if (l.source == d || l.target == d)
                     return "red";
@@ -195,7 +207,7 @@
               }
 
               var lowlight = function(d) {
-                link.style("stroke", "black")
+                link.style("stroke", linkColour)
                 .style("opacity", 1.0);
 
                 node.style("opacity", 1.0);
@@ -228,6 +240,7 @@
                   startForce(allNodes, allLinks);
                   updateLinks(allLinks);
                   updateNodes(allNodes);
+                  //force.start();
 
                   just_school = false;
                 }
@@ -235,6 +248,7 @@
                   startForce(filteredNodes, filteredLinks);
                   updateLinks(filteredLinks);
                   updateNodes(filteredNodes);
+                  //force.start();
 
                   just_school = true;
                 }

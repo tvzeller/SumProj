@@ -13,7 +13,8 @@ class GraphMaker(object):
 
 
 	def harmonise_names(self):
-		self.schl_names = [(name.split(", ")[1] + " " + name.split(", ")[0]).lower() for name in self.schl_names]
+		if self.schl_names:
+			self.schl_names = [(name.split(", ")[1] + " " + name.split(", ")[0]).lower() for name in self.schl_names]
 		
 		for title, authors in self.data_dict.items():
 			authors = [author.split(", ")[1] + " " + author.split(", ")[0] for author in authors]
@@ -27,10 +28,14 @@ class GraphMaker(object):
 
 	def add_vertices(self, authors):		
 		for author in authors:
-			self.graph.add_node(author)	
-			in_school = self.check_schl_status(author)
-			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
-			self.graph.node[author]["in_school"] = in_school
+			if author in self.graph.node:
+				self.graph.node[author]["paper_count"] += 1
+			else:
+				self.graph.add_node(author)	
+				in_school = self.check_schl_status(author)
+				# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
+				self.graph.node[author]["in_school"] = in_school
+				self.graph.node[author]["paper_count"] = 1
 
 
 	def add_links(self, authors):

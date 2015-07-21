@@ -24,9 +24,10 @@ def get_tree(url):
 	lxml
 	"""
 	while True:
+		time.sleep(1.5)
 		try:
 			page = requests.get(url, timeout=10)
-			time.sleep(3)
+			#time.sleep(2)
 			tree = html.fromstring(page.text)
 			break
 		except requests.exceptions.Timeout:
@@ -34,6 +35,7 @@ def get_tree(url):
 		except requests.exceptions.ConnectionError:
 			print "requests connection error, trying again"
 		except requests.exceptions.RequestException:
+			#time.sleep(2)
 			print "ambiguous requests exception happened, trying again"
 
 	return tree
@@ -264,7 +266,7 @@ def get_tagged_titles(ttls_lnks):
 	return tagged_titles
 
 
-def get_author_name_urls(dept_url, dept_name):
+def get_author_name_urls(dept_name, dept_url):
 	"""
 	Given a url with staff list, returns a dict with author names as keys
 	and 2-element tuples as values. The first element is a list of all
@@ -404,15 +406,16 @@ def get_titles_dict(name_url_list):
 
 	return bib_dict
 
-def get_coauthors_dict(name_url_list):
+def get_coauthors_dict(name_url_list, schl_name):
 	co_authors_dict = {}
 
 	for name_url in name_url_list:
-		paper_authors = get_authors_info()
+		paper_authors = get_authors_info(name_url[1])
 		co_authors_dict.update(paper_authors)
 
-	with open('../coauthor_data/' + dept_name + ".txt", 'w') as f:
-		json.dump(paper_info, f)
+	# TODO change back to dept_name
+	with open('../coauthor_data/' + schl_name + ".txt", 'w') as f:
+		json.dump(co_authors_dict, f)
 
 	return co_authors_dict
 
