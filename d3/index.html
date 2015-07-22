@@ -3,7 +3,6 @@
     <head>
         <meta charset="utf-8">
         <title>viz test</title>
-        <!--<link rel="stylesheet" href="tut.css">-->
         <script type="text/javascript" src="d3/d3.v3.js"></script>
     </head>
 
@@ -11,6 +10,9 @@
         <p id="filter"> click to toggle between school-only and everybody </p>
         <p id="freeze"> click to freeze / defrost </p>
         <p id="labels"> click to remove / add labels </p>
+        <div id="search">
+          <input type="text" id="searchBox" placeholder="search for an author">
+        </div>
 
         <script type="text/javascript">
           
@@ -187,6 +189,7 @@
                     //.call(drag);
 
                   nodeG.append("circle")
+                    .attr("class", "nodeCircle")
                     .attr("r", function(d) {
                       return nodeScale(d.paper_count);
                       //return 10;
@@ -223,7 +226,7 @@
                   .attr("font-weight", "bold");
               }
 
-              var highlight = function(d) {
+              highlight = function(d) {
                // alert(d.paper_count)
                 link.style("stroke", function(l) {
                   if (l.source == d || l.target == d)
@@ -339,6 +342,17 @@
 
                   labeled = true;
                 }
+              });
+
+              d3.select('#searchBox').on("keyup", function(d) {
+                searchText = this.value.toLowerCase();
+                d3.selectAll(".nodeCircle").style("stroke", function(d) {
+                  if(d.id.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
+                    return "orange"; })
+                  .style("stroke-width", function(d) {
+                    if(d.id.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
+                      return "3px";
+                  });           
               });
 
            });
