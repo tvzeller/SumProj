@@ -23,7 +23,7 @@ class GraphMaker(object):
 	def populate_graph(self):
 		for title, authors in self.data_dict.items():
 			self.add_vertices(authors)
-			self.add_links(authors)
+			self.add_links(title, authors)
 
 
 	def add_vertices(self, authors):		
@@ -38,10 +38,14 @@ class GraphMaker(object):
 				self.graph.node[author]["paper_count"] = 1
 
 
-	def add_links(self, authors):
+	def add_links(self, title, authors):
 		for i in range(0, len(authors)):
 			for j in range(i+1, len(authors)):
-				self.graph.add_edge(authors[i], authors[j])
+				if self.graph.has_edge(authors[i], authors[j]):
+					self.graph[authors[i]][authors[j]]["num_collabs"] += 1
+					self.graph[authors[i]][authors[j]]["collab_titles"].append(title)
+				else:
+					self.graph.add_edge(authors[i], authors[j], {'num_collabs': 1, "collab_titles": [title,]})
 
 
 	def check_schl_status(self, name):
