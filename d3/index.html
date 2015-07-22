@@ -3,6 +3,18 @@
     <head>
         <meta charset="utf-8">
         <title>viz test</title>
+        <style>
+          #svgArea {
+            position: relative;
+            /*left:100px;*/
+            border: 2px solid blue;
+          }
+          #infoArea {
+            float:right;
+            border: 2px solid green;
+            width: 320px;
+          }
+        </style>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
     </head>
 
@@ -16,7 +28,7 @@
 
         <script type="text/javascript">
           
-            var width = 1500,
+            var width = 1000,
                 height = 600;
 
             var colors = d3.scale.category10();
@@ -24,7 +36,14 @@
             var svg = d3.select("body")
                 .append("svg")
                 .attr("width", width)
-                .attr("height", height);
+                .attr("height", height)
+                .attr("border", 1)
+                .attr("id", "svgArea");
+
+            d3.select("body")
+              .append("div")
+              //.text("hello world")
+              .attr("id", "infoArea");
 
             // svg elements to hold links and nodes respectively
             // the link group is appended first so that the visual circle elements will cover the line elements
@@ -52,7 +71,7 @@
             var linkColour = "#ddd"
 
   
-            d3.json("School of Chemistry graph.json", function(error, graph)  {
+            d3.json("cswithattribs2.json", function(error, graph)  {
               
               //var all_data = graph
 
@@ -205,6 +224,11 @@
                     if(labeled)
                       addLabels(nodeG);
 
+                    nodeG.append("title")
+                    .text(function(d) {
+                      return d.id
+                    });
+
                     // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
                     node.exit().remove();
 
@@ -212,6 +236,7 @@
                     node.on("mouseover", highlight);
                     node.on("mouseout", lowlight);
                     node.on("dblclick", showCount);
+                    node.on("click", showCollabInfo);
               }
 
               var addLabels = function(sel) {
@@ -259,6 +284,18 @@
 
               var showCount = function(d) {
                 alert(d.paper_count)
+              }
+
+              var showCollabInfo = function(d) {
+                var info = d.id + "</br></br>Collaborators:</br>"
+                link.each(function(l) {
+                  if(l.source == d)
+                    info += l.target.id + " (" + l.num_collabs + ")</br>" 
+                  else if(l.target == d)
+                    info += l.source.id + " (" + l.num_collabs + ")</br>"
+                });
+                d3.select("#infoArea")
+                  .html(info);
               }
 
 
@@ -332,7 +369,7 @@
                 }
               });
 
-              d3.select('#labels').on("click", function(d) {
+              d3.select('#labels').on("click", function() {
                 if(labeled) {
                   svg.selectAll("text").remove();
                   labeled = false;

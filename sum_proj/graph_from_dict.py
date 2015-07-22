@@ -41,9 +41,11 @@ class GraphMaker(object):
 	def add_links(self, title, authors):
 		for i in range(0, len(authors)):
 			for j in range(i+1, len(authors)):
-				if self.graph.has_edge(authors[i], authors[j]):
+				# Check if edge already exists, update edge attributes
+				if authors[i] in self.graph[j]:
 					self.graph[authors[i]][authors[j]]["num_collabs"] += 1
 					self.graph[authors[i]][authors[j]]["collab_titles"].append(title)
+				# If edge is new, add it to the graph, give it initial attributes
 				else:
 					self.graph.add_edge(authors[i], authors[j], {'num_collabs': 1, "collab_titles": [title,]})
 
