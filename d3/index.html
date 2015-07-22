@@ -7,11 +7,11 @@
           #svgArea {
             position: relative;
             /*left:100px;*/
-            border: 2px solid blue;
+           /* border: 2px solid blue;*/
           }
           #infoArea {
             float:right;
-            border: 2px solid green;
+            /*border: 2px solid green;*/
             width: 320px;
           }
         </style>
@@ -288,12 +288,31 @@
 
               var showCollabInfo = function(d) {
                 var info = d.id + "</br></br>Collaborators:</br>"
+                var connections = []
                 link.each(function(l) {
-                  if(l.source == d)
+                  /*if(l.source == d)
                     info += l.target.id + " (" + l.num_collabs + ")</br>" 
                   else if(l.target == d)
-                    info += l.source.id + " (" + l.num_collabs + ")</br>"
+                    info += l.source.id + " (" + l.num_collabs + ")</br>" */
+                  if(l.source == d || l.target == d) {
+                    connections.push(l)
+                    console.log(l.source, l.target);
+                  }
                 });
+                  
+                connections.sort(function(a, b) {
+                  return (b.num_collabs - a.num_collabs) 
+                });
+                
+                console.log(connections)
+                for(var i=0; i<connections.length; i++) {
+                  var con = connections[i]
+                  if(d == con.source)
+                    info += con.target.id + " (" + con.num_collabs + ")</br>"
+                  else
+                    info += con.source.id + " (" + con.num_collabs + ")</br>"
+                }
+  
                 d3.select("#infoArea")
                   .html(info);
               }
