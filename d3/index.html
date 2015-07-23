@@ -19,10 +19,15 @@
             float:right;
           }
 
-          #schoolChooser {
+
+         /* #schoolChooser {
             position:relative;
-            right: 200px;
+            right: 100px;
             border:2px solid blue;
+          }*/
+
+          .numCollabs {
+            color: red;
           }
 
         </style>
@@ -88,6 +93,9 @@
             var just_school = true;
             var frozen = false;
             var labeled = true;
+
+            var nodeSelected = false;
+            var clickedNodeId;
 
             var nodeScale = d3.scale.log()
             .domain([1, 250])
@@ -171,7 +179,7 @@
                   link = linkGroup.selectAll(".link")
                         // Pass function as argument to data() to ensure that line elements are joined to the right link data
                         // d.source.id - d.target.id uniquely identifies a link
-                        // See further explanation below when the same is done for the nodes
+                        // See further explanation below when similar is done for the nodes
                         .data(links, function(d) {
                           return d.source.id + "-" + d.target.id;
                         });   
@@ -258,7 +266,8 @@
                             return "green";
                           else
                             return "blue";
-                      });
+                      })
+                      .style("stroke", "black");
 
                       if(labeled)
                         addLabels(nodeG);
@@ -274,8 +283,10 @@
                       // attach event listeners here so they get attached to new nodes as well
                       node.on("mouseover", highlight);
                       node.on("mouseout", lowlight);
-                      node.on("dblclick", showCount);
+                      node.on("dblclick", highlight);
+                      node.on("dblclick", fixNode)
                       node.on("click", showCollabInfo);
+
 
                       d3.select("#nodeCount").text("Number of Nodes: " + node[0].length);
                 }
@@ -295,37 +306,48 @@
 
                 highlight = function(d) {
                  // alert(d.paper_count)
-                  link.style("stroke", function(l) {
-                    if (l.source == d || l.target == d)
-                      return "red";
-                    else
-                      return "black";
-                  })
-                  .style("opacity", function(l) {
-                    if (l.source == d || l.target == d)
-                      return 1.0
-                    else
-                      return 0.1
-                  });
+                  if(!nodeSelected) {
+                    link.style("stroke", function(l) {
+                      if (l.source == d || l.target == d)
+                        return "red";
+                      else
+                        return "black";
+                    })
+                    .style("opacity", function(l) {
+                      if (l.source == d || l.target == d)
+                        return 1.0
+                      else
+                        return 0.1
+                    });
 
-                  node.style("opacity", function(o) {
-                    if (neighbours(d, o))
-                      return 1.0
-                    else
-                      return 0.1
-                  });
-                  d3.select(this).style("opacity", 1.0);
+                    node.style("opacity", function(o) {
+                      if (neighbours(d, o))
+                        return 1.0
+                      else
+                        return 0.1
+                    });
+                    d3.select(this).style("opacity", 1.0);
+                  }
                 }
 
                 var lowlight = function(d) {
-                  link.style("stroke", linkColour)
-                  .style("opacity", 1.0);
+                  if(!nodeSelected) {
+                    link.style("stroke", linkColour)
+                    .style("opacity", 1.0);
 
-                  node.style("opacity", 1.0);
+                    node.style("opacity", 1.0);
+                  }
                 }
 
-                var showCount = function(d) {
+                /*var showCount = function(d) {
                   alert(d.paper_count)
+                }*/
+
+                var fixNode = function(d) {
+                  if(nodeSelected == true)
+                    nodeSelected = false;
+                  else
+                    nodeSelected = true;
                 }
 
                 var showCollabInfo = function(d) {
@@ -344,12 +366,15 @@
                   for(var i=0; i<connections.length; i++) {
                     var con = connections[i]
                     if(d == con.source)
-                      info += con.target.id + " (" + con.num_collabs + ")</br>"
+                      info += con.target.id + " (<span class=\"numCollabs\" id=\"" + 
+                        con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
                     else
-                      info += con.source.id + " (" + con.num_collabs + ")</br>"
+                      info += con.source.id + " (<span class=\"numCollabs\" id=\"" + 
+                        con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
                   }
-    
+
                   d3.select("#infoArea").html(info);
+                  d3.selectAll(".numCollabs").on("click", showTitles)              
                 }
 
 
@@ -464,13 +489,35 @@
                         return "3px";
                     });           
                 });
+              
+                function showTitles() {
+                  var elemId = this.id;
+                  // Need to get the link which corresponds to this number of papers...
+                  // there must be a nicer way of doing this?
+                  link.each(function(l) {
+                    if(l.source.id + "-" + l.target.id === elemId) {
+                      
+                      var titles = l.collab_titles;
+                      
+                      var titleString = "<strong>Papers connecting " + l.source.id + " and " + l.target.id + "</strong><br><br>";
+                      
+                      for(var i = 0; i < titles.length; i++)
+                        titleString += titles[i] + "<br><br>"
+                      
+                      d3.select("#infoArea").html(titleString);
+                    }
+                  });
+                }
+
+
+
               });
             }
 
             d3.select("#schoolChooser").on("change", function() {
               var choice = this.value;
               startItUp(choice);
-            })
+            });
 
 
 
