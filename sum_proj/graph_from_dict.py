@@ -42,7 +42,7 @@ class GraphMaker(object):
 		for i in range(0, len(authors)):
 			for j in range(i+1, len(authors)):
 				# Check if edge already exists, update edge attributes
-				if authors[i] in self.graph[j]:
+				if self.graph.has_edge(authors[i], authors[j]):
 					self.graph[authors[i]][authors[j]]["num_collabs"] += 1
 					self.graph[authors[i]][authors[j]]["collab_titles"].append(title)
 				# If edge is new, add it to the graph, give it initial attributes

@@ -14,15 +14,41 @@
             /*border: 2px solid green;*/
             width: 320px;
           }
+
+          #rightDiv {
+            float:right;
+          }
+
+          #schoolChooser {
+            position:relative;
+            right: 200px;
+            border:2px solid blue;
+          }
+
         </style>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
     </head>
 
     <body>
+        <div id="rightDiv">
+          <select id="schoolChooser">  
+            <option value="cswithattribs2"> Computer Science </option>
+            <option value="Adam Smith Business School graph"> Adam Smith Business School </option>
+            <option value="Dental School graph"> Dental School </option>
+            <option value="School of Chemistry graph"> School of Chemistry </option>
+            <option value="School of Critical Studies graph"> School of Critical Studies </option>
+            <option value="School of Culture and Creative Arts graph"> School of Culture and Creative Arts </option>
+            <option value="School of Education graph"> School of Education </option>
+          </select>
+          <p id="nodeCount"></p>
+          <p id="edgeCount"></p>
+        </div>
+
         <p id="filter"> click to toggle between school-only and everybody </p>
         <p id="freeze"> click to freeze / defrost </p>
         <p id="labels"> click to remove / add labels </p>
         <p id="bff"> click to see most frequent collaborators </p>
+        
         <div id="search">
           <input type="text" id="searchBox" placeholder="search for an author">
         </div>
@@ -53,379 +79,402 @@
             var nodeGroup = svg.append("g").attr("id", "node_display");
 
             var force = d3.layout.force()
-                .gravity(.13)
+                .gravity(0.12)
                 //.distance(200)
-                .linkDistance([125])
-                .charge(-80)
+                .linkDistance([100])
+                .charge(-200)
                 .size([width, height]);
 
             var just_school = true;
             var frozen = false;
             var labeled = true;
 
-            //var scale = d3.scale.log().base([2]);
+            var nodeScale = d3.scale.log()
+            .domain([1, 250])
+            .range([5, 30])
+            .base([10]);
             //console.log(scale.base());
-            var nodeScale = d3.scale.linear();
+            /*var nodeScale = d3.scale.linear();
             nodeScale.domain([1, 200]);
-            nodeScale.range([5, 25])
+            nodeScale.range([5, 25])*/
+
+            var linkScale = d3.scale.log()
+            .domain([1, 100])
+            .range([1, 8])
+            .base([10]);
 
             var linkColour = "#bbb"
 
-  
-            d3.json("cswithattribs2.json", function(error, graph)  {
-              
-              //var all_data = graph
+            var defaultSchool = "cswithattribs2"
+            startItUp(defaultSchool);
 
-              // for d3 force layout to work, the links can reference the actual source and target node objects
-              // or they can reference the index of the objects in the nodes array
-              // networkx's json string uses the index referencing
-              // however if we want to add or remove nodes from the array (to filter the data that we want to
-              // see), the index referencing will not work, as nodes will not be in the positions referenced by the links
-              // so here we replace the references to indices with the references to the objects themselves
-              for(var i=0; i < graph.links.length; i++) {
-                graph.links[i].source = graph.nodes[graph.links[i].source];
-                graph.links[i].target = graph.nodes[graph.links[i].target];
-              }
+            function startItUp(schlGraph) {
+              d3.json(schlGraph + ".json", function(error, graph)  {
+                
+                //var all_data = graph
 
-              var allLinks = graph.links
-              var allNodes = graph.nodes
+                // for d3 force layout to work, the links can reference the actual source and target node objects
+                // or they can reference the index of the objects in the nodes array
+                // networkx's json string uses the index referencing
+                // however if we want to add or remove nodes from the array (to filter the data that we want to
+                // see), the index referencing will not work, as nodes will not be in the positions referenced by the links
+                // so here we replace the references to indices with the references to the objects themselves
+                for(var i=0; i < graph.links.length; i++) {
+                  graph.links[i].source = graph.nodes[graph.links[i].source];
+                  graph.links[i].target = graph.nodes[graph.links[i].target];
+                }
 
-              var link
-              var node
+                var allLinks = graph.links
+                var allNodes = graph.nodes
 
-              // NB this is the JS array filter() not the d3 filter being used here
-              // This gets just the links whose nodes both represent authors belonging to the school being displayed
-              var filteredLinks = graph.links.filter(function(l) {
-                good = l.source.in_school && l.target.in_school;
-                if(good)
-                  console.log("ok", l);
-                return good;
-              })
-              // This gets just the nodes that represent authors belonging to the school being displayed
-              var filteredNodes = graph.nodes.filter(function(n) {
-                return n.in_school;
-              });
+                var link
+                var node
 
-
-              for(var i=0; i<allLinks.length; i++) {
-                if(allLinks[i].source.id == "Calder, Professor Muffy" || allLinks[i].target.id == "Calder, Professor Muffy") 
-                    console.log(allLinks[i].source.id + ", " + allLinks[i].target.id)
-              }
-
-              // custom drag behaviour for use in frozen mode
-              // doesn't use force.drag as that reactivates force automatically
-              var staticDrag = d3.behavior.drag()
-                      .on("dragstart", dragstart)
-                      .on("drag", dragmove)
-                      .on("dragend", dragend);
-
-
-
-              // Create a map indicating whether 2 nodes are adjacent, to make it faster to check this when necessary
-              // idea from Mike Bostock - http://stackoverflow.com/a/8780277
-              var neighboursMap = {}
-              for(var i=0; i < allLinks.length; i++) {
-                neighboursMap[allLinks[i].source.id + "," + allLinks[i].target.id] = 1;
-                neighboursMap[allLinks[i].target.id + "," + allLinks[i].source.id] = 1;
-              }
-
-              // Add the node and link data to the layout and start the simulation
-              // NB apparently should not be passing nodes and links again - just change variable?
-              function startForce(nodes, links) {
-                force.nodes(nodes)
-                      .links(links)
-                      .start();  
-              }
-
-              // Used to bind new link data to visual elements and display
-              function updateLinks(links) {
-                link = linkGroup.selectAll(".link")
-                      .data(links)   
-                      
-                link.enter()
-                      .append("line")
-                      .attr("class", "link")
-                      .style("stroke", linkColour)
-                      .style("stroke-width", 1);
-
-                link.exit().remove()
-
-                //link = svg.selectAll(".link")
-              }
-
-              // In static mode, disable highlighting when dragging a node
-              function dragstart(d, i) {
-                node.on("mouseover", null);
-              }
-
-              function dragmove(d, i) {
-                // Change x and y coordinates of d to those of mouse, then call tick() to translate
-                // tick() also moves links along with the node
-                /*d.px += d3.event.dx;
-                d.py += d3.event.dy;*/
-                d.x = d3.event.x;
-                d.y = d3.event.y;
-                tick();
-              }
-
-              // reenable highlighting when finished dragging node
-              function dragend(d, i) {
-                node.on("mouseover", highlight)
-              }
-
-              // Used to bind new node data to visual elements and display
-              function updateNodes(nodes) {
-                node = nodeGroup.selectAll(".node")
-                    /* second argument to data() is a d3 "key function", used to join data to visual elements by the return value (a unique string,
-                     in this case the id)
-                     The default behaviour is joining by index - data is joined to elements in order. That wouldn't work here because we are using
-                     2 different sets of data (all the nodes and just the filtered nodes), so we need to associate elements to datums by their id.
-                     Example problem - we have an initial nodeset [a, b, c, d, e] they will be linked to node elements by index like so:
-                     a --> 0
-                     b --> 1
-                     c --> 2
-                     d --> 3
-                     e --> 4
-                     Then we filter the dataset to [b, d, e]
-                     b --> 0
-                     d --> 1
-                     e --> 2
-                     Because the new dataset is size 3, elements (0, 1, 2), previously linked to other data, remain, the others are discarded
-                     But the elements will still be displaying the names of nodes [a, b, c]
-                     If we associate data to elements by a key, then when [b, d, e] come in they will remain linked to their original elements:
-                     b --> 1
-                     d --> 3
-                     e --> 4  
-                    */
-                    .data(nodes, function(d) {
-                      return d.id;
-                    })
-
-                // New nodes - we get these the first time the page is loaded and when we go from displaying filtered nodes to all nodes
-                nodeG = node.enter()
-                    .append("g")
-                    .attr("class", "node")
-                    .call(force.drag);
-                    //.call(drag);
-
-                  nodeG.append("circle")
-                    .attr("class", "nodeCircle")
-                    .attr("r", function(d) {
-                      return nodeScale(d.paper_count);
-                      //return 10;
-                    })
-                    .style("fill", function(d, i) {
-                        //return colors(i);
-                        if(d.in_school)
-                          return "green";
-                        else
-                          return "blue";
-                    });
-
-                    if(labeled)
-                      addLabels(nodeG);
-
-                    nodeG.append("title")
-                    .text(function(d) {
-                      return d.id
-                    });
-
-                    // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
-                    node.exit().remove();
-
-                    // attach event listeners here so they get attached to new nodes as well
-                    node.on("mouseover", highlight);
-                    node.on("mouseout", lowlight);
-                    node.on("dblclick", showCount);
-                    node.on("click", showCollabInfo);
-              }
-
-              var addLabels = function(sel) {
-                sel.append("text")
-                  .attr("font-size", "10px")
-                  .attr("font-family", "sans-serif")
-                  .text(function(d) { 
-                    console.log("new node, id is " + d.id)
-                    return d.id })
-                  .attr("dy", ".35em")
-                  .attr("text-anchor", "middle")
-                  .attr("font-weight", "bold");
-              }
-
-              highlight = function(d) {
-               // alert(d.paper_count)
-                link.style("stroke", function(l) {
-                  if (l.source == d || l.target == d)
-                    return "red";
-                  else
-                    return "black";
-                })
-                .style("opacity", function(l) {
-                  if (l.source == d || l.target == d)
-                    return 1.0
-                  else
-                    return 0.1
+                // NB this is the JS array filter() not the d3 filter being used here
+                // This gets just the links whose nodes both represent authors belonging to the school being displayed
+                var filteredLinks = graph.links.filter(function(l) {
+                  return l.source.in_school && l.target.in_school;
+                });
+                // This gets just the nodes that represent authors belonging to the school being displayed
+                var filteredNodes = graph.nodes.filter(function(n) {
+                  return n.in_school;
                 });
 
-                node.style("opacity", function(o) {
-                  if (neighbours(d, o))
-                    return 1.0
+
+                // custom drag behaviour for use in frozen mode
+                // doesn't use force.drag as that reactivates force automatically
+                var staticDrag = d3.behavior.drag()
+                        .on("dragstart", dragstart)
+                        .on("drag", dragmove)
+                        .on("dragend", dragend);
+
+
+
+                // Create a map indicating whether 2 nodes are adjacent, to make it faster to check this when necessary
+                // idea from Mike Bostock - http://stackoverflow.com/a/8780277
+                var neighboursMap = {}
+                for(var i=0; i < allLinks.length; i++) {
+                  neighboursMap[allLinks[i].source.id + "," + allLinks[i].target.id] = 1;
+                  neighboursMap[allLinks[i].target.id + "," + allLinks[i].source.id] = 1;
+                }
+
+                // Add the node and link data to the layout and start the simulation
+                // NB apparently should not be passing nodes and links again - just change variable?
+                function startForce(nodes, links) {
+                  force.nodes(nodes)
+                        .links(links)
+                        .start();  
+                }
+
+                // Used to bind new link data to visual elements and display
+                function updateLinks(links) {
+                  link = linkGroup.selectAll(".link")
+                        // Pass function as argument to data() to ensure that line elements are joined to the right link data
+                        // d.source.id - d.target.id uniquely identifies a link
+                        // See further explanation below when the same is done for the nodes
+                        .data(links, function(d) {
+                          return d.source.id + "-" + d.target.id;
+                        });   
+                        
+                  link.enter()
+                        .append("line")
+                        .attr("class", "link")
+                        .style("stroke", linkColour)
+                        .style("stroke-width", function(d) {
+                          return linkScale(d.num_collabs);
+                        });
+
+                  link.exit().remove()
+
+                  d3.select("#edgeCount").text("Number of links: " + link[0].length);
+
+                  //link = svg.selectAll(".link")
+                }
+
+                // In static mode, disable highlighting when dragging a node
+                function dragstart(d, i) {
+                  node.on("mouseover", null);
+                }
+
+                function dragmove(d, i) {
+                  // Change x and y coordinates of d to those of mouse, then call tick() to translate
+                  // tick() also moves links along with the node
+                  /*d.px += d3.event.dx;
+                  d.py += d3.event.dy;*/
+                  d.x = d3.event.x;
+                  d.y = d3.event.y;
+                  tick();
+                }
+
+                // reenable highlighting when finished dragging node
+                function dragend(d, i) {
+                  node.on("mouseover", highlight)
+                }
+
+                // Used to bind new node data to visual elements and display
+                function updateNodes(nodes) {
+                  node = nodeGroup.selectAll(".node")
+                      /* second argument to data() is a d3 "key function", used to join data to visual elements by the return value (a unique string,
+                       in this case the id)
+                       The default behaviour is joining by index - data is joined to elements in order. That wouldn't work here because we are using
+                       2 different sets of data (all the nodes and just the filtered nodes), so we need to associate elements to datums by their id.
+                       Example problem - we have an initial nodeset [a, b, c, d, e] they will be linked to node elements by index like so:
+                       a --> 0
+                       b --> 1
+                       c --> 2
+                       d --> 3
+                       e --> 4
+                       Then we filter the dataset to [b, d, e]
+                       b --> 0
+                       d --> 1
+                       e --> 2
+                       Because the new dataset is size 3, elements (0, 1, 2), previously linked to other data, remain, the others are discarded
+                       But the elements will still be displaying the names of nodes [a, b, c]
+                       If we associate data to elements by a key, then when [b, d, e] come in they will remain linked to their original elements:
+                       b --> 1
+                       d --> 3
+                       e --> 4  
+                      */
+                      .data(nodes, function(d) {
+                        return d.id;
+                      })
+
+                  // New nodes - we get these the first time the page is loaded and when we go from displaying filtered nodes to all nodes
+                  nodeG = node.enter()
+                      .append("g")
+                      .attr("class", "node")
+                      .call(force.drag);
+                      //.call(drag);
+
+                    nodeG.append("circle")
+                      .attr("class", "nodeCircle")
+                      .attr("r", function(d) {
+                        return nodeScale(d.paper_count);
+                        //return 10;
+                      })
+                      .style("fill", function(d, i) {
+                          //return colors(i);
+                          if(d.in_school)
+                            return "green";
+                          else
+                            return "blue";
+                      });
+
+                      if(labeled)
+                        addLabels(nodeG);
+
+                      nodeG.append("title")
+                      .text(function(d) {
+                        return d.id
+                      });
+
+                      // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
+                      node.exit().remove();
+
+                      // attach event listeners here so they get attached to new nodes as well
+                      node.on("mouseover", highlight);
+                      node.on("mouseout", lowlight);
+                      node.on("dblclick", showCount);
+                      node.on("click", showCollabInfo);
+
+                      d3.select("#nodeCount").text("Number of Nodes: " + node[0].length);
+                }
+
+
+
+                var addLabels = function(sel) {
+                  sel.append("text")
+                    .attr("font-size", "10px")
+                    .attr("font-family", "sans-serif")
+                    .text(function(d) { 
+                      return d.id })
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "middle")
+                    .attr("font-weight", "bold");
+                }
+
+                highlight = function(d) {
+                 // alert(d.paper_count)
+                  link.style("stroke", function(l) {
+                    if (l.source == d || l.target == d)
+                      return "red";
+                    else
+                      return "black";
+                  })
+                  .style("opacity", function(l) {
+                    if (l.source == d || l.target == d)
+                      return 1.0
+                    else
+                      return 0.1
+                  });
+
+                  node.style("opacity", function(o) {
+                    if (neighbours(d, o))
+                      return 1.0
+                    else
+                      return 0.1
+                  });
+                  d3.select(this).style("opacity", 1.0);
+                }
+
+                var lowlight = function(d) {
+                  link.style("stroke", linkColour)
+                  .style("opacity", 1.0);
+
+                  node.style("opacity", 1.0);
+                }
+
+                var showCount = function(d) {
+                  alert(d.paper_count)
+                }
+
+                var showCollabInfo = function(d) {
+                  var info = d.id + "</br></br>Collaborators:</br>"
+                  var connections = []
+                  link.each(function(l) {
+                    if(l.source == d || l.target == d) {
+                      connections.push(l)
+                    }
+                  });
+                    
+                  connections.sort(function(a, b) {
+                    return (b.num_collabs - a.num_collabs) 
+                  });
+                  
+                  for(var i=0; i<connections.length; i++) {
+                    var con = connections[i]
+                    if(d == con.source)
+                      info += con.target.id + " (" + con.num_collabs + ")</br>"
+                    else
+                      info += con.source.id + " (" + con.num_collabs + ")</br>"
+                  }
+    
+                  d3.select("#infoArea").html(info);
+                }
+
+
+                function neighbours(n1, n2) {
+                  return neighboursMap[n1.id + "," + n2.id]
+                }
+
+                // Make graph static by stopping the force simulation
+                // Attach drag event listener to nodes so they can be moved around in static mode
+                function freeze() {
+                  force.stop();
+                  node.call(staticDrag);
+                }
+
+                // Restart simulation
+                // Remove the static drag listener and reattach the normal force.drag listener
+                function defrost() {
+                  node.on(".drag", null)
+                  node.call(force.drag);
+                  force.resume();
+                }
+
+                
+                updateLinks(filteredLinks);
+                updateNodes(filteredNodes);
+                /*force.charge(function(d, i) {
+                  if(nodeScale(d.paper_count) >= 15)
+                    return -200;
                   else
-                    return 0.1
-                });
-                d3.select(this).style("opacity", 1.0);
-              }
+                    return -100;
+                });*/
 
-              var lowlight = function(d) {
-                link.style("stroke", linkColour)
-                .style("opacity", 1.0);
 
-                node.style("opacity", 1.0);
-              }
 
-              var showCount = function(d) {
-                alert(d.paper_count)
-              }
+                startForce(filteredNodes, filteredLinks);
+                // force simulation is running in background, position of things is changing with each tick
+                // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
+                force.on("tick", tick);
 
-              var showCollabInfo = function(d) {
-                var info = d.id + "</br></br>Collaborators:</br>"
-                var connections = []
-                link.each(function(l) {
-                  /*if(l.source == d)
-                    info += l.target.id + " (" + l.num_collabs + ")</br>" 
-                  else if(l.target == d)
-                    info += l.source.id + " (" + l.num_collabs + ")</br>" */
-                  if(l.source == d || l.target == d) {
-                    connections.push(l)
-                    console.log(l.source, l.target);
+                function tick() {
+                 link.attr("x1", function(d) { return d.source.x; })
+                      .attr("y1", function(d) { return d.source.y; })
+                      .attr("x2", function(d) { return d.target.x; })
+                      .attr("y2", function(d) { return d.target.y; });
+                  // same with g elements, but these have no x and y, have to be translated
+                  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+                }  
+
+
+                d3.select("#filter").on("click", function() {                
+                  if(just_school) {
+                    startForce(allNodes, allLinks);
+                    updateLinks(allLinks);
+                    updateNodes(allNodes);
+                    //force.start();
+
+                    just_school = false;
+                  }
+                  else {
+                    startForce(filteredNodes, filteredLinks);
+                    updateLinks(filteredLinks);
+                    updateNodes(filteredNodes);
+                    //force.start();
+
+                    just_school = true;
                   }
                 });
-                  
-                connections.sort(function(a, b) {
-                  return (b.num_collabs - a.num_collabs) 
+
+                d3.select("#freeze").on("click", function() {
+                  if(frozen) {
+                    defrost();
+                    frozen = false;
+                  }
+                  else {
+                    freeze()
+                    frozen = true;
+                  }
                 });
-                
-                console.log(connections)
-                for(var i=0; i<connections.length; i++) {
-                  var con = connections[i]
-                  if(d == con.source)
-                    info += con.target.id + " (" + con.num_collabs + ")</br>"
-                  else
-                    info += con.source.id + " (" + con.num_collabs + ")</br>"
-                }
-  
-                d3.select("#infoArea").html(info);
-              }
 
+                d3.select('#labels').on("click", function() {
+                  if(labeled) {
+                    svg.selectAll("text").remove();
+                    labeled = false;
+                  }
+                  else {
+                    addLabels(node);
 
-              function neighbours(n1, n2) {
-                return neighboursMap[n1.id + "," + n2.id]
-              }
-
-              // Make graph static by stopping the force simulation
-              // Attach drag event listener to nodes so they can be moved around in static mode
-              function freeze() {
-                force.stop();
-                node.call(staticDrag);
-              }
-
-              // Restart simulation
-              // Remove the static drag listener and reattach the normal force.drag listener
-              function defrost() {
-                node.on(".drag", null)
-                node.call(force.drag);
-                force.resume();
-              }
-
-
-
-
-              startForce(filteredNodes, filteredLinks);
-              updateLinks(filteredLinks);
-              updateNodes(filteredNodes); 
-
-              // force simulation is running in background, position of things is changing with each tick
-              // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
-              force.on("tick", tick);
-
-              function tick() {
-               link.attr("x1", function(d) { return d.source.x; })
-                    .attr("y1", function(d) { return d.source.y; })
-                    .attr("x2", function(d) { return d.target.x; })
-                    .attr("y2", function(d) { return d.target.y; });
-                // same with g elements, but these have no x and y, have to be translated
-                node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-              }  
-
-
-              d3.select("#filter").on("click", function() {                
-                if(just_school) {
-                  startForce(allNodes, allLinks);
-                  updateLinks(allLinks);
-                  updateNodes(allNodes);
-                  //force.start();
-
-                  just_school = false;
-                }
-                else {
-                  startForce(filteredNodes, filteredLinks);
-                  updateLinks(filteredLinks);
-                  updateNodes(filteredNodes);
-                  //force.start();
-
-                  just_school = true;
-                }
-              });
-
-              d3.select("#freeze").on("click", function() {
-                if(frozen) {
-                  defrost();
-                  frozen = false;
-                }
-                else {
-                  freeze()
-                  frozen = true;
-                }
-              });
-
-              d3.select('#labels').on("click", function() {
-                if(labeled) {
-                  svg.selectAll("text").remove();
-                  labeled = false;
-                }
-                else {
-                  addLabels(node);
-
-                  labeled = true;
-                }
-              });
-
-              d3.select("#bff").on("click", function() {
-                bffs = force.links()
-                bffs.sort(function(a, b) {
-                  return b.num_collabs - a.num_collabs
+                    labeled = true;
+                  }
                 });
-                console.log("AAAAA");
-                console.log(bffs);
-                var bffText = "Most Frequent Collaborators: </br>"
-                for(var i = 0; i < 10; i++) {
-                  bffText += "</br>" + bffs[i].source.id + ", " + bffs[i].target.id + " (" + bffs[i].num_collabs + ")</br>"
-                }
-                d3.select("#infoArea").html(bffText);
-              });
 
-              d3.select('#searchBox').on("keyup", function() {
-                searchText = this.value.toLowerCase();
-                d3.selectAll(".nodeCircle").style("stroke", function(d) {
-                  if(d.id.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
-                    return "orange"; })
-                  .style("stroke-width", function(d) {
+                d3.select("#bff").on("click", function() {
+                  bffs = force.links()
+                  bffs.sort(function(a, b) {
+                    return b.num_collabs - a.num_collabs
+                  });
+
+                  var bffText = "Most Frequent Collaborators: </br>"
+                  for(var i = 0; i < 10; i++) {
+                    bffText += "</br>" + bffs[i].source.id + ", " + bffs[i].target.id + " (" + bffs[i].num_collabs + ")</br>"
+                  }
+                  d3.select("#infoArea").html(bffText);
+                });
+
+                d3.select('#searchBox').on("keyup", function() {
+                  searchText = this.value.toLowerCase();
+                  d3.selectAll(".nodeCircle").style("stroke", function(d) {
                     if(d.id.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
-                      return "3px";
-                  });           
+                      return "orange"; })
+                    .style("stroke-width", function(d) {
+                      if(d.id.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
+                        return "3px";
+                    });           
+                });
               });
+            }
 
-           });
+            d3.select("#schoolChooser").on("change", function() {
+              var choice = this.value;
+              startItUp(choice);
+            })
+
+
+
+
 
         </script>
     </body>
