@@ -1,7 +1,7 @@
 import re
 
 # NB TODO this only works when node keys are the names, is that what we want?
-def disambiguate(g):
+def get_similar_keys(g):
 	index_names = enumerate(g.nodes())
 	similar_keys_dict = {}
 	names = g.nodes()
@@ -11,18 +11,59 @@ def disambiguate(g):
 		if base_name not in similar_keys_dict:
 			similar_keys_dict[base_name] = [n]
 		
-			for j in range(i+1, len(nodes)):				
-				if base_name == make_base_name(nodes[j]):
-					similar_keys_dict[base_name].append(nodes[j])
+			for j in range(i+1, len(names)):				
+				if base_name == make_base_name(names[j]):
+					similar_keys_dict[base_name].append(names[j])
 		else:
 			continue
 
-	for base_name, similar_keys in similar_keys_dict:
-		if similar_keys > 1:
-			compare_coauthors(g, similar_keys)
-
     # Testing
 	return similar_keys_dict
+
+def disambiguate(g, skd):
+	merged_authors = {}
+	for base_name, similar_keys in skd.items():
+		if similar_keys > 1:
+			merged_authors.update(merge_authors(g, similar_keys))
+
+	for k_author, v_author in merged_authors.items():
+		k_coauthors = g[k_author]
+		v_coauthors = g[v_author]
+
+		for coauthor in v_coauthors:
+			if coauthor in k_coauthors:
+				k_coauthors[coauthor]["num_collabs"] += v_coauthors[coauthor]["num_collabs"]
+				k_coauthors[coauthor]["collab_titles"].extend(v_coauthors[coauthor]["collab_titles"])
+			else:
+				g.add_edge(k_author, coauthor)
+				g[k_author][coauthor]["num_collabs"] = v_coauthors[coauthor]["num_collabs"]
+				g[k_author][coauthor]["collab_titles"] = v_coauthors[coauthor]["collab_titles"]
+
+		g.remove_node(v_author)
+
+	return g
+
+
+
+def merge_authors(graph, keys):
+	merged = {}
+	# keys is a list of similar keys we need to disambiguate
+	for index, name in enumerate(keys):
+		if name in merged:
+			continue
+
+		coauthor_set = set(graph[name].keys())
+		for j in range(index + 1, len(keys)):
+			coauthors = set(graph[keys[j]].keys())
+			common_coauthors = compare_coauthors(name, coauthor_set, coauthors)
+			
+			if common_coauthors:
+				merged[keys[j]] = name
+				coauthor_set.update(coauthors)
+
+	return merged
+
+
 
 
 
@@ -51,6 +92,15 @@ def make_base_name(name):
 	return base_name.lower()
 
 
-def compare_coauthors(graph, keys):
-	
+def compare_coauthors(name, set1, set2):
+	if name in set2:
+		return False
+
+	for author in set1:
+		if author in set2:
+			return True
+
+	return False
+
+
 

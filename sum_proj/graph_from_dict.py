@@ -25,10 +25,13 @@ class GraphMaker(object):
 		for title, authors in self.data_dict.items():
 			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
 			# Or use subclasses with different implementations of add_vertices here
+			if not authors:
+				continue
+
 			if isinstance(authors[0], basestring):
-				add_vertices(authors)
+				self.add_vertices(authors)
 			else:
-				add_vertices_from_tups(authors)
+				self.add_vertices_from_tups(authors)
 			self.add_vertices(authors)
 			self.add_links(title, authors)
 
@@ -51,7 +54,7 @@ class GraphMaker(object):
 		if name == None:
 			name = vertex_id
 		# TODO think graph.node can be replaced by just self.graph (also a dict)
-		if unique_id in self.graph.node:
+		if vertex_id in self.graph.node:
 			self.graph.node[vertex_id]["paper_count"] += 1
 		else:
 			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
