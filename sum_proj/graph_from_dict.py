@@ -8,17 +8,18 @@ class GraphMaker(object):
 		self.data_dict = dd
 		self.schl_names = sn
 		self.graph = nx.Graph()
-		self.harmonise_names()
+		#self.harmonise_names()
 		self.populate_graph()
 
 
-	def harmonise_names(self):
-		if self.schl_names:
-			self.schl_names = [(name.split(", ")[1] + " " + name.split(", ")[0]).lower() for name in self.schl_names]
+	# Do this step before passing the data to here - this module should not have to handle this
+	# def harmonise_names(self):
+	# 	if self.schl_names:
+	# 		self.schl_names = [(name.split(", ")[1] + " " + name.split(", ")[0]).lower() for name in self.schl_names]
 		
-		for title, authors in self.data_dict.items():
-			authors = [author.split(", ")[1] + " " + author.split(", ")[0] for author in authors]
-			self.data_dict[title] = authors
+	# 	for title, authors in self.data_dict.items():
+	# 		authors = [author.split(", ")[1] + " " + author.split(", ")[0] for author in authors]
+	# 		self.data_dict[title] = authors
 
 	def populate_graph(self):
 		for title, authors in self.data_dict.items():
@@ -28,6 +29,7 @@ class GraphMaker(object):
 
 	def add_vertices(self, authors):		
 		for author in authors:
+			# TODO think graph.node can be replaced by just self.graph (also a dict)
 			if author in self.graph.node:
 				self.graph.node[author]["paper_count"] += 1
 			else:
@@ -69,5 +71,11 @@ class GraphMaker(object):
 		graph_data = json_graph.node_link_data(self.graph)
 		with open("../d3/" + filename + ".json", 'w') as f:
 			json.dump(graph_data, f)
+
+
+
+
+
+
 
 

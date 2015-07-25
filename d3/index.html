@@ -7,11 +7,14 @@
           #svgArea {
             position: relative;
             /*left:100px;*/
-           /* border: 2px solid blue;*/
+            border: 2px solid gray;
           }
           #infoArea {
-            float:right;
+            /*float:right;*/
             /*border: 2px solid green;*/
+            position: absolute;
+            right:10px;
+            top:120px;
             width: 320px;
           }
 
@@ -27,7 +30,8 @@
           }*/
 
           .numCollabs {
-            color: red;
+            color: blue;
+            text-decoration: underline;
           }
 
         </style>
@@ -49,19 +53,23 @@
           <p id="edgeCount"></p>
         </div>
 
-        <p id="filter"> click to toggle between school-only and everybody </p>
-        <p id="freeze"> click to freeze / defrost </p>
-        <p id="labels"> click to remove / add labels </p>
-        <p id="bff"> click to see most frequent collaborators </p>
+        <button type="button" id="filter"> click to toggle between school-only and everybody </button>
+        <button type="button" id="freeze"> click to freeze / defrost </button>
+        <br>
+        <button type="button" id="labels"> click to remove / add labels </button>
+        <button type="button" id="bff"> click to see most frequent collaborators </button>
+        <br>
         
         <div id="search">
           <input type="text" id="searchBox" placeholder="search for an author">
         </div>
 
+        <div id="infoArea"></div>
+
         <script type="text/javascript">
           
             var width = 1000,
-                height = 600;
+                height = 1000;
 
             var colors = d3.scale.category10();
 
@@ -72,10 +80,10 @@
                 .attr("border", 1)
                 .attr("id", "svgArea");
 
-            d3.select("body")
+            /*d3.select("body")
               .append("div")
               //.text("hello world")
-              .attr("id", "infoArea");
+              .attr("id", "infoArea");*/
 
             // svg elements to hold links and nodes respectively
             // the link group is appended first so that the visual circle elements will cover the line elements
@@ -84,10 +92,10 @@
             var nodeGroup = svg.append("g").attr("id", "node_display");
 
             var force = d3.layout.force()
-                .gravity(0.12)
+                .gravity(0.10)
                 //.distance(200)
                 .linkDistance([100])
-                .charge(-200)
+                .charge(-220)
                 .size([width, height]);
 
             var just_school = true;
