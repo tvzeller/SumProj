@@ -1,16 +1,26 @@
 import re
 
-
+# NB TODO this only works when node keys are the names, is that what we want?
 def disambiguate(g):
-	index_authors = enumerate(g.nodes())
+	index_names = enumerate(g.nodes())
 	similar_keys_dict = {}
-	for i, author in index_authors:
-		base_name = make_base_name(author)
+	names = g.nodes()
+	for i, n in index_names:
+		base_name = make_base_name(n)
+
 		if base_name not in similar_keys_dict:
-			similar_keys_dict[base_name] = [author]
-		for j in range(i+1, len(g.nodes())):				
-			if base_name == make_base_name(g.nodes()[j]):
-				similar_keys_dict[base_name].append(g.nodes()[j])
+			similar_keys_dict[base_name] = [n]
+		
+			for j in range(i+1, len(nodes)):				
+				if base_name == make_base_name(nodes[j]):
+					similar_keys_dict[base_name].append(nodes[j])
+		else:
+			continue
+
+	for base_name, similar_keys in similar_keys_dict:
+		if similar_keys > 1:
+			compare_coauthors(g, similar_keys)
+
     # Testing
 	return similar_keys_dict
 
@@ -22,6 +32,7 @@ def disambiguate(g):
 # How can you tell the difference between that and a name with title??
 def make_base_name(name):
 	# TODO use regex here to check if name contains ", [letter].", which would indicate the presence of an initialised first name with no title
+	# TODO consider cases where name is First Name Last Name as well - see paper for ideas
 	initials_match = re.search(", [a-zA-Z]\.", name)
 	if initials_match:
 		tokens = name.split(", ")
@@ -38,3 +49,8 @@ def make_base_name(name):
 		base_name = tokens[0] + ", " + abbrev_first_name
 	
 	return base_name.lower()
+
+
+def compare_coauthors(graph, keys):
+	
+

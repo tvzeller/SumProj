@@ -23,22 +23,41 @@ class GraphMaker(object):
 
 	def populate_graph(self):
 		for title, authors in self.data_dict.items():
+			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
+			# Or use subclasses with different implementations of add_vertices here
+			if isinstance(authors[0], basestring):
+				add_vertices(authors)
+			else:
+				add_vertices_from_tups(authors)
 			self.add_vertices(authors)
 			self.add_links(title, authors)
 
 
 	def add_vertices(self, authors):		
-		for author in authors:
-			# TODO think graph.node can be replaced by just self.graph (also a dict)
-			if author in self.graph.node:
-				self.graph.node[author]["paper_count"] += 1
-			else:
-				self.graph.add_node(author)	
-				in_school = self.check_schl_status(author)
-				# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
-				self.graph.node[author]["in_school"] = in_school
-				self.graph.node[author]["paper_count"] = 1
+		# When the data_dict value is a list of names
+		for author_name in authors:
+			self.add_vertex(author_name)
+	
+	def add_vertices_from_tups(self, authors):
+		# When the data_dict value is a list of tuples
+		for author_name, author_id in authors:
+			self.add_vertex(author_id, author_name)
 
+
+	def add_vertex(self, vertex_id, name=None):
+		# In scraped data authors have a unique id number we can use in the graph structure
+		# In oai data we just use the name as unique id and assume same name equals same person
+		# In both cases the node is given a "name" attribute, to be used within the visualisation
+		if name == None:
+			name = vertex_id
+		# TODO think graph.node can be replaced by just self.graph (also a dict)
+		if unique_id in self.graph.node:
+			self.graph.node[vertex_id]["paper_count"] += 1
+		else:
+			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
+			in_school = self.check_schl_status(name)
+			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
+			self.graph.node[vertex_id]["in_school"] = in_school
 
 	def add_links(self, title, authors):
 		for i in range(0, len(authors)):
@@ -62,8 +81,8 @@ class GraphMaker(object):
 		else:
 			return False
 
+	
 	def get_graph(self):
-
 		return self.graph
 
 
