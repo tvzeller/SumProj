@@ -19,9 +19,9 @@ class Rake(object):
 				self.stopwords.add(line.strip())
 
 
-	def get_keyphrases(self, text):
+	def get_phrases(self, text):
 		words = re.split("\s", text.lower())
-		keyphrases = []
+		phrases = []
 		index = 0
 		last_word_was_stopword = True
 
@@ -32,16 +32,16 @@ class Rake(object):
 					last_word_was_stopword = True
 			else:
 				last_word_was_stopword = False
-				if len(keyphrases) > index:
-					keyphrases[index] += " " + word.strip()
+				if len(phrases) > index:
+					phrases[index] += " " + word.strip()
 				else:
-					keyphrases.append(word.strip())
+					phrases.append(word.strip())
 
 		#keywords2 = []
 		#for kw in keywords:
-		keyphrases = [word.strip() for kp in keyphrases for word in re.split("[^-\w ]", kp)]
-		print keyphrases
-		return keyphrases
+		phrases = [word.strip() for p in phrases for word in re.split("[^-\w ]", p)]
+		#print keyphrases
+		return phrases
 
 	def calc_ind_word_scores(self, kp):
 
@@ -75,9 +75,16 @@ class Rake(object):
 			for word in ind_words:
 				keyphrase_scores[phrase] += self.ind_word_scores[word]
 
-		sorted_kp_scores = sorted(keyphrase_scores.items(), key=operator.itemgetter(1), reverse=True)
-		print sorted_kp_scores
-		return sorted_kp_scores
+
+		return keyphrase_scores
+
+	def get_keyphrases(self, text):
+		phrases = self.get_phrases(text)
+		ws = self.calc_ind_word_scores(phrases)
+		kp_scores = self.calc_keyphrase_scores(ws, phrases)
+		sorted_kp_scores = sorted(kp_scores.items(), key=operator.itemgetter(1), reverse=True)
+		keyphrases = [word_score[0] for word_score in sorted_kp_scores][:5]
+		return keyphrases
 
 
 if __name__ == "__main__":

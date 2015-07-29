@@ -302,6 +302,10 @@ def get_author_name_urls(dept_name, dept_url):
 			if winning_name_url:
 				winning_name_urls.add(winning_name_url)
 
+	# TODO For safekeeping for now
+	with open("../nameurls/" + dept_name + ".txt", 'w') as f:
+		json.dump(list(winning_name_urls), f)
+
 	return winning_name_urls
 
 
@@ -428,18 +432,37 @@ def get_authors_info(author_url):
 	a_elems = get_a_elems_for_papers(author_url)
 	# Each a is a paper
 	for a in a_elems:
-		# get list of the paper's authors
-		authors = get_paper_authors(a.get("href"))
+		# Title of paper is the text content of the a element
+		paper_title = a.text_content()
+		paper_url = a.get("href")
+		paper_tree = get_tree(paper_url)
+		# Get list of the paper's authors
+		authors = get_paper_authors(paper_tree)
+		# Get paper abstract
+		abstract = get_paper_abstract(paper_tree)
 		# Add paper to dictionary with title as key and co-authors as value
-		author_dict[a.text_content()] = authors 
+		author_dict[paper_title] = {
+						"authors": authors,
+						"abstract": abstract,
+						"url": paper_url
+		} 
 
 	return author_dict
 
 # N.B. TODO this only returns Glasgow Uni authors, is this what we want here?
-def get_paper_authors(paper_url):
-	tree = get_tree(paper_url)
+def get_paper_authors(tree):
+	#tree = get_tree(paper_url)
 	# similar path to when getting school info...
-	path = '//table/tr/th[text() = "Glasgow Author(s) Enlighten ID:"]/following-sibling::td/a/text()'
+	path = '//table/tr/th[text() = "Glasgow Author(s) Enlighten ID:"]/following-sibling::td/a'
+	# Get list of <a> elements, each an author
 	authors = tree.xpath(path)
+	# Make list of (author name, author url) pairs to return
+	authors = [(author.text, author.get("href")) for author in authors]
 
 	return authors
+
+def get_paper_abstract(tree):
+	path = '//h2[text() = "Abstract"]/following-sibling::p/text()'
+	abstract = tree.xpath(path)
+	
+	return abstract

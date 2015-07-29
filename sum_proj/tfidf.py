@@ -35,13 +35,15 @@ class Extractor(object):
 		pass
 
 
-	def calc_score(self, text):
+	def get_keywords(self, text):
 		tfidf_scores = {}
 		word_freq = self.count_words(text)
 		for word in word_freq:
 			tfidf_scores[word] = word_freq[word] * (self.num_texts / self.idf_dict[word])
 
-		return sorted(tfidf_scores.items(), key=operator.itemgetter(1), reverse=True)
+		word_score_pairs = sorted(tfidf_scores.items(), key=operator.itemgetter(1), reverse=True)
+		keywords = [word_score[0] for word_score in word_score_pairs]
+		return keywords[:5]
 
 
 

@@ -1,6 +1,8 @@
 import networkx as nx
 from networkx.readwrite import json_graph
 import json
+import tfidf
+import rake
 
 class GraphMaker(object):
 
@@ -9,7 +11,40 @@ class GraphMaker(object):
 		self.schl_names = sn
 		self.graph = nx.Graph()
 		#self.harmonise_names()
-		self.populate_graph()
+		#self.populate_graph()
+
+
+	
+
+	def add_kw_to_data(self):
+		#ex = tfidf.Extractor()
+		
+		# for title in self.data_dict:
+		# 	text = self.get_text(title)
+		# 	ex.add_text(text)
+
+
+		rk = rake.Rake()
+		rk.add_stopwords("stopwords.txt")
+
+		for title in self.data_dict:
+			text = self.get_text(title)
+			keywords = rk.get_keyphrases(text)
+			self.data_dict[title]["keywords"] = keywords
+
+		return self.data_dict
+
+	def get_text(self, title):
+		# TODO abstract is in dict as a list but should just be a string
+		# for now access the list but should not have to do this - see what es is returning
+		abstract = self.data_dict[title]["abstract"]
+		if abstract:
+			abs_text = abstract[0]
+			text = title + "\n" + abs_text
+		else:
+			text = title
+		return text
+
 
 
 	# Do this step before passing the data to here - this module should not have to handle this
@@ -37,11 +72,13 @@ class GraphMaker(object):
 
 
 	def add_vertices(self, authors):		
+		print "adding a node using add vertices"
 		# When the data_dict value is a list of names
 		for author_name in authors:
 			self.add_vertex(author_name)
 	
 	def add_vertices_from_tups(self, authors):
+		print "adding a node"
 		# When the data_dict value is a list of tuples
 		for author_name, author_id in authors:
 			self.add_vertex(author_id, author_name)
