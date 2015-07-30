@@ -11,11 +11,13 @@ class GraphMaker(object):
 		self.schl_names = sn
 		self.graph = nx.Graph()
 		#self.harmonise_names()
-		#self.populate_graph()
+		self.populate_graph()
 
 
 	
-
+	# Paper may or may not have keywords (some Enlighten papers have keywords)
+	# If they don't, extract keywords and add to data dict
+	# N.B. using rake but could use something else here (e.g. TFIDF)
 	def add_kw_to_data(self):
 		#ex = tfidf.Extractor()
 		
@@ -28,21 +30,21 @@ class GraphMaker(object):
 		rk.add_stopwords("stopwords.txt")
 
 		for title in self.data_dict:
-			text = self.get_text(title)
-			keywords = rk.get_keyphrases(text)
-			self.data_dict[title]["keywords"] = keywords
+			# If paper does not already have associated keywords
+			if not self.data_dict[title]["keywords"]:
+				text = self.get_text(title)
+				keywords = rk.get_keyphrases(text)
+				self.data_dict[title]["keywords"] = keywords
 
 		return self.data_dict
 
 	def get_text(self, title):
-		# TODO abstract is in dict as a list but should just be a string
-		# for now access the list but should not have to do this - see what es is returning
+		text = title
 		abstract = self.data_dict[title]["abstract"]
+		# Some papers do not have abstract
 		if abstract:
-			abs_text = abstract[0]
-			text = title + "\n" + abs_text
-		else:
-			text = title
+			text += "\n" + abs_text
+		
 		return text
 
 
@@ -57,39 +59,32 @@ class GraphMaker(object):
 	# 		self.data_dict[title] = authors
 
 	def populate_graph(self):
-		for title, authors in self.data_dict.items():
+		for title, info in self.data_dict.items():
 			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
 			# Or use subclasses with different implementations of add_vertices here
+			print "title is " + title.encode("utf-8")
+			authors = info["authors"]
 			if not authors:
 				continue
 
-			if isinstance(authors[0], basestring):
-				self.add_vertices(authors)
-			else:
-				self.add_vertices_from_tups(authors)
-			self.add_vertices(authors)
+			for author in authors:
+				self.add_vertex(author)
+			
 			self.add_links(title, authors)
 
 
-	def add_vertices(self, authors):		
-		print "adding a node using add vertices"
-		# When the data_dict value is a list of names
-		for author_name in authors:
-			self.add_vertex(author_name)
-	
-	def add_vertices_from_tups(self, authors):
-		print "adding a node"
-		# When the data_dict value is a list of tuples
-		for author_name, author_id in authors:
-			self.add_vertex(author_id, author_name)
+	def add_vertex(self, author):
+		# author is either a (name, unique_url) pair or just a name string
+		# If just a string, the name is used as both the node identifier and the "name" attribute
+		# Otherwise access the (name, url) collection to get the url (to use as id) and the author name
+		if isinstance(author, basestring):
+			vertex_id = author
+			name = author
+		else:
+			vertex_id = author[1]
+			print "vertex id is ", vertex_id
+			name = author[0]
 
-
-	def add_vertex(self, vertex_id, name=None):
-		# In scraped data authors have a unique id number we can use in the graph structure
-		# In oai data we just use the name as unique id and assume same name equals same person
-		# In both cases the node is given a "name" attribute, to be used within the visualisation
-		if name == None:
-			name = vertex_id
 		# TODO think graph.node can be replaced by just self.graph (also a dict)
 		if vertex_id in self.graph.node:
 			self.graph.node[vertex_id]["paper_count"] += 1
@@ -99,7 +94,13 @@ class GraphMaker(object):
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school
 
+
 	def add_links(self, title, authors):
+		# Check if authors is a list of collections or just strings
+		# If collections, make new list out of element at index 1, which is the unique author url and the node id
+		if not isinstance(authors[0], basestring):
+			authors = [author[1] for author in authors]
+
 		for i in range(0, len(authors)):
 			for j in range(i+1, len(authors)):
 				# Check if edge already exists, update edge attributes
@@ -130,11 +131,3 @@ class GraphMaker(object):
 		graph_data = json_graph.node_link_data(self.graph)
 		with open("../d3/" + filename + ".json", 'w') as f:
 			json.dump(graph_data, f)
-
-
-
-
-
-
-
-

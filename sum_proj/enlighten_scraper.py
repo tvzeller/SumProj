@@ -15,19 +15,23 @@ import time
 import re
 import json
 import operator
+import sys
 
 author_list_base = "http://eprints.gla.ac.uk/view/author/"
+TIMEOUT = 10
+MAX_EXCEPTIONS = 15
+SLEEP_TIME = 1
 
 def get_tree(url):
 	"""
 	Takes a url and returns an html tree object to be parsed using
 	lxml
 	"""
+	num_exceptions = 0
 	while True:
-		time.sleep(1.5)
+		time.sleep(SLEEP_TIME)
 		try:
-			page = requests.get(url, timeout=10)
-			#time.sleep(2)
+			page = requests.get(url, timeout=TIMEOUT)
 			tree = html.fromstring(page.text)
 			break
 		except requests.exceptions.Timeout:
@@ -35,8 +39,11 @@ def get_tree(url):
 		except requests.exceptions.ConnectionError:
 			print "requests connection error, trying again"
 		except requests.exceptions.RequestException:
-			#time.sleep(2)
 			print "ambiguous requests exception happened, trying again"
+		num_exceptions += 1
+		# If we hit too many exceptions
+		if num_exceptions == MAX_EXCEPTIONS:
+			sys.exit()
 
 	return tree
 
@@ -47,7 +54,6 @@ def get_names(url):
 	returns list of names in form "Last Name, Title First Name"
 	e.g. "Manlove, Dr David"
 	"""
-
 	# get html element tree
 	tree = get_tree(url)
 	# get list of last names
@@ -134,10 +140,13 @@ def sort_name_urls(name_url_list, schl_name):
 	# From dict, create list of (name, url) tuples sorted by value
 	# First sort a list of (key, value) tuples ordered by item at index 1 (the value, i.e. the num of matches)
 	# N.B. use reverse flag so that key with highest value goes first
-	sorted_schl_matches = sorted(school_matches.items(), key=operator.itemgetter(1), reverse=True)
+	sorted_name_urls = sorted(school_matches.items(), key=operator.itemgetter(1), reverse=True)
+	
 	# Then make list from just the keys (the (name, url) tuples)
-	sorted_name_urls = [kv_tup[0] for kv_tup in sorted_schl_matches]
+	#sorted_name_urls = [kv_tup[0] for kv_tup in sorted_schl_matches]
 
+	# NB returning [((name, url), num), ((name, url), num)] so that calling function can check
+	# that the top ranked (name, url) actually has more than 0 papers in the relevant school
 	return sorted_name_urls
 
 def check_if_in_dept(author_url, schl_name):
@@ -277,16 +286,13 @@ def get_author_name_urls(dept_name, dept_url):
 	if "Humanities" in dept_name:
 		dept_name = "School of Humanities"
 
-
-	# Dict to contain (author name, author page url) as keys and a tuple of ([all_titles][tagged_titles]) as values
-	
-	#bib_dict = {}
 	
 	# get list of names of researchers in department
 	names = get_names(dept_url)
-	# loop through each name
+
 	winning_name_urls = set()
 
+	# loop through each name
 	for name in names:
 		name = initialise_first_name(name)
 		full_url = author_list_base + "index."+ name.split(" ")[0][0] + ".html"
@@ -348,10 +354,14 @@ def get_winning_url(nm_url_list, school):
 	if len(nm_url_list) > 1:
 		# Sort (name, url) pairs by number of papers in relevant school
 		sorted_urls = sort_name_urls(nm_url_list, school)
-		# The first one in the list is chosen 
-		# TODO FIRST CHECK IF SOMEONE ACTUALLY HAS PAPERS ASSOCIATED - BECAUSE MAYBE NONE OF THEM ARE IN DEPT
-		# THIS IS IMPORTANT
-		winning_name_url = sorted_urls[0]
+		# Get back list of two element tuples - ((name, url), num_papers)
+		# If the first ranked (name, url) has 0 num_papers in relevant school, disregard it
+		if sorted_urls[0][1] == 0:
+			winning_name_url = None
+		# Else select the first ranked (name, url) as the winning_name_url
+		else:
+			winning_name_url = sorted_urls[0][0]
+
 		print "CLASH! Winner is", winning_name_url[0]
 
 	# After the existing (name, url) pairs have been filtered out, there is only one url present
@@ -440,11 +450,14 @@ def get_authors_info(author_url):
 		authors = get_paper_authors(paper_tree)
 		# Get paper abstract
 		abstract = get_paper_abstract(paper_tree)
+		# Get paper keywords
+		keywords = get_paper_keywords(paper_tree)
 		# Add paper to dictionary with title as key and co-authors as value
 		author_dict[paper_title] = {
 						"authors": authors,
 						"abstract": abstract,
-						"url": paper_url
+						"url": paper_url,
+						"keywords": keywords
 		} 
 
 	return author_dict
@@ -464,5 +477,20 @@ def get_paper_authors(tree):
 def get_paper_abstract(tree):
 	path = '//h2[text() = "Abstract"]/following-sibling::p/text()'
 	abstract = tree.xpath(path)
+	# If paper page contains the abstract, xpath returns a list with single string element
+	# Access list to get the abstract string to return
+	if abstract:
+		abstract = abstract[0]
 	
 	return abstract
+
+def get_paper_keywords(tree):
+	path = '//table/tr/th[text() = "Keywords:"]/following-sibling::td/text()'
+	keywords = tree.xpath(path)
+	# xpath returns a list with the keywords as a single string element separated by commas
+	# Make this into a list of keywords
+	if keywords:
+		keywords = keywords[0].split(",")
+		keywords = [kw.strip() for kw in keywords]
+
+	return keywords
