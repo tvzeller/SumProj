@@ -3,27 +3,23 @@
 # TODO refactor, think about how querying will work
 # clear up responsibilities between modules/classes
 
+from collections import defaultdict
+
 class Search(object):
 	
 	def __init__(self):
-		self.index = {}
+		self.index = defaultdict(set)
 
-
+	# TODO can record size of postings to optimise intersections - faster if start intersecting with smallest set; 
+	# see Intro to IR pg.11 
 	def make_index(self, data_dict):
-		count = 0
 		for title in data_dict:
-			keywords = data_dict[title]["keywords"]
-			#tokens = self.process_text(keywords)
-			terms = set(self.process_text(keywords))
-			authors = data_dict[title]["authors"]
+			terms = set(self.process_text(data_dict[title]["keywords"]))
 			# Authors is list of lists, we want second element in list (the unique identifier)
-			authors = [author[1] for author in authors]
-			# For each keyword in this paper
+			authors = [author[1] for author in data_dict[title]["authors"]]
+			# For each keyword term in this paper, add authors to postings set
 			for term in terms:
-				if term in self.index:
-					self.index[term].update(authors)
-				else:
-					self.index[term] = set(authors)
+				self.index[term].update(authors)
 
 
 	# TODO is text coming in as a string or a list?
