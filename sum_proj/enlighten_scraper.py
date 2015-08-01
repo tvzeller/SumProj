@@ -493,4 +493,5 @@ def get_paper_keywords(tree):
 		keywords = keywords[0].split(",")
 		keywords = [kw.strip() for kw in keywords]
 
+	# TODO clean up keywords (some use ; as delimiter, some have \n characters inside them etc)
 	return keywords

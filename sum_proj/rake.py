@@ -20,6 +20,7 @@ class Rake(object):
 
 
 	def get_phrases(self, text):
+		# \s splits on all white space characters
 		words = re.split("\s", text.lower())
 		phrases = []
 		index = 0
@@ -37,10 +38,10 @@ class Rake(object):
 				else:
 					phrases.append(word.strip())
 
-		#keywords2 = []
-		#for kw in keywords:
+		# TODO improve regex, want to keep things like apostrophes, # etc. but get rid of punctuation
+		# and what about . within abbreviations eg. U.S.A.
 		phrases = [word.strip() for p in phrases for word in re.split("[^-\w ]", p)]
-		#print keyphrases
+
 		return phrases
 
 	def calc_ind_word_scores(self, kp):
@@ -61,8 +62,8 @@ class Rake(object):
 
 		# TODO Final score can be either frequency, degree or degree/frequency
 		for word in word_freq:
-			self.ind_word_scores[word] = (word_deg[word] * 1.0) / word_freq[word]
-			#self.ind_word_scores[word] = word_freq[word]
+			#self.ind_word_scores[word] = (word_deg[word] * 1.0) / word_freq[word]
+			self.ind_word_scores[word] = word_freq[word]
 
 		sorted_word_scores = sorted(self.ind_word_scores.items(), key=operator.itemgetter(1), reverse=True)
 
@@ -83,8 +84,8 @@ class Rake(object):
 		ws = self.calc_ind_word_scores(phrases)
 		kp_scores = self.calc_keyphrase_scores(ws, phrases)
 		sorted_kp_scores = sorted(kp_scores.items(), key=operator.itemgetter(1), reverse=True)
-		keyphrases = [word_score[0] for word_score in sorted_kp_scores][:5]
-		return keyphrases
+		keyphrases = [word_score[0] for word_score in sorted_kp_scores]
+		return " ".join(keyphrases)
 
 
 if __name__ == "__main__":

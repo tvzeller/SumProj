@@ -10,8 +10,9 @@ class GraphMaker(object):
 		self.data_dict = dd
 		self.schl_names = sn
 		self.graph = nx.Graph()
+		#self.add_kw_to_data()
 		#self.harmonise_names()
-		self.populate_graph()
+		#self.populate_graph()
 
 
 	
@@ -25,16 +26,17 @@ class GraphMaker(object):
 		# 	text = self.get_text(title)
 		# 	ex.add_text(text)
 
-
 		rk = rake.Rake()
 		rk.add_stopwords("stopwords.txt")
 
-		for title in self.data_dict:
+		for title, info in self.data_dict.items():
 			# If paper does not already have associated keywords
-			if not self.data_dict[title]["keywords"]:
+			if not info["keywords"]:
 				text = self.get_text(title)
 				keywords = rk.get_keyphrases(text)
 				self.data_dict[title]["keywords"] = keywords
+			else:
+				self.data_dict[title]["keywords"] = " ".join(info["keywords"])
 
 		return self.data_dict
 
@@ -43,7 +45,7 @@ class GraphMaker(object):
 		abstract = self.data_dict[title]["abstract"]
 		# Some papers do not have abstract
 		if abstract:
-			text += "\n" + abs_text
+			text += "\n" + abstract
 		
 		return text
 
@@ -67,13 +69,15 @@ class GraphMaker(object):
 			if not authors:
 				continue
 
+			kw = info["keywords"]
+			
 			for author in authors:
-				self.add_vertex(author)
+				self.add_vertex(author, kw)
 			
 			self.add_links(title, authors)
 
-
-	def add_vertex(self, author):
+	# TODO consider using polymorphism here... having separate classes for data from scraper vs from oai
+	def add_vertex(self, author, keywords):
 		# author is either a (name, unique_url) pair or just a name string
 		# If just a string, the name is used as both the node identifier and the "name" attribute
 		# Otherwise access the (name, url) collection to get the url (to use as id) and the author name
@@ -88,8 +92,10 @@ class GraphMaker(object):
 		# TODO think graph.node can be replaced by just self.graph (also a dict)
 		if vertex_id in self.graph.node:
 			self.graph.node[vertex_id]["paper_count"] += 1
+			# TODO now treating keywords as a string rather than list (concatenate rather than extend)
+			self.graph.node[vertex_id]["keywords"] += " " + keywords
 		else:
-			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
+			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1, "keywords": keywords})
 			in_school = self.check_schl_status(name)
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school
@@ -103,13 +109,15 @@ class GraphMaker(object):
 
 		for i in range(0, len(authors)):
 			for j in range(i+1, len(authors)):
+				author1 = authors[i]
+				author2 = authors[j]
 				# Check if edge already exists, update edge attributes
-				if self.graph.has_edge(authors[i], authors[j]):
-					self.graph[authors[i]][authors[j]]["num_collabs"] += 1
-					self.graph[authors[i]][authors[j]]["collab_titles"].append(title)
+				if self.graph.has_edge(author1, author2):
+					self.graph[author1][author2]["num_collabs"] += 1
+					self.graph[author1][author2]["collab_titles"].append(title)
 				# If edge is new, add it to the graph, give it initial attributes
 				else:
-					self.graph.add_edge(authors[i], authors[j], {'num_collabs': 1, "collab_titles": [title,]})
+					self.graph.add_edge(author1, author2, {'num_collabs': 1, "collab_titles": [title,]})
 
 
 	def check_schl_status(self, name):
