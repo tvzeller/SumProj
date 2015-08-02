@@ -1,6 +1,7 @@
 # just a test
 # this goes through all the xml files made by tokentest
-# parses them and extracts the titles, returns dict with author: [titles]
+# parses them and extracts the titles, returns dict with title: [authors]
+# TODO change to get same data as scraper
 
 from lxml import etree
 #import tokentest

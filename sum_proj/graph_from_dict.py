@@ -33,17 +33,21 @@ class GraphMaker(object):
 			# If paper does not already have associated keywords
 			if not info["keywords"]:
 				text = self.get_text(title)
+				# rk returns keywords as a list
+				# join on "|" and set as keywords for this paper
+				# TODO nb we have keywords as string to allow for phrase search (search for substring in keyword string)
 				keywords = rk.get_keyphrases(text)
 				self.data_dict[title]["keywords"] = keywords
-			else:
-				self.data_dict[title]["keywords"] = " ".join(info["keywords"])
+			# If it does, join the list that came from the scraper into string and set as keywords
+			#else:
+			#	self.data_dict[title]["keywords"] = info["keywords"])
 
 		return self.data_dict
 
 	def get_text(self, title):
 		text = title
 		abstract = self.data_dict[title]["abstract"]
-		# Some papers do not have abstract
+		# Some papers do not have an abstract
 		if abstract:
 			text += "\n" + abstract
 		
@@ -68,16 +72,14 @@ class GraphMaker(object):
 			authors = info["authors"]
 			if not authors:
 				continue
-
-			kw = info["keywords"]
 			
 			for author in authors:
-				self.add_vertex(author, kw)
+				self.add_vertex(author)
 			
 			self.add_links(title, authors)
 
 	# TODO consider using polymorphism here... having separate classes for data from scraper vs from oai
-	def add_vertex(self, author, keywords):
+	def add_vertex(self, author):
 		# author is either a (name, unique_url) pair or just a name string
 		# If just a string, the name is used as both the node identifier and the "name" attribute
 		# Otherwise access the (name, url) collection to get the url (to use as id) and the author name
@@ -93,9 +95,11 @@ class GraphMaker(object):
 		if vertex_id in self.graph.node:
 			self.graph.node[vertex_id]["paper_count"] += 1
 			# TODO now treating keywords as a string rather than list (concatenate rather than extend)
-			self.graph.node[vertex_id]["keywords"] += " " + keywords
+			#self.graph.node[vertex_id]["keywords"] += " " + keywords
 		else:
-			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1, "keywords": keywords})
+			#self.graph.add_node(vertex_id, {"name": name, "paper_count": 1, "keywords": keywords})
+			# TODO keywords do not go in this graph anymore
+			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
 			in_school = self.check_schl_status(name)
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school

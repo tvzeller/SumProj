@@ -11,7 +11,8 @@ class Search(object):
 		self.index = defaultdict(set)
 
 	# TODO can record size of postings to optimise intersections - faster if start intersecting with smallest set; 
-	# see Intro to IR pg.11 
+	# see Intro to IR pg.11
+	# TODO also record amount of times author has this term 
 	def make_index(self, data_dict):
 		for title in data_dict:
 			terms = set(self.process_text(data_dict[title]["keywords"]))
@@ -24,6 +25,7 @@ class Search(object):
 
 	# TODO is text coming in as a string or a list?
 	# Assume string for now, but it will be all separated by spaces by this point
+	# CURRENT STATUS kw coming in as a LIST (of PHRASES)
 	# NB not making tokens into a set because this same method will be used on query
 	# and want to keep query as full phrase with repeated words if the case
 	def process_text(self, text):

@@ -85,7 +85,9 @@ class Rake(object):
 		kp_scores = self.calc_keyphrase_scores(ws, phrases)
 		sorted_kp_scores = sorted(kp_scores.items(), key=operator.itemgetter(1), reverse=True)
 		keyphrases = [word_score[0] for word_score in sorted_kp_scores]
-		return " ".join(keyphrases)
+		# TODO now returning list
+		# TODO how many should we return? Everything? Let caller decide?
+		return keyphrases[:5]
 
 
 if __name__ == "__main__":
