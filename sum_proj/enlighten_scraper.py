@@ -479,7 +479,7 @@ def get_paper_abstract(tree):
 	abstract = tree.xpath(path)
 	# If paper page contains the abstract, xpath returns a list with single string element
 	# Access list to get the abstract string to return
-	if abstract:
+	if abstract and abstract[0] != "No abstract available.":
 		abstract = abstract[0]
 	
 	return abstract

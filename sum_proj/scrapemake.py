@@ -14,6 +14,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 # wnl = WordNetLemmatizer()
 # wnl.lemmatize("word")
 from difflib import SequenceMatcher 
+import Levenshtein
 from collections import defaultdict
 import enlighten_scraper as es
 import graph_from_dict as gfd
@@ -42,7 +43,11 @@ def scrape_and_make(data_dict):
 		# Use regex to split into terms.. take into account "|"
 		# Once tokenised, build inv index like in search.py
 		keyword_list = info["keywords"]
+		# TODO temporary fixes
+		keyword_list = [kw for kw in keyword_list if kw != ""]
 		stemmed_kw_list = stem_kwlist(keyword_list)
+		# TODO temporary fixes
+		stemmed_kw_list = [kw for kw in keyword_list if "abstract avail" not in kw]
 		# TODO do we need to check if authors exists?
 		for author in authors:
 			# TODO Add a node to collab graph here
@@ -108,6 +113,7 @@ def make_sim_graph(my_tup):
 	collab_graph = my_tup[1]
 	authors = [author for author in collab_graph.node if collab_graph.node[author]["in_school"]]
 	# TODO AKW DICT should only contain school authors
+	full_start = time.time()
 
 	sim_graph = nx.Graph()
 	#authors = akw_dict.keys()
@@ -127,13 +133,16 @@ def make_sim_graph(my_tup):
 			author2_id = author2
 			sim_graph.add_node(author2_id, {"name": author2_name})
 			kw_tokens2 = akw_dict[author2]["keywords"].split("|")
-			is_sim = similar(kw_tokens1, kw_tokens2)
-			if is_sim:
+			sim_check = similar(kw_tokens1, kw_tokens2)
+			sim_match = sim_check[0]
+			sim_kw = sim_check[1]
+			if sim_match >= 0.2:
 				# add edge between authors
 				# TODO have keywords as edge attribute?
-				sim_graph.add_edge(author1, author2)
-		print "time taken: %d", time.time() - start
+				sim_graph.add_edge(author1, author2, {"sim_keywords": sim_kw})
+		print "time taken:", time.time() - start
 
+	print "total time taken:", time.time() - full_start
 	return sim_graph
 				
 
@@ -150,30 +159,37 @@ def similar(kw_list1, kw_list2):
 	tot_sim = 0.0
 	indices1 = set()
 	indices2 = set()
-	for i, kw1 in enumerate(kw_list1):
-		for j, kw2 in enumerate(kw_list2):
+	sim_keywords = []
+	for kw1_index, kw1 in enumerate(kw_list1):
+		for kw2_index, kw2 in enumerate(kw_list2):
 			# This uses the SequenceMatcher class from difflib to get string similarity metric 
 			# TODO explore using different algorithms instead
 			# TODO try Levenshtein
-			ratio = SequenceMatcher(None, kw1, kw2).quick_ratio()
+			#ratio = SequenceMatcher(None, kw1, kw2).quick_ratio()
+			ratio = Levenshtein.ratio(kw1, kw2)
 			#ratio = 0.2
 			#print kw1, kw2, ratio
 			# TODO try different thresholds
 			# if ratio is above threshold, add both indices to respective index set
 			# Python: "As a rule of thumb, a ratio() value over 0.6 means the sequences are close matches" (for difflib ratio)
-			if ratio > 0.7:
-				indices1.add(i)
-				indices2.add(j)
+			if ratio >= 0.7:
+				indices1.add(kw1_index)
+				indices2.add(kw2_index)
 				# if match found, break out of inner loop
+				sim_keywords.append(kw1)
+				sim_keywords.append(kw2)
 				break
 
-	for i, kw2 in enumerate(kw_list2):
-		for j, kw1 in enumerate(kw_list1):
-			if kw1 in indices1:
-				ratio = SequenceMatcher(None, kw1, kw2).quick_ratio()
-				if ratio > 0.7:
-					indices2.add(i)
-					indices1.add(j)
+	for kw2_index, kw2 in enumerate(kw_list2):
+		for kw1_index, kw1 in enumerate(kw_list1):
+			if kw2_index not in indices2 and kw1_index in indices1:
+				#ratio = SequenceMatcher(None, kw1, kw2).quick_ratio()
+				ratio = Levenshtein.ratio(kw1, kw2)
+				if ratio >= 0.7:
+					indices2.add(kw2_index)
+					indices1.add(kw1_index)
+					sim_keywords.append(kw1)
+					sim_keywords.append(kw2)
 					break
 
 	pct_match1 = (len(indices1) * 1.0) / len(kw_list1)
@@ -181,9 +197,9 @@ def similar(kw_list1, kw_list2):
 	match = (pct_match1 + pct_match2) / 2
 	#print "final score is: " + str(match)
 	# TODO try different thresholds
-	if match >= 0.6:
+	if match >= 0.2:
 		print "matching authors"
-	return match >= 0.6
+	return (match, sim_keywords)
 			
 
 
