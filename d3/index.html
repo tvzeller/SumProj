@@ -8,10 +8,11 @@
             position: relative;
             /*left:100px;*/
             border: 2px solid gray;
+            width: 1000px;
+            height: 1000px;
           }
+
           #infoArea {
-            /*float:right;*/
-            /*border: 2px solid green;*/
             position: absolute;
             right:10px;
             top:120px;
@@ -21,7 +22,6 @@
           #rightDiv {
             float:right;
           }
-
 
          /* #schoolChooser {
             position:relative;
@@ -67,23 +67,21 @@
         <div id="infoArea"></div>
 
         <script type="text/javascript">
-          
-            var width = 1000,
-                height = 1000;
+            // JS style enums - https://stijndewitt.wordpress.com/2014/01/26/enums-in-javascript/
+            var vizTypes = {
+              AUTHOR_COLLAB: 1,
+              SIMILARITY: 2,
+              // etc.
+            }
+            // Start with author collaboration graph as default on page load
+            var currentViz = vizTypes.AUTHOR_COLLAB
 
             var colors = d3.scale.category10();
+            var linkColour = "#bbb"
 
             var svg = d3.select("body")
                 .append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("border", 1)
                 .attr("id", "svgArea");
-
-            /*d3.select("body")
-              .append("div")
-              //.text("hello world")
-              .attr("id", "infoArea");*/
 
             // svg elements to hold links and nodes respectively
             // the link group is appended first so that the visual circle elements will cover the line elements
@@ -93,11 +91,12 @@
 
             var force = d3.layout.force()
                 .gravity(0.10)
-                //.distance(200)
+                //.distance(200) TODO what is this?
                 .linkDistance([100])
                 .charge(-220)
                 .size([width, height]);
 
+            // OPTIONS
             var just_school = true;
             var frozen = false;
             var labeled = true;
@@ -109,28 +108,21 @@
             .domain([1, 250])
             .range([5, 30])
             .base([10]);
-            //console.log(scale.base());
-            /*var nodeScale = d3.scale.linear();
-            nodeScale.domain([1, 200]);
-            nodeScale.range([5, 25])*/
 
             var linkScale = d3.scale.log()
             .domain([1, 100])
             .range([1, 8])
             .base([10]);
 
-            var linkColour = "#bbb"
-
             // TODO change back
-            //var defaultSchool = "cswithattribs2"
-            var defaultSchool = "cssimgraph"
-            startItUp(defaultSchool);
+            var defaultGraph = "cswithattribs2"
+            //var defaultSchool = "cssimgraph"
+            startItUp(defaultGraph);
 
-            function startItUp(schlGraph) {
-              d3.json(schlGraph + ".json", function(error, graph)  {
+            function startItUp(graphFile) {
+              // TODO this will come from django
+              d3.json(graphFile + ".json", function(error, graph)  {
                 
-                //var all_data = graph
-
                 // for d3 force layout to work, the links can reference the actual source and target node objects
                 // or they can reference the index of the objects in the nodes array
                 // networkx's json string uses the index referencing
@@ -144,20 +136,29 @@
 
                 var allLinks = graph.links
                 var allNodes = graph.nodes
+                var currentLinks = allLinks
+                var currentNodes = allNodes
 
+                // If viewing an author collaboration graph (the default), allow for filtering between
+                // school-only authors and full set (includes authors who collaborate with school-only)
+                if(currentViz == vizTypes.AUTHOR_COLLAB) {
+                  // NB this is the JS array filter() not the d3 filter being used here
+                  // This gets just the links whose nodes both represent authors belonging to the school being displayed
+                  var filteredLinks = graph.links.filter(function(l) {
+                    return l.source.in_school && l.target.in_school;
+                  });
+                  // This gets just the nodes that represent authors belonging to the school being displayed
+                  var filteredNodes = graph.nodes.filter(function(n) {
+                    return n.in_school;
+                  });
+                  currentLinks = filteredLinks;
+                  currentNodes = filteredNodes
+                }
+
+                // link will hold all the visual elements representing links
                 var link
+                // node will hold all the visual elements representing nodes
                 var node
-
-                // NB this is the JS array filter() not the d3 filter being used here
-                // This gets just the links whose nodes both represent authors belonging to the school being displayed
-                var filteredLinks = graph.links.filter(function(l) {
-                  return l.source.in_school && l.target.in_school;
-                });
-                // This gets just the nodes that represent authors belonging to the school being displayed
-                var filteredNodes = graph.nodes.filter(function(n) {
-                  return n.in_school;
-                });
-
 
                 // custom drag behaviour for use in frozen mode
                 // doesn't use force.drag as that reactivates force automatically
@@ -165,8 +166,6 @@
                         .on("dragstart", dragstart)
                         .on("drag", dragmove)
                         .on("dragend", dragend);
-
-
 
                 // Create a map indicating whether 2 nodes are adjacent, to make it faster to check this when necessary
                 // idea from Mike Bostock - http://stackoverflow.com/a/8780277
@@ -192,8 +191,9 @@
                         // See further explanation below when similar is done for the nodes
                         .data(links, function(d) {
                           return d.source.id + "-" + d.target.id;
-                        });   
-                        
+                        });
+
+                  
                   link.enter()
                         .append("line")
                         .attr("class", "link")
@@ -234,6 +234,17 @@
 
                 // Used to bind new node data to visual elements and display
                 function updateNodes(nodes) {
+                  // First remove nodes that are already present.
+                  // This is because a node may be present as a non-school member in one graph, but then
+                  // be a school member in the next. But would still be visualised as a non-school member as the visualisation
+                  // will not be refreshed for it (as it will be treated as an already existing element).
+                  // If we remove all existing elements first we ensure that every node gets visualised appropriately.
+                  // In practice this is almost equivalent to calling remove on data().exit() (i.e. the set of visual elements that
+                  // no longer have data attached to them) after renewing the data. But here we just remove before adding new data rather than
+                  // after.
+                  var existingNodes = nodeGroup.selectAll(".node");
+                  existingNodes.remove();
+
                   node = nodeGroup.selectAll(".node")
                       /* second argument to data() is a d3 "key function", used to join data to visual elements by the return value (a unique string,
                        in this case the id)
@@ -258,9 +269,10 @@
                       */
                       .data(nodes, function(d) {
                         return d.id;
-                      })
+                      });
 
-                  // New nodes - we get these the first time the page is loaded and when we go from displaying filtered nodes to all nodes
+                  // node.enter() returns data not attached to visual elements - since we removed all existing data above, all
+                  // data will be treated as new data 
                   nodeG = node.enter()
                       .append("g")
                       .attr("class", "node")
@@ -292,8 +304,10 @@
                         return d.name
                       });
 
-                      // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
-                      node.exit().remove();
+                  
+                    // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
+                    //TODO this is no longer needed - removing above
+                    //  node.exit().remove();
 
                       // attach event listeners here so they get attached to new nodes as well
                       node.on("mouseover", highlight);
@@ -301,7 +315,6 @@
                       node.on("dblclick", highlight);
                       node.on("dblclick", fixNode)
                       node.on("click", showCollabInfo);
-
 
                       d3.select("#nodeCount").text("Number of Nodes: " + node[0].length);
                 }
@@ -353,10 +366,6 @@
                     node.style("opacity", 1.0);
                   }
                 }
-
-                /*var showCount = function(d) {
-                  alert(d.paper_count)
-                }*/
 
                 var fixNode = function(d) {
                   if(nodeSelected == true)
@@ -412,22 +421,24 @@
                   force.resume();
                 }
 
-                //TODO change back to filtered
-                updateLinks(allLinks);
-                updateNodes(allNodes);
-                /*force.charge(function(d, i) {
-                  if(nodeScale(d.paper_count) >= 15)
-                    return -200;
-                  else
-                    return -100;
-                });*/
+                function update(links, nodes) {
+                  //TODO change back to filtered
+                  updateLinks(links);
+                  updateNodes(nodes);
+                  //TODO set charge depending on size of node
+                  /*force.charge(function(d, i) {
+                    if(nodeScale(d.paper_count) >= 15)
+                      return -200;
+                    else
+                      return -100;
+                  });*/
+                  startForce(nodes, links);
+                  // force simulation is running in background, position of things is changing with each tick
+                  // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
+                  force.on("tick", tick);
+                }
 
-
-
-                startForce(allNodes, allLinks);
-                // force simulation is running in background, position of things is changing with each tick
-                // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
-                force.on("tick", tick);
+                update(currentLinks, currentNodes)
 
                 function tick() {
                  link.attr("x1", function(d) { return d.source.x; })
@@ -488,6 +499,7 @@
                   });
 
                   var bffText = "Most Frequent Collaborators: </br>"
+                  // TODO 10 is a magic number
                   for(var i = 0; i < 10; i++) {
                     bffText += "</br>" + bffs[i].source.id + ", " + bffs[i].target.id + " (" + bffs[i].num_collabs + ")</br>"
                   }
@@ -533,10 +545,6 @@
               var choice = this.value;
               startItUp(choice);
             });
-
-
-
-
 
         </script>
     </body>
