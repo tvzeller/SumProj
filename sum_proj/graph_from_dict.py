@@ -8,7 +8,7 @@ class GraphMaker(object):
 
 	def __init__(self, dd, sn=None):
 		self.data_dict = dd
-		self.schl_names = sn
+		self.schl_names = [n.lower() for n in sn]
 		self.graph = nx.Graph()
 		#self.add_kw_to_data()
 		#self.harmonise_names()
@@ -84,11 +84,12 @@ class GraphMaker(object):
 		# If just a string, the name is used as both the node identifier and the "name" attribute
 		# Otherwise access the (name, url) collection to get the url (to use as id) and the author name
 		if isinstance(author, basestring):
+			print "author is just a string!"
 			vertex_id = author
 			name = author
 		else:
 			vertex_id = author[1]
-			print "vertex id is ", vertex_id
+			#print "vertex id is ", vertex_id
 			name = author[0]
 
 		# TODO think graph.node can be replaced by just self.graph (also a dict)
@@ -101,6 +102,7 @@ class GraphMaker(object):
 			# TODO keywords do not go in this graph anymore
 			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
 			in_school = self.check_schl_status(name)
+			#print name, in_school
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school
 
@@ -125,10 +127,12 @@ class GraphMaker(object):
 
 
 	def check_schl_status(self, name):
+		
 		if self.schl_names:
 			# do name abbreviation here to ensure we get everyone?
 			# TODO and lowercase to ensure consistency
 			return name.lower() in self.schl_names
+
 		# If no list of names of school members has been provided (e.g. when data comes from OAI) return false
 		# TODO or do something else??
 		else:

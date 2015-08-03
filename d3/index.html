@@ -121,7 +121,9 @@
 
             var linkColour = "#bbb"
 
-            var defaultSchool = "cswithattribs2"
+            // TODO change back
+            //var defaultSchool = "cswithattribs2"
+            var defaultSchool = "cssimgraph"
             startItUp(defaultSchool);
 
             function startItUp(schlGraph) {
@@ -197,7 +199,10 @@
                         .attr("class", "link")
                         .style("stroke", linkColour)
                         .style("stroke-width", function(d) {
-                          return linkScale(d.num_collabs);
+                          if(d.num_collabs != undefined)
+                            return linkScale(d.num_collabs);
+                          else
+                            return 1;
                         });
 
                   link.exit().remove()
@@ -265,8 +270,10 @@
                     nodeG.append("circle")
                       .attr("class", "nodeCircle")
                       .attr("r", function(d) {
-                        return nodeScale(d.paper_count);
-                        //return 10;
+                        if(d.paper_count != undefined)
+                          return nodeScale(d.paper_count);
+                        else
+                          return 10;
                       })
                       .style("fill", function(d, i) {
                           //return colors(i);
@@ -282,7 +289,7 @@
 
                       nodeG.append("title")
                       .text(function(d) {
-                        return d.id
+                        return d.name
                       });
 
                       // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
@@ -306,7 +313,7 @@
                     .attr("font-size", "10px")
                     .attr("font-family", "sans-serif")
                     .text(function(d) { 
-                      return d.id })
+                      return d.name })
                     .attr("dy", ".35em")
                     .attr("text-anchor", "middle")
                     .attr("font-weight", "bold");
@@ -405,9 +412,9 @@
                   force.resume();
                 }
 
-                
-                updateLinks(filteredLinks);
-                updateNodes(filteredNodes);
+                //TODO change back to filtered
+                updateLinks(allLinks);
+                updateNodes(allNodes);
                 /*force.charge(function(d, i) {
                   if(nodeScale(d.paper_count) >= 15)
                     return -200;
@@ -417,7 +424,7 @@
 
 
 
-                startForce(filteredNodes, filteredLinks);
+                startForce(allNodes, allLinks);
                 // force simulation is running in background, position of things is changing with each tick
                 // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
                 force.on("tick", tick);
