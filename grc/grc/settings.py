@@ -16,6 +16,8 @@ TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
 
 STATIC_PATH = os.path.join(BASE_DIR, 'static')
 
+GRAPHS_PATH = os.path.join(BASE_DIR, 'graphs')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
@@ -95,3 +97,4 @@ TEMPLATE_DIRS = (
     
     TEMPLATE_PATH,
 )
+

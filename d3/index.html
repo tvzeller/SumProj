@@ -67,6 +67,9 @@
         <div id="infoArea"></div>
 
         <script type="text/javascript">
+            var width = 1000;
+            var height = 1000;
+
             // JS style enums - https://stijndewitt.wordpress.com/2014/01/26/enums-in-javascript/
             var vizTypes = {
               AUTHOR_COLLAB: 1,
@@ -121,7 +124,7 @@
 
             function startItUp(graphFile) {
               // TODO this will come from django
-              d3.json(graphFile + ".json", function(error, graph)  {
+              d3.json("../graphs/" + graphFile + ".json", function(error, graph)  {
                 
                 // for d3 force layout to work, the links can reference the actual source and target node objects
                 // or they can reference the index of the objects in the nodes array

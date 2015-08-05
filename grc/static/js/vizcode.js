@@ -1,4 +1,5 @@
-alert("hello");
+var width = 1000
+var height = 1000
 // JS style enums - https://stijndewitt.wordpress.com/2014/01/26/enums-in-javascript/
 var vizTypes = {
   AUTHOR_COLLAB: 1,
@@ -46,14 +47,25 @@ var linkScale = d3.scale.log()
 .range([1, 8])
 .base([10]);
 
+
 // TODO change back
 var defaultGraph = "cswithattribs2"
 //var defaultSchool = "cssimgraph"
 startItUp(defaultGraph);
 
+// get_json is the url which maps to the django view which loads the json file and returns the data
+d3.json('get_json/', function(error, data) {
+  //for some reason d3.json() is not parsing the data, have to parse it
+  var thing = JSON.parse(data)
+  console.log(thing.nodes);
+  console.log("bla blue blee")
+});
+//console.log(graphData)
+
 function startItUp(graphFile) {
-  // TODO this will come from django
-  d3.json(graphFile + ".json", function(error, graph)  {
+  // TODO n.b. need to send data to server to get right json back; so not sure we can do everything directly inside
+  // d3.json, may have to get data first and then just pass it to another method; see above
+  d3.json('get_json/', function(error, graph)  {
     
     // for d3 force layout to work, the links can reference the actual source and target node objects
     // or they can reference the index of the objects in the nodes array
