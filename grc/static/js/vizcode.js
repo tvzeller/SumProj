@@ -1,3 +1,5 @@
+
+
 var width = 1000
 var height = 1000
 // JS style enums - https://stijndewitt.wordpress.com/2014/01/26/enums-in-javascript/
@@ -53,14 +55,7 @@ var defaultGraph = "cswithattribs2"
 //var defaultSchool = "cssimgraph"
 //var thing;
 
-// get_json is the url which maps to the django view which loads the json file and returns the data
-d3.json('get_json/', function(error, data) {
-  //for some reason d3.json() is not parsing the data, have to parse it
-  var thing = JSON.parse(data)
-  //console.log(thing.links);
-  //console.log("bla blue blee")
-  startItUp(thing)
-});
+
 
 
 //startItUp(thing);
@@ -499,7 +494,34 @@ function startItUp(graph) {
   //});
 }
 
+
+// get_json is the url which maps to the django view which loads the json file and returns the data
+/*d3.json('get_json/', function(error, data) {
+  //for some reason d3.json() is not parsing the data, have to parse it
+  var thing = JSON.parse(data)
+  //console.log(thing.links);
+  //console.log("bla blue blee")
+  startItUp(thing)
+});*/
+
+/*d3.xhr('get_json/').header("Content-Type", "application/x-www-form-urlencoded").post("a=2", function(error, data) {
+  console.log(data)
+})*/
+
+// Using jquery to make get request to server as was having trouble passing parameters in d3 requests
+// get_json is the url which maps to the django view which loads the json file and returns the data
+function getData(name, type) {
+  $.get('get_json/', {name: name, type: type}, function(data) {
+    //alert("hello");
+    graph_data = JSON.parse(data);
+    startItUp(graph_data);
+  });
+}
+
+
 d3.select("#schoolChooser").on("change", function() {
   var choice = this.value;
   startItUp(choice);
 });
+
+getData("Dental School graph", "collab");
