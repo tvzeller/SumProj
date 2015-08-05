@@ -13,12 +13,14 @@ from nltk import stem
 from nltk.stem.wordnet import WordNetLemmatizer
 # wnl = WordNetLemmatizer()
 # wnl.lemmatize("word")
-from difflib import SequenceMatcher 
+#from difflib import SequenceMatcher 
 import Levenshtein
+from fuzzywuzzy import fuzz
 from collections import defaultdict
 import enlighten_scraper as es
 import graph_from_dict as gfd
 import time
+import commontest
 
 
 # get data_dict
@@ -46,28 +48,32 @@ def scrape_and_make(data_dict):
 		# TODO temporary fixes
 		keyword_list = [kw for kw in keyword_list if kw != ""]
 		stemmed_kw_list = stem_kwlist(keyword_list)
+		#stemmed_kw_list = keyword_list[:]
 		# TODO temporary fixes
-		stemmed_kw_list = [kw for kw in keyword_list if "abstract avail" not in kw]
+		stemmed_kw_list = [kw for kw in stemmed_kw_list if "abstract avail" not in kw]
 		# TODO do we need to check if authors exists?
 		for author in authors:
 			# TODO Add a node to collab graph here
 			gm.add_vertex(author)
 			# Make list of keywords into a single string, with phrases separated by a divisor
-			kw_string = "|".join(stemmed_kw_list)
+			# TODO using kw list for now
+			#kw_string = "|".join(stemmed_kw_list)
 			author_name = author[0]
 			# TODO have to do this to work with shelve because loading from json for now
 			author_id = author[1].encode("utf-8")
 			# Add author to authorkw_dict / add keywords to existing author
+			# TODO using kw list but may become string
 			if author_id not in authorkw_dict:
-				authorkw_dict[author_id] = {"name": author_name, "keywords": kw_string}
+				authorkw_dict[author_id] = {"name": author_name, "keywords": stemmed_kw_list}
 			else:
-				authorkw_dict[author_id]["keywords"] += kw_string + "|"
+				authorkw_dict[author_id]["keywords"].extend(stemmed_kw_list)
 			# NB each author is a (name, unique id) pair; unique id is dict key, name goes as value
 
 		# Add edges to collab graph here
 		gm.add_links(title, authors)
 		# Potentially add to inv_index here as we are already looping through the data_dict
-
+	
+	clean_authorkw = clean_keywords(authorkw_dict.copy())
 	# store collab graph (as json?)
 	gm.write_to_file("newcsgraph")
 	# store authorkw_dict (using shelve for now)
@@ -75,7 +81,7 @@ def scrape_and_make(data_dict):
 	she.update(authorkw_dict)
 	she.close()
 	# TODO
-	return (authorkw_dict, gm.get_graph())
+	return (clean_authorkw, gm.get_graph())
 
 
 # make inv index based on data_dict / author_kw dict (or do this while looping above)
@@ -101,6 +107,12 @@ def stem_kwlist(kw_list):
 
 	return kw_copy
 
+def clean_keywords(kwdict):
+	for author in kwdict:
+		kw = kwdict[author]["keywords"]
+		kwdict[author]["keywords"] = commontest.remove_bad2(kw)
+	return kwdict
+
 def make_sim_graph(my_tup):
 # Make similarity graph:
 # for each author in authorkw_dict:
@@ -121,7 +133,7 @@ def make_sim_graph(my_tup):
 		start = time.time()
 		author1 = authors[i]
 		# split kw string into phrase tokens
-		kw_tokens1 = akw_dict[author1]["keywords"].split("|")
+		kw_tokens1 = akw_dict[author1]["keywords"] #.split("|")
 		author1_name = akw_dict[author1]["name"]
 		author1_id = author1
 		sim_graph.add_node(author1_id, {"name": author1_name})
@@ -132,11 +144,19 @@ def make_sim_graph(my_tup):
 			author2_name = akw_dict[author2]["name"]
 			author2_id = author2
 			sim_graph.add_node(author2_id, {"name": author2_name})
-			kw_tokens2 = akw_dict[author2]["keywords"].split("|")
+			kw_tokens2 = akw_dict[author2]["keywords"] #.split("|")
 			sim_check = similar(kw_tokens1, kw_tokens2)
 			sim_match = sim_check[0]
 			sim_kw = sim_check[1]
+			#sim_match = Levenshtein.setratio(kw_tokens1, kw_tokens2)
+			# TODO try different thresholds, 0.6 is high
+			#print sim_match
+			#print author1_name
+			#print author2_name
+			#time.sleep(0.5)
 			if sim_match >= 0.2:
+				#print "matching authors"
+				#print author2_name
 				# add edge between authors
 				# TODO have keywords as edge attribute?
 				sim_graph.add_edge(author1, author2, {"sim_keywords": sim_kw})
@@ -162,30 +182,37 @@ def similar(kw_list1, kw_list2):
 	sim_keywords = []
 	for kw1_index, kw1 in enumerate(kw_list1):
 		for kw2_index, kw2 in enumerate(kw_list2):
-			# This uses the SequenceMatcher class from difflib to get string similarity metric 
-			# TODO explore using different algorithms instead
-			# TODO try Levenshtein
 			#ratio = SequenceMatcher(None, kw1, kw2).quick_ratio()
-			ratio = Levenshtein.ratio(kw1, kw2)
-			#ratio = 0.2
-			#print kw1, kw2, ratio
+			#ratio = Levenshtein.ratio(kw1, kw2)
+			# Threshold increases the smaller the keyword
+			#threshold = min(1.0, (1.0 / min(len(kw1.split()), len(kw2.split())) + 0.2))
+			# we need half of the longest string to have matches for dice to be above this threshold
+			threshold = (1.0 * max(len(kw1.split()), len(kw2.split()))) / len(kw1.split() + kw2.split())
+			#ratio = fuzz.partial_ratio(kw1, kw2)
+			ratio = dice(kw1, kw2)
 			# TODO try different thresholds
 			# if ratio is above threshold, add both indices to respective index set
 			# Python: "As a rule of thumb, a ratio() value over 0.6 means the sequences are close matches" (for difflib ratio)
-			if ratio >= 0.7:
+			if ratio >= threshold:
 				indices1.add(kw1_index)
 				indices2.add(kw2_index)
-				# if match found, break out of inner loop
 				sim_keywords.append(kw1)
 				sim_keywords.append(kw2)
+				print kw1
+				print kw2
+				time.sleep(1)
 				break
 
 	for kw2_index, kw2 in enumerate(kw_list2):
 		for kw1_index, kw1 in enumerate(kw_list1):
 			if kw2_index not in indices2 and kw1_index in indices1:
 				#ratio = SequenceMatcher(None, kw1, kw2).quick_ratio()
-				ratio = Levenshtein.ratio(kw1, kw2)
-				if ratio >= 0.7:
+				#ratio = Levenshtein.ratio(kw1, kw2)
+				#threshold = 1.0 / min(len(kw1.split()), len(kw2.split()))
+				threshold = (1.0 * max(len(kw1.split()), len(kw2.split()))) / len(kw1.split() + kw2.split())
+				#ratio = fuzz.partial_ratio(kw1, kw2)
+				ratio = bi_dice(kw1, kw2)
+				if ratio >= threshold:
 					indices2.add(kw2_index)
 					indices1.add(kw1_index)
 					sim_keywords.append(kw1)
@@ -196,10 +223,42 @@ def similar(kw_list1, kw_list2):
 	pct_match2 = (len(indices2) * 1.0) / len(kw_list2)
 	match = (pct_match1 + pct_match2) / 2
 	#print "final score is: " + str(match)
-	# TODO try different thresholds
-	if match >= 0.2:
-		print "matching authors"
 	return (match, sim_keywords)
+
+# can do on word level or bigram level - see http://www.catalysoft.com/articles/StrikeAMatch.html
+def dice(str1, str2):
+	tokens1 = set(str1.split())
+	tokens2 = set(str2.split())
+	inter = tokens1.intersection(tokens2)
+
+	return (2.0 * len(inter)) / (len(tokens1) + len(tokens2))
+
+def bi_dice(str1, str2):
+	
+	pairs1 = word_letter_pairs(str1)
+	pairs2 = word_letter_pairs(str2)
+	
+	if pairs1 or pairs2:
+		union = len(pairs1) + len(pairs2)
+		inter = set(pairs1).intersection(set(pairs2))
+		return (2.0 * len(inter)) / union
+	
+	else:
+		return 0.0
+
+
+def word_letter_pairs(phrase):
+	all_pairs = []
+	tokens = phrase.split()
+	for token in tokens:
+		all_pairs.extend(letter_pairs(token))
+	return all_pairs
+
+def letter_pairs(word):
+	pairs = []
+	for i in range(0, len(word)-1):
+		pairs.append(word[i:i+2])
+	return pairs
 			
 
 

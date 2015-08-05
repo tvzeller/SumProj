@@ -44,7 +44,8 @@ class Extractor(object):
 
 		word_score_pairs = sorted(tfidf_scores.items(), key=operator.itemgetter(1), reverse=True)
 		keywords = [word_score[0] for word_score in word_score_pairs]
-		return keywords[:5]
+		# TODO
+		return keywords[:10]
 
 
 

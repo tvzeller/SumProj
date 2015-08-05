@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>viz test</title>
+
+        <script type="text/javascript" src="{% static "js/d3/d3.v3.js" %}"></script>
+        <script type="text/javascript" src="{% static "js/vizcode.js" %}"></script>
+
+    </head>
+
+    <body>
+    	<img src="{% static "images/logo.png" %}" alt="the logo" />
+        <div id="rightDiv">
+          <select id="schoolChooser">  
+            <option value="cswithattribs2"> Computer Science </option>
+            <option value="Adam Smith Business School graph"> Adam Smith Business School </option>
+            <option value="Dental School graph"> Dental School </option>
+            <option value="School of Chemistry graph"> School of Chemistry </option>
+            <option value="School of Critical Studies graph"> School of Critical Studies </option>
+            <option value="School of Culture and Creative Arts graph"> School of Culture and Creative Arts </option>
+            <option value="School of Education graph"> School of Education </option>
+          </select>
+          <p id="nodeCount"></p>
+          <p id="edgeCount"></p>
+        </div>
+
+        <button type="button" id="filter"> click to toggle between school-only and everybody </button>
+        <button type="button" id="freeze"> click to freeze / defrost </button>
+        <br>
+        <button type="button" id="labels"> click to remove / add labels </button>
+        <button type="button" id="bff"> click to see most frequent collaborators </button>
+        <br>
+        
+        <div id="search">
+          <input type="text" id="searchBox" placeholder="search for an author">
+        </div>
+
+        <div id="infoArea"></div>
+    </body>
+</html>   
+
+
+
+
+
+
+

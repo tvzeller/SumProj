@@ -53,6 +53,8 @@ class Rake(object):
 			ind_words = phrase.split()
 			deg = len(ind_words)
 			for word in ind_words:
+				if word == "earcons":
+					print "EARCONS!"
 				if word in word_freq:
 					word_freq[word] += 1
 					word_deg[word] += deg
@@ -62,11 +64,13 @@ class Rake(object):
 
 		# TODO Final score can be either frequency, degree or degree/frequency
 		for word in word_freq:
-			#self.ind_word_scores[word] = (word_deg[word] * 1.0) / word_freq[word]
-			self.ind_word_scores[word] = word_freq[word]
+			self.ind_word_scores[word] = (word_deg[word] * 1.0) / word_freq[word]
+			#self.ind_word_scores[word] = word_freq[word]
+			if word == "earcons":
+				print "earcons", str(self.ind_word_scores[word])
 
 		sorted_word_scores = sorted(self.ind_word_scores.items(), key=operator.itemgetter(1), reverse=True)
-
+		print "average is ", str(sum(self.ind_word_scores.values()) / len(self.ind_word_scores.values()))
 	
 	def calc_keyphrase_scores(self, word_scores, kp):
 		keyphrase_scores = {}
@@ -81,13 +85,15 @@ class Rake(object):
 
 	def get_keyphrases(self, text):
 		phrases = self.get_phrases(text)
+		print "phrases:"
+		print phrases
 		ws = self.calc_ind_word_scores(phrases)
 		kp_scores = self.calc_keyphrase_scores(ws, phrases)
 		sorted_kp_scores = sorted(kp_scores.items(), key=operator.itemgetter(1), reverse=True)
 		keyphrases = [word_score[0] for word_score in sorted_kp_scores]
 		# TODO now returning list
 		# TODO how many should we return? Everything? Let caller decide?
-		return keyphrases[:5]
+		return keyphrases
 
 
 if __name__ == "__main__":

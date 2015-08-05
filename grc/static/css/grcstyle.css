@@ -1,0 +1,29 @@
+#svgArea {
+  position: relative;
+  /*left:100px;*/
+  border: 2px solid gray;
+  width: 1000px;
+  height: 1000px;
+}
+
+#infoArea {
+  position: absolute;
+  right:10px;
+  top:120px;
+  width: 320px;
+}
+
+#rightDiv {
+  float:right;
+}
+
+/* #schoolChooser {
+  position:relative;
+  right: 100px;
+  border:2px solid blue;
+}*/
+
+.numCollabs {
+  color: blue;
+  text-decoration: underline;
+}

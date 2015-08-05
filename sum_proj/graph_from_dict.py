@@ -3,6 +3,7 @@ from networkx.readwrite import json_graph
 import json
 import tfidf
 import rake
+import time
 
 class GraphMaker(object):
 
@@ -20,11 +21,11 @@ class GraphMaker(object):
 	# If they don't, extract keywords and add to data dict
 	# N.B. using rake but could use something else here (e.g. TFIDF)
 	def add_kw_to_data(self):
-		#ex = tfidf.Extractor()
+		ex = tfidf.Extractor()
 		
-		# for title in self.data_dict:
-		# 	text = self.get_text(title)
-		# 	ex.add_text(text)
+		for title in self.data_dict:
+		 	text = self.get_text(title)
+		 	ex.add_text(text)
 
 		rk = rake.Rake()
 		rk.add_stopwords("stopwords.txt")
@@ -36,8 +37,20 @@ class GraphMaker(object):
 				# rk returns keywords as a list
 				# join on "|" and set as keywords for this paper
 				# TODO nb we have keywords as string to allow for phrase search (search for substring in keyword string)
-				keywords = rk.get_keyphrases(text)
-				self.data_dict[title]["keywords"] = keywords
+				keyphrases = rk.get_keyphrases(text)
+				print keyphrases
+				# tfidf_words = ex.get_keywords(text)
+				# for i, kp in enumerate(keyphrases):
+				# 	tokens = kp.split()
+				# 	filtered_phrase = ""
+				# 	for token in tokens:
+				# 		if token in tfidf_words:
+				# 			filtered_phrase += token + " "
+				# 	keyphrases[i] = filtered_phrase
+				#print keyphrases
+				time.sleep(2)
+
+				self.data_dict[title]["keywords"] = keyphrases
 			# If it does, join the list that came from the scraper into string and set as keywords
 			#else:
 			#	self.data_dict[title]["keywords"] = info["keywords"])
