@@ -6,10 +6,7 @@
     <head>
         <meta charset="utf-8">
         <title>viz test</title>
-
-        <script type="text/javascript" src="{% static "js/d3/d3.v3.js" %}"></script>
-        <script type="text/javascript" src="{% static "js/vizcode.js" %}"></script>
-
+        <link rel="stylesheet" href="{% static "css/grcstyle.css" %}" />
     </head>
 
     <body>
@@ -27,7 +24,7 @@
           <p id="nodeCount"></p>
           <p id="edgeCount"></p>
         </div>
-
+    	
         <button type="button" id="filter"> click to toggle between school-only and everybody </button>
         <button type="button" id="freeze"> click to freeze / defrost </button>
         <br>
@@ -39,8 +36,17 @@
           <input type="text" id="searchBox" placeholder="search for an author">
         </div>
 
+  		<div id="svgDiv"></div>
+
         <div id="infoArea"></div>
+      	
+      	<script type="text/javascript" src="{% static "js/d3/d3.v3.js" %}"></script>
+    	<script type="text/javascript" src="{% static "js/vizcode.js" %}"></script>
+
     </body>
+
+
+
 </html>   
 
 

@@ -12,7 +12,7 @@ var currentViz = vizTypes.AUTHOR_COLLAB
 var colors = d3.scale.category10();
 var linkColour = "#bbb"
 
-var svg = d3.select("body")
+var svg = d3.select("#svgDiv")
     .append("svg")
     .attr("id", "svgArea");
 
@@ -51,21 +51,24 @@ var linkScale = d3.scale.log()
 // TODO change back
 var defaultGraph = "cswithattribs2"
 //var defaultSchool = "cssimgraph"
-startItUp(defaultGraph);
+//var thing;
 
 // get_json is the url which maps to the django view which loads the json file and returns the data
 d3.json('get_json/', function(error, data) {
   //for some reason d3.json() is not parsing the data, have to parse it
   var thing = JSON.parse(data)
-  console.log(thing.nodes);
-  console.log("bla blue blee")
+  //console.log(thing.links);
+  //console.log("bla blue blee")
+  startItUp(thing)
 });
-//console.log(graphData)
 
-function startItUp(graphFile) {
+
+//startItUp(thing);
+
+function startItUp(graph) {
   // TODO n.b. need to send data to server to get right json back; so not sure we can do everything directly inside
   // d3.json, may have to get data first and then just pass it to another method; see above
-  d3.json('get_json/', function(error, graph)  {
+ // d3.json('get_json/', function(error, graph)  {
     
     // for d3 force layout to work, the links can reference the actual source and target node objects
     // or they can reference the index of the objects in the nodes array
@@ -78,10 +81,12 @@ function startItUp(graphFile) {
       graph.links[i].target = graph.nodes[graph.links[i].target];
     }
 
+
     var allLinks = graph.links
     var allNodes = graph.nodes
     var currentLinks = allLinks
     var currentNodes = allNodes
+    console.log(allLinks)
 
     // If viewing an author collaboration graph (the default), allow for filtering between
     // school-only authors and full set (includes authors who collaborate with school-only)
@@ -96,7 +101,8 @@ function startItUp(graphFile) {
         return n.in_school;
       });
       currentLinks = filteredLinks;
-      currentNodes = filteredNodes
+      currentNodes = filteredNodes;
+      console.log("HAHAHUOU")
     }
 
     // link will hold all the visual elements representing links
@@ -129,6 +135,8 @@ function startItUp(graphFile) {
 
     // Used to bind new link data to visual elements and display
     function updateLinks(links) {
+      console.log(links)
+
       link = linkGroup.selectAll(".link")
             // Pass function as argument to data() to ensure that line elements are joined to the right link data
             // d.source.id - d.target.id uniquely identifies a link
@@ -137,7 +145,10 @@ function startItUp(graphFile) {
               return d.source.id + "-" + d.target.id;
             });
 
-      
+      console.log("in update links");
+      console.log(link);
+      console.log(link.enter())
+
       link.enter()
             .append("line")
             .attr("class", "link")
@@ -150,6 +161,7 @@ function startItUp(graphFile) {
             });
 
       link.exit().remove()
+      console.log("getting here")
 
       d3.select("#edgeCount").text("Number of links: " + link[0].length);
 
@@ -367,6 +379,8 @@ function startItUp(graphFile) {
 
     function update(links, nodes) {
       //TODO change back to filtered
+      console.log("in update")
+      console.log(links)
       updateLinks(links);
       updateNodes(nodes);
       //TODO set charge depending on size of node
@@ -482,7 +496,7 @@ function startItUp(graphFile) {
 
 
 
-  });
+  //});
 }
 
 d3.select("#schoolChooser").on("change", function() {
