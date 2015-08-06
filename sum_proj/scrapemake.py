@@ -23,6 +23,11 @@ import time
 import commontest
 
 
+
+#######################################################################
+## TODO TODO moved add_kw function to here from gfd, needs adapting ###
+
+
 # get data_dict
 # add keywords to data
 # stem and lem keywords - should there be some sort of word processing module, maybe not necessary
@@ -82,6 +87,65 @@ def scrape_and_make(data_dict):
 	she.close()
 	# TODO
 	return (clean_authorkw, gm.get_graph())
+
+
+
+# Paper may or may not have keywords (some Enlighten papers have keywords)
+# If they don't, extract keywords and add to data dict
+# N.B. using rake but could use something else here (e.g. TFIDF)
+# TODO this has nothing to do with the collab graph, do it somewhere else
+def add_kw_to_data(self):
+	ex = tfidf.Extractor()
+	
+	for title in self.data_dict:
+	 	text = self.get_text(title)
+	 	ex.add_text(text)
+
+	rk = rake.Rake()
+	rk.add_stopwords("stopwords.txt")
+
+	for title, info in self.data_dict.items():
+		# If paper does not already have associated keywords
+		if not info["keywords"]:
+			text = self.get_text(title)
+			# rk returns keywords as a list
+			# join on "|" and set as keywords for this paper
+			# TODO nb we have keywords as string to allow for phrase search (search for substring in keyword string)
+			keyphrases = rk.get_keyphrases(text)
+			print keyphrases
+			# tfidf_words = ex.get_keywords(text)
+			# for i, kp in enumerate(keyphrases):
+			# 	tokens = kp.split()
+			# 	filtered_phrase = ""
+			# 	for token in tokens:
+			# 		if token in tfidf_words:
+			# 			filtered_phrase += token + " "
+			# 	keyphrases[i] = filtered_phrase
+			#print keyphrases
+			#time.sleep(2)
+
+			self.data_dict[title]["keywords"] = keyphrases
+		# If it does, join the list that came from the scraper into string and set as keywords
+		#else:
+		#	self.data_dict[title]["keywords"] = info["keywords"])
+
+	return self.data_dict
+
+def get_text(self, title):
+	text = title
+	abstract = self.data_dict[title]["abstract"]
+	# Some papers do not have an abstract
+	if abstract:
+		text += "\n" + abstract
+	
+	return text
+
+
+
+
+
+
+
 
 
 # make inv index based on data_dict / author_kw dict (or do this while looping above)

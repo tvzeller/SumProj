@@ -1,9 +1,37 @@
+#container {
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+#logo {
+  height: 50px;
+  width: 35px;
+  float: left;
+}
+
+#title {
+  position:relative;
+  left: 2%;
+}
+
+.menudrop {
+  /* or use display inline */
+  /*float:left;*/
+  clear:all;
+}
+
+/*#buttons {
+  clear:all;
+}
+
+#filter {
+  clear:all;*/
+}
+
 #svgArea {
   position: relative;
   /*left:100px;*/
   border: 2px solid gray;
-  width: 1000px;
-  height: 1000px;
 }
 
 #infoArea {
@@ -13,8 +41,17 @@
   width: 320px;
 }
 
-#rightDiv {
+#countDiv {
   float:right;
+  position:relative;
+  top: 10px;
+
+  /*left:75%;
+  top: 50%;*/
+  /*border:2px solid blue;*/
+  /*width: 320px;*/
+  font-family: sans-serif;
+  font-size: 70%
 }
 
 /* #schoolChooser {
@@ -27,3 +64,10 @@
   color: blue;
   text-decoration: underline;
 }
+
+#dragtest {
+  height: 100px;
+  width: 50px;
+  border: 1px solid blue;
+}
+

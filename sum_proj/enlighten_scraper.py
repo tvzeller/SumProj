@@ -16,11 +16,12 @@ import re
 import json
 import operator
 import sys
+import re
 
 author_list_base = "http://eprints.gla.ac.uk/view/author/"
 TIMEOUT = 10
 MAX_EXCEPTIONS = 15
-SLEEP_TIME = 1
+SLEEP_TIME = 0.8
 
 def get_tree(url):
 	"""
@@ -421,21 +422,22 @@ def get_titles_dict(name_url_list):
 	return bib_dict
 
 def get_coauthors_dict(name_url_list, schl_name):
-	co_authors_dict = {}
+	paper_info_dict = {}
 
 	for name_url in name_url_list:
-		paper_authors = get_authors_info(name_url[1])
-		co_authors_dict.update(paper_authors)
+		papers_info = get_papers_info(name_url[1], paper_info_dict.keys())
+		paper_info_dict.update(papers_info)
 
-	# TODO change back to dept_name
+	
 	with open('../coauthor_data/' + schl_name + ".txt", 'w') as f:
-		json.dump(co_authors_dict, f)
+		json.dump(paper_info_dict, f)
 
-	return co_authors_dict
+	return paper_info_dict
 
 # TODO avoid getting co-author info for papers that are already in co-authors dict... how? ... pass this method
 # the current keys of co_authors dict...
-def get_authors_info(author_url):
+# TODO consider using paper urls instead of titles as dict keys
+def get_papers_info(author_url, existing_papers):
 	author_dict = {}
 
 	# Get the <a> elements for the papers on the author's page
@@ -444,6 +446,10 @@ def get_authors_info(author_url):
 	for a in a_elems:
 		# Title of paper is the text content of the a element
 		paper_title = a.text_content()
+		# Check if paper has already been checked
+		if paper_title in existing_papers:
+			break
+
 		paper_url = a.get("href")
 		paper_tree = get_tree(paper_url)
 		# Get list of the paper's authors
@@ -490,8 +496,10 @@ def get_paper_keywords(tree):
 	# xpath returns a list with the keywords as a single string element separated by commas
 	# Make this into a list of keywords
 	if keywords:
-		keywords = keywords[0].split(",")
-		keywords = [kw.strip() for kw in keywords]
+		#keywords = keywords[0].split(",")
+		keywords = re.split('[\s,;]', keywords[0])
+		# Remove trailing white space and empty strings
+		keywords = [kw.strip() for kw in keywords if kw]
 
 	# TODO clean up keywords (some use ; as delimiter, some have \n characters inside them etc)
 	return keywords

@@ -1,7 +1,7 @@
 
 
 var width = 1000
-var height = 1000
+var height = 750
 // JS style enums - https://stijndewitt.wordpress.com/2014/01/26/enums-in-javascript/
 var vizTypes = {
   AUTHOR_COLLAB: 1,
@@ -16,7 +16,11 @@ var linkColour = "#bbb"
 
 var svg = d3.select("#svgDiv")
     .append("svg")
-    .attr("id", "svgArea");
+    .attr("height", height)
+    //TODO make size responsive..
+    .attr("width", "100%")
+    .attr("id", "svgArea")
+    .style("border", "1px solid grey");
 
 // svg elements to hold links and nodes respectively
 // the link group is appended first so that the visual circle elements will cover the line elements
@@ -54,6 +58,19 @@ var linkScale = d3.scale.log()
 var defaultGraph = "cswithattribs2"
 //var defaultSchool = "cssimgraph"
 //var thing;
+
+/*svg.append("text")
+    .text("testing")
+    .attr("x", "95%")
+    .attr("y", "5%"); */
+
+svg.append("g")
+  //.attr("id", "elemCount")
+  .attr("x", "95%")
+  .attr("y", "5%")
+  .append("text")
+  .text("hello");
+
 
 
 
@@ -159,8 +176,7 @@ function startItUp(graph) {
       console.log("getting here")
 
       d3.select("#edgeCount").text("Number of links: " + link[0].length);
-
-      //link = svg.selectAll(".link")
+     //link = svg.selectAll(".link")
     }
 
     // In static mode, disable highlighting when dragging a node
@@ -518,10 +534,16 @@ function getData(name, type) {
   });
 }
 
+$(function() {
+  $('#dragtest').draggable({
+    zIndex: 100
+  });
+});
+
 
 d3.select("#schoolChooser").on("change", function() {
-  var choice = this.value;
-  startItUp(choice);
+  var choice = this.value
+  getData(choice, "collab");
 });
 
 getData("Dental School graph", "collab");

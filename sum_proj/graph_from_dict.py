@@ -9,73 +9,10 @@ class GraphMaker(object):
 
 	def __init__(self, dd, sn=None):
 		self.data_dict = dd
-		self.schl_names = [n.lower() for n in sn]
+		self.schl_names = sn
 		self.graph = nx.Graph()
-		#self.add_kw_to_data()
-		#self.harmonise_names()
-		#self.populate_graph()
+		self.populate_graph()
 
-
-	
-	# Paper may or may not have keywords (some Enlighten papers have keywords)
-	# If they don't, extract keywords and add to data dict
-	# N.B. using rake but could use something else here (e.g. TFIDF)
-	def add_kw_to_data(self):
-		ex = tfidf.Extractor()
-		
-		for title in self.data_dict:
-		 	text = self.get_text(title)
-		 	ex.add_text(text)
-
-		rk = rake.Rake()
-		rk.add_stopwords("stopwords.txt")
-
-		for title, info in self.data_dict.items():
-			# If paper does not already have associated keywords
-			if not info["keywords"]:
-				text = self.get_text(title)
-				# rk returns keywords as a list
-				# join on "|" and set as keywords for this paper
-				# TODO nb we have keywords as string to allow for phrase search (search for substring in keyword string)
-				keyphrases = rk.get_keyphrases(text)
-				print keyphrases
-				# tfidf_words = ex.get_keywords(text)
-				# for i, kp in enumerate(keyphrases):
-				# 	tokens = kp.split()
-				# 	filtered_phrase = ""
-				# 	for token in tokens:
-				# 		if token in tfidf_words:
-				# 			filtered_phrase += token + " "
-				# 	keyphrases[i] = filtered_phrase
-				#print keyphrases
-				time.sleep(2)
-
-				self.data_dict[title]["keywords"] = keyphrases
-			# If it does, join the list that came from the scraper into string and set as keywords
-			#else:
-			#	self.data_dict[title]["keywords"] = info["keywords"])
-
-		return self.data_dict
-
-	def get_text(self, title):
-		text = title
-		abstract = self.data_dict[title]["abstract"]
-		# Some papers do not have an abstract
-		if abstract:
-			text += "\n" + abstract
-		
-		return text
-
-
-
-	# Do this step before passing the data to here - this module should not have to handle this
-	# def harmonise_names(self):
-	# 	if self.schl_names:
-	# 		self.schl_names = [(name.split(", ")[1] + " " + name.split(", ")[0]).lower() for name in self.schl_names]
-		
-	# 	for title, authors in self.data_dict.items():
-	# 		authors = [author.split(", ")[1] + " " + author.split(", ")[0] for author in authors]
-	# 		self.data_dict[title] = authors
 
 	def populate_graph(self):
 		for title, info in self.data_dict.items():
@@ -89,7 +26,8 @@ class GraphMaker(object):
 			for author in authors:
 				self.add_vertex(author)
 			
-			self.add_links(title, authors)
+			paper_url = info['url']
+			self.add_links(title, paper_url, authors)
 
 	# TODO consider using polymorphism here... having separate classes for data from scraper vs from oai
 	def add_vertex(self, author):
@@ -114,13 +52,13 @@ class GraphMaker(object):
 			#self.graph.add_node(vertex_id, {"name": name, "paper_count": 1, "keywords": keywords})
 			# TODO keywords do not go in this graph anymore
 			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
-			in_school = self.check_schl_status(name)
+			in_school = self.check_schl_status(vertex_id)
 			#print name, in_school
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school
 
 
-	def add_links(self, title, authors):
+	def add_links(self, title, url, authors):
 		# Check if authors is a list of collections or just strings
 		# If collections, make new list out of element at index 1, which is the unique author url and the node id
 		if not isinstance(authors[0], basestring):
@@ -133,18 +71,23 @@ class GraphMaker(object):
 				# Check if edge already exists, update edge attributes
 				if self.graph.has_edge(author1, author2):
 					self.graph[author1][author2]["num_collabs"] += 1
-					self.graph[author1][author2]["collab_titles"].append(title)
+					self.graph[author1][author2]["collab_title_urls"].append([title, url])
 				# If edge is new, add it to the graph, give it initial attributes
 				else:
-					self.graph.add_edge(author1, author2, {'num_collabs': 1, "collab_titles": [title,]})
+					self.graph.add_edge(author1, author2, {'num_collabs': 1, "collab_title_urls": [[title, url],]})
 
 
-	def check_schl_status(self, name):
+	def check_schl_status(self, author_id):
 		
 		if self.schl_names:
 			# do name abbreviation here to ensure we get everyone?
 			# TODO and lowercase to ensure consistency
-			return name.lower() in self.schl_names
+			# TODO nb now using url to check school membership, more accurate
+			for name_url in self.schl_names:
+				if author_id in name_url:
+					return True 
+			
+			return False 
 
 		# If no list of names of school members has been provided (e.g. when data comes from OAI) return false
 		# TODO or do something else??
@@ -155,7 +98,7 @@ class GraphMaker(object):
 	def get_graph(self):
 		return self.graph
 
-
+	# TODO change this path later
 	def write_to_file(self, filename):
 		graph_data = json_graph.node_link_data(self.graph)
 		with open("../d3/" + filename + ".json", 'w') as f:
