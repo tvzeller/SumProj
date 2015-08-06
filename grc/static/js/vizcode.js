@@ -20,7 +20,7 @@ var svg = d3.select("#svgDiv")
     //TODO make size responsive..
     .attr("width", "100%")
     .attr("id", "svgArea");
-   // .style("border", "1px solid yellow")
+    //.style("border", "1px solid yellow");
 
 // svg elements to hold links and nodes respectively
 // the link group is appended first so that the visual circle elements will cover the line elements
@@ -364,7 +364,11 @@ function startItUp(graph) {
             con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
       }
 
-      d3.select("#infoArea").html(info);
+      d3.select("#infoArea")
+      .html(info)
+      .style("visibility", "visible");
+      
+      $("#infoArea").draggable()
       d3.selectAll(".numCollabs").on("click", showTitles)              
     }
 
