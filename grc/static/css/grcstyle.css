@@ -3,6 +3,10 @@
   margin-right: 5%;
 }
 
+#titleArea {
+  height: 70px;
+}
+
 #logo {
   height: 50px;
   width: 35px;
@@ -14,11 +18,66 @@
   left: 2%;
 }
 
-.menudrop {
-  /* or use display inline */
-  /*float:left;*/
-  clear:all;
+#mainBar {
+  position: static;
+  height: 30px;
+  width: 100%;
+  background-color: gray;
+  color: white;
 }
+
+
+ul { 
+  padding: 0;
+  margin: 0;
+  background: gray;
+}
+
+li { 
+  float: left;
+  width: 100px;
+  padding-left: 5px;
+  padding-top:5px;
+  /*display: inline; */
+  list-style: none;
+  position: relative; 
+}
+
+
+
+ul ul { 
+  position: absolute; 
+  left: 0; 
+  top: 100%; 
+  display: none; 
+}
+
+li:hover > ul { 
+ 
+  display: block; 
+}
+
+li:hover > ul li {
+  width: 300px;
+}
+
+li:hover > ul li:hover {
+  background: orange;
+}
+
+
+ul ul ul {
+  left: 100%;
+  top: 0;
+}
+
+/*.menudrop {
+  /* or use display inline */
+  /*float:left;
+  clear:all;
+}*/
+
+/*
 
 /*#buttons {
   clear:all;
@@ -28,10 +87,10 @@
   clear:all;*/
 }
 
+/* Is this doing anything? */
 #svgArea {
   position: relative;
   /*left:100px;*/
-  border: 2px solid gray;
 }
 
 #infoArea {
@@ -44,8 +103,7 @@
 #countDiv {
   float:right;
   position:relative;
-  top: 10px;
-
+  
   /*left:75%;
   top: 50%;*/
   /*border:2px solid blue;*/

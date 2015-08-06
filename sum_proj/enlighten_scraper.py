@@ -363,7 +363,7 @@ def get_winning_url(nm_url_list, school):
 		else:
 			winning_name_url = sorted_urls[0][0]
 
-		print "CLASH! Winner is", winning_name_url[0]
+		#print "CLASH! Winner is", winning_name_url[0]
 
 	# After the existing (name, url) pairs have been filtered out, there is only one url present
 	# If match has been made with abbreviated first name, there is a chance that the author we were looking

@@ -1,7 +1,7 @@
 
 
 var width = 1000
-var height = 750
+var height = 650
 // JS style enums - https://stijndewitt.wordpress.com/2014/01/26/enums-in-javascript/
 var vizTypes = {
   AUTHOR_COLLAB: 1,
@@ -19,8 +19,8 @@ var svg = d3.select("#svgDiv")
     .attr("height", height)
     //TODO make size responsive..
     .attr("width", "100%")
-    .attr("id", "svgArea")
-    .style("border", "1px solid grey");
+    .attr("id", "svgArea");
+   // .style("border", "1px solid yellow")
 
 // svg elements to hold links and nodes respectively
 // the link group is appended first so that the visual circle elements will cover the line elements
