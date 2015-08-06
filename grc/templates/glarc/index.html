@@ -14,11 +14,12 @@
 
     	<div id="container">
     		<div id="titleArea">
-				<img id="logo" src="{% static "images/logo.png" %}" alt="the logo"/>
-				<h1 id="title">Glasgow Research Connections</h1>
+
     		</div>
 
     		<div id="mainBar">
+    		<h1 id="title">Glasgow Research Connections</h1>
+			<img id="logo" src="{% static "images/logo2.png" %}" alt="the logo"/>
     		<ul>
 				<li>
 					<span>type</span>
@@ -26,7 +27,8 @@
 						<li>
 							Collaboration
 							<ul>
-								<li data-type="collab" data-name="cswithattribs2">School of Computing Science</li>
+								<li id="test" data-type="collab" data-name="cswithattribs2" data-nametext="Computing Science" data-typetext="collaboration graph">	School of Computing Science
+								</li>
 								<li>School of Critical Studies</li>
 							</ul>
 						</li>
@@ -51,7 +53,7 @@
 					<span>options</span>
 					<ul>
 						<li id="filter">toggle between school members and everybody</li>
-						<li id="labels">toggle labels</li>
+						<li id="togLabels">toggle labels</li>
 						<li>
 							colours
 							<ul>

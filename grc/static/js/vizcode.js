@@ -24,6 +24,19 @@ var svg = d3.select("#svgDiv")
     .attr("id", "svgArea");
     //.style("border", "1px solid yellow");
 
+var nameText = svg.append("text")
+                  .attr("x", 0)
+                  .attr("y", "10%")
+                  .attr("class", "displayText")
+                  .text("hello");
+
+var typeText = svg.append("text")
+                  .attr("x", 0)
+                  .attr("y", "20%")
+                  .attr("class", "displayText")
+                  .text("hello");
+
+
 // svg elements to hold links and nodes respectively
 // the link group is appended first so that the visual circle elements will cover the line elements
 // that way the edges connect to the outside of the nodes rather than the centre
@@ -66,12 +79,7 @@ var defaultGraph = "cswithattribs2"
     .attr("x", "95%")
     .attr("y", "5%"); */
 
-svg.append("g")
-  //.attr("id", "elemCount")
-  .attr("x", "95%")
-  .attr("y", "5%")
-  .append("text")
-  .text("hello");
+
 
 
 function startItUp(graph) {
@@ -295,7 +303,8 @@ function startItUp(graph) {
         })
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
-        .attr("font-weight", "bold");
+        .attr("font-weight", "bold")
+        .attr("class", "label");
     }
 
     highlight = function(d) {
@@ -462,9 +471,9 @@ function startItUp(graph) {
       }
     });
 
-    d3.select('#labels').on("click", function() {
+    d3.select('#togLabels').on("click", function() {
       if(labeled) {
-        svg.selectAll("text").remove();
+        svg.selectAll(".label").remove();
         labeled = false;
       }
       else {
@@ -542,6 +551,7 @@ function startItUp(graph) {
 // Using jquery to make get request to server as was having trouble passing parameters in d3 requests
 // get_json is the url which maps to the django view which loads the json file and returns the data
 function getData(name, type) {
+  console.log(name)
   $.get('get_json/', {name: name, type: type}, function(data) {
     //alert("hello");
     graph_data = JSON.parse(data);
@@ -561,10 +571,18 @@ d3.select("#schoolChooser").on("change", function() {
   getData(choice, "collab");
 });
 
-d3.selectAll("li").on("click", function() {
+d3.selectAll("#test").on("click", function() {
   var type = d3.select(this).attr("data-type");
   var name = d3.select(this).attr("data-name");
-  getData(name, type)
-})
+  var nmtext = d3.select(this).attr("data-nametext");
+  var tptext = d3.select(this).attr("data-typetext");
+  //console.log(thetext)
+  //var mytext = d3.select("#displayText").text()
+  //console.log(mytext);
+  //d3.select("#displayText").text(thetext);
+  nameText.text(nmtext)
+  typeText.text(tptext)
+  getData(name, type);
+});
 
 getData("Dental School graph", "collab");
