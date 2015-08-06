@@ -74,11 +74,6 @@ svg.append("g")
   .text("hello");
 
 
-
-
-
-//startItUp(thing);
-
 function startItUp(graph) {
   // TODO n.b. need to send data to server to get right json back; so not sure we can do everything directly inside
   // d3.json, may have to get data first and then just pass it to another method; see above
@@ -116,7 +111,6 @@ function startItUp(graph) {
       });
       currentLinks = filteredLinks;
       currentNodes = filteredNodes;
-      console.log("HAHAHUOU")
     }
 
     // link will hold all the visual elements representing links
@@ -281,13 +275,12 @@ function startItUp(graph) {
           // attach event listeners here so they get attached to new nodes as well
           node.on("mouseover", highlight);
           node.on("mouseout", lowlight);
-          node.on("dblclick", highlight);
-          node.on("dblclick", fixNode)
-          node.on("click", showCollabInfo);
+          //node.on("dblclick", highlight);
+          //node.on("dblclick", fixNode)
+          node.on("dblclick", showCollabInfo);
 
           d3.select("#nodeCount").text("Number of Nodes: " + node[0].length);
     }
-
 
 
     var addLabels = function(sel) {
@@ -295,7 +288,11 @@ function startItUp(graph) {
         .attr("font-size", "10px")
         .attr("font-family", "sans-serif")
         .text(function(d) { 
-          return d.name })
+          if(d.name)
+            return d.name
+          else
+            return d.id
+        })
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .attr("font-weight", "bold");
@@ -366,14 +363,22 @@ function startItUp(graph) {
             con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
       }
 
+      displayInfoBox(info);
+
+      d3.selectAll(".numCollabs").on("click", showTitles);
+        
+    }
+
+    function displayInfoBox(text) {
       d3.select("#infoArea")
-      .html(close + info)
+      .html(close + text)
       .style("visibility", "visible");
 
-      d3.select("#close").on("click", closeBox);
-      d3.selectAll(".numCollabs").on("click", showTitles);
+      d3.select("#close").on("click", function() {
+        d3.select("#infoArea").style("visibility", "hidden");
+      });
 
-      $("#infoArea").draggable();            
+      $("#infoArea").draggable();   
     }
 
 
@@ -480,7 +485,8 @@ function startItUp(graph) {
       for(var i = 0; i < 10; i++) {
         bffText += "</br>" + bffs[i].source.id + ", " + bffs[i].target.id + " (" + bffs[i].num_collabs + ")</br>"
       }
-      d3.select("#infoArea").html(bffText);
+
+      displayInfoBox(bffText)
     });
 
     d3.select('#searchBox').on("keyup", function() {
@@ -508,16 +514,12 @@ function startItUp(graph) {
           for(var i = 0; i < titles.length; i++)
             titleString += titles[i] + "<br><br>"
           
-          d3.select("#infoArea").html(close + titleString);
-          d3.select("#close").on("click", closeBox);
+          //d3.select("#infoArea").html(close + titleString);
+          displayInfoBox(titleString);
+          //d3.select("#close").on("click", closeBox);
         }
       });
     }
-
-    function closeBox() {
-      d3.select("#infoArea").style("visibility", "hidden");
-    }
-
 
 
   //});
@@ -558,5 +560,11 @@ d3.select("#schoolChooser").on("change", function() {
   var choice = this.value
   getData(choice, "collab");
 });
+
+d3.selectAll("li").on("click", function() {
+  var type = d3.select(this).attr("data-type");
+  var name = d3.select(this).attr("data-name");
+  getData(name, type)
+})
 
 getData("Dental School graph", "collab");

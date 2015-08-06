@@ -8,14 +8,15 @@
 }
 
 #logo {
-  height: 50px;
-  width: 35px;
+  height: 70px;
+  width: 50px;
   float: left;
 }
 
 #title {
   position:relative;
   left: 2%;
+  top: 10%;
   font-family: sans-serif;
 }
 
@@ -55,11 +56,13 @@ ul ul {
 }
 
 li:hover > ul { 
- 
+
   display: block; 
 }
 
 li:hover > ul li {
+  padding-top: 20px;
+  padding-bottom: 5px;
   width: 300px;
 }
 
