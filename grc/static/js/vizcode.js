@@ -14,6 +14,8 @@ var currentViz = vizTypes.AUTHOR_COLLAB
 var colors = d3.scale.category10();
 var linkColour = "#bbb"
 
+var close = "<span id=\"close\">close</span><br>"
+
 var svg = d3.select("#svgDiv")
     .append("svg")
     .attr("height", height)
@@ -312,14 +314,14 @@ function startItUp(graph) {
           if (l.source == d || l.target == d)
             return 1.0
           else
-            return 0.1
+            return 0.2
         });
 
         node.style("opacity", function(o) {
           if (neighbours(d, o))
             return 1.0
           else
-            return 0.1
+            return 0.2
         });
         d3.select(this).style("opacity", 1.0);
       }
@@ -365,11 +367,13 @@ function startItUp(graph) {
       }
 
       d3.select("#infoArea")
-      .html(info)
+      .html(close + info)
       .style("visibility", "visible");
-      
-      $("#infoArea").draggable()
-      d3.selectAll(".numCollabs").on("click", showTitles)              
+
+      d3.select("#close").on("click", closeBox);
+      d3.selectAll(".numCollabs").on("click", showTitles);
+
+      $("#infoArea").draggable();            
     }
 
 
@@ -504,9 +508,14 @@ function startItUp(graph) {
           for(var i = 0; i < titles.length; i++)
             titleString += titles[i] + "<br><br>"
           
-          d3.select("#infoArea").html(titleString);
+          d3.select("#infoArea").html(close + titleString);
+          d3.select("#close").on("click", closeBox);
         }
       });
+    }
+
+    function closeBox() {
+      d3.select("#infoArea").style("visibility", "hidden");
     }
 
 
