@@ -451,7 +451,9 @@ def get_papers_info(author_url, existing_papers):
 		paper_title = a.text_content()
 		# Check if paper has already been checked
 		if paper_title in existing_papers:
-			break
+			# TODO OOOOOOPS
+			#break
+			continue
 
 		paper_url = a.get("href")
 		paper_tree = get_tree(paper_url)

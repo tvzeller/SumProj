@@ -11,7 +11,7 @@ var vizTypes = {
 // Start with author collaboration graph as default on page load
 var currentViz = vizTypes.AUTHOR_COLLAB
 
-var colours = d3.scale.category20();
+var multiColour = d3.scale.category20();
 var metricColour = d3.scale.linear();
 var linkColour = "#bbb";
 var inSchoolColour = "green";
@@ -368,6 +368,10 @@ function startItUp(graph) {
   }
 
   function makeKey(arr) {
+    //First remove existing key
+    d3.selectAll(".keyCircle").remove();
+    d3.selectAll(".keyText").remove();
+
     for(var i=0; i<arr.length; i++) {
       var radius = 6;
       var yValue = keyStartY + (i * radius * 4)
@@ -376,6 +380,7 @@ function startItUp(graph) {
               .attr("class", "keyCircle")
               .attr("r", radius)
               .style("fill", arr[i][0])
+              .style("stroke", "black")
               .attr("cx", radius)
               .attr("cy", yValue);
 
@@ -612,29 +617,49 @@ function startItUp(graph) {
   }
 
   d3.select("#deg_cent").on("click", function() {
-    colourByDegree();
+    colourByMetric("deg_cent");
+    keyArray = [["white", "least degree centrality"], ["red", "most degree centrality"]];
+    makeKey(keyArray);
   });
 
-  function colourByDegree() {
+  //TODO change key, text etc.
+
+  d3.select("#bet_cent").on("click", function() {
+    colourByMetric("between_cent");
+    keyArray = [["white", "least betweenness centrality"], ["red", "most betweenness centrality"]];
+    makeKey(keyArray);
+  });
+
+  d3.select("#close_cent").on("click", function() {
+    colourByMetric("close_cent");
+    keyArray = [["white", "least closeness centrality"], ["red", "most closeness centrality"]];
+    makeKey(keyArray);
+  })
+
+
+  function colourByMetric(metric) {
     theNodes = force.nodes()
-    max_deg_cent = theNodes[0].deg_cent
-    min_deg_cent = theNodes[0].deg_cent
-    for(var i=0, len=theNodes.length; i<len; i++) {
-      thisDegCent = theNodes[i].deg_cent
-      if(thisDegCent < min_deg_cent)
-        min_deg_cent = thisDegCent
-      else if(thisDegCent > max_deg_cent)
-        max_deg_cent = thisDegCent
-    }
-    metricColour.domain([min_deg_cent, max_deg_cent])
+    max = Math.max.apply(Math,theNodes.map(function(n){
+      return n[metric]
+    }));
+    min = Math.min.apply(Math,theNodes.map(function(n){
+      return n[metric]
+    }));
+    metricColour.domain([min, max])
                 .range(["white", "red"]);
 
     d3.selectAll(".nodeCircle").style("fill", function(d) {
       console.log("DEGEDSDAFDA")
-      return metricColour(d.deg_cent);
-    }); 
-
+      return metricColour(d[metric]);
+    });
   }
+
+  d3.select("#community").on("click", function() {
+    d3.selectAll(".nodeCircle").style("fill", function(d) {
+      return multiColour(d.com);
+    })
+  });
+
 
 }
 
