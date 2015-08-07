@@ -43,11 +43,13 @@ var typeText = svg.append("text")
 var linkGroup = svg.append("g").attr("id", "link_display");
 var nodeGroup = svg.append("g").attr("id", "node_display");
 
+var k = Math.sqrt(57 / (width * height));
+
 var force = d3.layout.force()
-    .gravity(0.10)
+    .gravity(100 * k)
     //.distance(200) TODO what is this?
     .linkDistance([100])
-    .charge(-220)
+    .charge(-10/k)
     .size([width, height]);
 
 // OPTIONS
@@ -58,10 +60,10 @@ var labeled = true;
 var nodeSelected = false;
 var clickedNodeId;
 
-var nodeScale = d3.scale.log()
-.domain([1, 250])
-.range([5, 30])
-.base([10]);
+var nodeScale = d3.scale.log();
+//.domain([1, 300])
+/*.range([5, 30])
+.base([10]);*/
 
 var linkScale = d3.scale.log()
 .domain([1, 100])
@@ -151,8 +153,7 @@ function startItUp(graph) {
 
     // Used to bind new link data to visual elements and display
     function updateLinks(links) {
-      console.log(links)
-
+      
       link = linkGroup.selectAll(".link")
             // Pass function as argument to data() to ensure that line elements are joined to the right link data
             // d.source.id - d.target.id uniquely identifies a link
@@ -250,30 +251,48 @@ function startItUp(graph) {
           .call(force.drag);
           //.call(drag);
 
-        nodeG.append("circle")
-          .attr("class", "nodeCircle")
-          .attr("r", function(d) {
-            if(d.paper_count != undefined)
-              return nodeScale(d.paper_count);
+      var maxPapers = nodes[0].paper_count
+      var minPapers = nodes[0].paper_count
+      for(var i=1, len=nodes.length; i<len; i++) {
+        if(nodes[i].paper_count < minPapers)
+          minPapers = nodes[i].paper_count;
+        else if(nodes[i].paper_count > maxPapers)
+          maxPapers = nodes[i].paper_count;
+      }
+
+      maxSize = Math.min(70, 2200/nodes.length);
+      minSize = maxSize/5
+      nodeScale.domain([minPapers, maxPapers])
+                .range([minSize, maxSize])
+                .base([10]);  
+
+      nodeG.append("circle")
+        .attr("class", "nodeCircle")
+        .attr("r", function(d) {
+          if(d.paper_count != undefined)
+            return nodeScale(d.paper_count);
+          else
+            return 10;
+        })
+        .style("fill", function(d, i) {
+            //return colors(i);
+            if(d.in_school)
+              return "green";
             else
-              return 10;
-          })
-          .style("fill", function(d, i) {
-              //return colors(i);
-              if(d.in_school)
-                return "green";
-              else
-                return "blue";
-          })
-          .style("stroke", "black");
+              return "blue";
+        })
+        .style("stroke", "black");
 
-          if(labeled)
-            addLabels(nodeG);
+        if(labeled)
+          addLabels(nodeG);
 
-          nodeG.append("title")
-          .text(function(d) {
+        nodeG.append("title")
+        .text(function(d) {
+          if(d.name)
             return d.name
-          });
+          else
+            return d.id
+        });
 
       
         // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
@@ -350,7 +369,7 @@ function startItUp(graph) {
     }
 
     var showCollabInfo = function(d) {
-      var info = d.id + "</br></br>Collaborators:</br>"
+      var info = d.name + "</br></br>Collaborators:</br>"
       var connections = []
       link.each(function(l) {
         if(l.source == d || l.target == d) {
@@ -365,10 +384,10 @@ function startItUp(graph) {
       for(var i=0; i<connections.length; i++) {
         var con = connections[i]
         if(d == con.source)
-          info += con.target.id + " (<span class=\"numCollabs\" id=\"" + 
+          info += con.target.name + " (<span class=\"numCollabs\" id=\"" + 
             con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
         else
-          info += con.source.id + " (<span class=\"numCollabs\" id=\"" + 
+          info += con.source.name + " (<span class=\"numCollabs\" id=\"" + 
             con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
       }
 
@@ -417,12 +436,15 @@ function startItUp(graph) {
       updateLinks(links);
       updateNodes(nodes);
       //TODO set charge depending on size of node
-      /*force.charge(function(d, i) {
-        if(nodeScale(d.paper_count) >= 15)
-          return -200;
-        else
-          return -100;
-      });*/
+
+      // Formula to set appropriate gravity and charge as a function of the number of nodes
+      // and the area
+      // based on http://stackoverflow.com/a/9929599
+      var k = Math.sqrt(nodes.length / (width * height));
+      force.gravity(70 * k)
+            .charge(-10/k)
+            .linkDistance([120])
+      
       startForce(nodes, links);
       // force simulation is running in background, position of things is changing with each tick
       // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
@@ -443,19 +465,12 @@ function startItUp(graph) {
 
     d3.select("#filter").on("click", function() {                
       if(just_school) {
-        startForce(allNodes, allLinks);
-        updateLinks(allLinks);
-        updateNodes(allNodes);
-        //force.start();
+        update(allLinks, allNodes)
 
         just_school = false;
       }
       else {
-        startForce(filteredNodes, filteredLinks);
-        updateLinks(filteredLinks);
-        updateNodes(filteredNodes);
-        //force.start();
-
+        update(filteredLinks, filteredNodes)
         just_school = true;
       }
     });
@@ -514,14 +529,15 @@ function startItUp(graph) {
       // Need to get the link which corresponds to this number of papers...
       // there must be a nicer way of doing this?
       link.each(function(l) {
+        console.log(l.source.id + "-" + l.target.id)
         if(l.source.id + "-" + l.target.id === elemId) {
+          var title_urls = l.collab_title_urls;
+          console.log(title_urls)
           
-          var titles = l.collab_titles;
+          var titleString = "<strong>Papers connecting " + l.source.name + " and " + l.target.name + "</strong><br><br>";
           
-          var titleString = "<strong>Papers connecting " + l.source.id + " and " + l.target.id + "</strong><br><br>";
-          
-          for(var i = 0; i < titles.length; i++)
-            titleString += titles[i] + "<br><br>"
+          for(var i = 0; i < title_urls.length; i++)
+            titleString += title_urls[i][0] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
           
           //d3.select("#infoArea").html(close + titleString);
           displayInfoBox(titleString);

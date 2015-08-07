@@ -148,6 +148,11 @@ ul ul ul {
   max-height: 80%;
 }
 
+#infoArea a {
+  color:#2ecc71;
+}
+
+
 #close {
   position:relative;
   left:260px;
@@ -164,4 +169,5 @@ ul ul ul {
   font-size: 50px;
   fill: #e0e0e0;
 }
+
 
