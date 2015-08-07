@@ -12,7 +12,9 @@ var vizTypes = {
 var currentViz = vizTypes.AUTHOR_COLLAB
 
 var colors = d3.scale.category10();
-var linkColour = "#bbb"
+var linkColour = "#bbb";
+var inSchoolColour = "green";
+var nonSchoolColour = "blue";
 
 var close = "<span id=\"close\">close</span><br>"
 
@@ -36,6 +38,30 @@ var typeText = svg.append("text")
                   .attr("class", "displayText")
                   .text("hello");
 
+var nodeCountText = svg.append("text")
+                  .attr("x", 0)
+                  .attr("y", "30%")
+                  .attr("class", "numText")
+                  .text("count goes here")
+
+var edgeCountText = svg.append("text")
+                  .attr("x", 0)
+                  .attr("y", "35%")
+                  .attr("class", "numText")
+                  .text("edge count goes here")
+
+var keyStartY = height/2
+
+var keyGroup = svg.append("g")
+                  .attr("class", "key");
+                //.attr("x", 0)
+                //.attr("y", "60%")
+               /* .append("text")
+                .attr("x", 0)
+                .attr("y", "60%")
+                .text("testing");*/
+
+
 
 // svg elements to hold links and nodes respectively
 // the link group is appended first so that the visual circle elements will cover the line elements
@@ -53,7 +79,8 @@ var force = d3.layout.force()
     .size([width, height]);
 
 // OPTIONS
-var just_school = true;
+//TODO n.b. just_school is always true by default so put inside functions
+//var just_school = true;
 var frozen = false;
 var labeled = true;
 
@@ -76,10 +103,6 @@ var defaultGraph = "cswithattribs2"
 //var defaultSchool = "cssimgraph"
 //var thing;
 
-/*svg.append("text")
-    .text("testing")
-    .attr("x", "95%")
-    .attr("y", "5%"); */
 
 
 
@@ -107,6 +130,8 @@ function startItUp(graph) {
     var currentNodes = allNodes
     console.log(allLinks)
 
+    
+    just_school = true;
     // If viewing an author collaboration graph (the default), allow for filtering between
     // school-only authors and full set (includes authors who collaborate with school-only)
     if(currentViz == vizTypes.AUTHOR_COLLAB) {
@@ -180,7 +205,7 @@ function startItUp(graph) {
       link.exit().remove()
       console.log("getting here")
 
-      d3.select("#edgeCount").text("Number of links: " + link[0].length);
+      //edgeCountText.text(link[0].length + " links");
      //link = svg.selectAll(".link")
     }
 
@@ -260,8 +285,8 @@ function startItUp(graph) {
           maxPapers = nodes[i].paper_count;
       }
 
-      maxSize = Math.min(70, 2200/nodes.length);
-      minSize = maxSize/5
+      maxSize = Math.min(70, 2300/nodes.length);
+      minSize = maxSize/3
       nodeScale.domain([minPapers, maxPapers])
                 .range([minSize, maxSize])
                 .base([10]);  
@@ -277,9 +302,9 @@ function startItUp(graph) {
         .style("fill", function(d, i) {
             //return colors(i);
             if(d.in_school)
-              return "green";
+              return inSchoolColour;
             else
-              return "blue";
+              return nonSchoolColour;
         })
         .style("stroke", "black");
 
@@ -306,7 +331,7 @@ function startItUp(graph) {
           //node.on("dblclick", fixNode)
           node.on("dblclick", showCollabInfo);
 
-          d3.select("#nodeCount").text("Number of Nodes: " + node[0].length);
+        // nodeCountText.text(node[0].length + " nodes");
     }
 
 
@@ -324,6 +349,43 @@ function startItUp(graph) {
         .attr("text-anchor", "middle")
         .attr("font-weight", "bold")
         .attr("class", "label");
+    }
+
+    function updateInfoText(links, nodes) {
+      console.log("UPDAAAATE")
+      nodeCountText.text(nodes.length + " nodes");
+      edgeCountText.text(links.length + " links");
+
+      if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == false) {
+        a = [[inSchoolColour, "school member"], [nonSchoolColour, "non school member"]];
+        makeKey(a);
+      }
+
+      if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == true) {
+        d3.selectAll(".keyCircle").remove();
+        d3.selectAll(".keyText").remove();
+      }
+    }
+
+    function makeKey(arr) {
+      for(var i=0; i<arr.length; i++) {
+        var radius = 6;
+        var yValue = keyStartY + (i * radius * 4)
+        
+        keyGroup.append("circle")
+                .attr("class", "keyCircle")
+                .attr("r", radius)
+                .style("fill", arr[i][0])
+                .attr("cx", radius)
+                .attr("cy", yValue);
+
+
+        keyGroup.append("text")
+                .attr("class", "keyText")
+                .text(arr[i][1])
+                .attr("x", radius*2 + 5)
+                .attr("y", yValue + radius/2);
+      }
     }
 
     highlight = function(d) {
@@ -435,6 +497,7 @@ function startItUp(graph) {
       console.log(links)
       updateLinks(links);
       updateNodes(nodes);
+      updateInfoText(links, nodes);
       //TODO set charge depending on size of node
 
       // Formula to set appropriate gravity and charge as a function of the number of nodes
@@ -443,8 +506,9 @@ function startItUp(graph) {
       var k = Math.sqrt(nodes.length / (width * height));
       force.gravity(70 * k)
             .charge(-10/k)
-            .linkDistance([120])
-      
+            //.linkDistance([120])
+            .linkDistance([0.8/k])
+
       startForce(nodes, links);
       // force simulation is running in background, position of things is changing with each tick
       // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
@@ -465,13 +529,14 @@ function startItUp(graph) {
 
     d3.select("#filter").on("click", function() {                
       if(just_school) {
-        update(allLinks, allNodes)
-
+        
         just_school = false;
+        update(allLinks, allNodes)
       }
       else {
-        update(filteredLinks, filteredNodes)
         just_school = true;
+        update(filteredLinks, filteredNodes)
+        
       }
     });
 
@@ -592,12 +657,11 @@ d3.selectAll(".menuChoice").on("click", function() {
   var name = d3.select(this).attr("data-name");
   var nmtext = d3.select(this).attr("data-nametext");
   var tptext = d3.select(this).attr("data-typetext");
-  //console.log(thetext)
-  //var mytext = d3.select("#displayText").text()
-  //console.log(mytext);
-  //d3.select("#displayText").text(thetext);
+
+  //display background text
   nameText.text(nmtext)
   typeText.text(tptext)
+
   getData(name, type);
 });
 

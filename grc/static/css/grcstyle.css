@@ -11,14 +11,13 @@
 }*/
 
 #logo {
-  height: 83px;
-  width: 200px;
+  height: 75px;
+  width: 225px;
  /* float: right;
   bottom:50px;*/
   position: absolute;
-  top: 4%;
-  left: 78%;
-
+  top: 4.5%;
+  left: 75%;
 }
 
 #title {
@@ -167,6 +166,20 @@ ul ul ul {
 .displayText {
   font-family: sans-serif;
   font-size: 50px;
+  fill: #e0e0e0;
+}
+
+.numText {
+  font-family: sans-serif;
+  fill: #e0e0e0;
+}
+
+.keyCircle {
+  opacity: 0.8;
+}
+
+.keyText {
+  font-family: sans-serif;
   fill: #e0e0e0;
 }
 
