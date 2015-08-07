@@ -25,7 +25,7 @@ var svg = d3.select("#svgDiv")
     //TODO make size responsive..
     .attr("width", "100%")
     .attr("id", "svgArea");
-    //.style("border", "1px solid yellow");
+   // .style("border", "1px solid yellow");
 
 var nameText = svg.append("text")
                   .attr("x", 0)
@@ -37,21 +37,21 @@ var typeText = svg.append("text")
                   .attr("x", 0)
                   .attr("y", "20%")
                   .attr("class", "displayText")
-                  .text("hello");
+                  .text("world");
 
 var nodeCountText = svg.append("text")
                   .attr("x", 0)
                   .attr("y", "30%")
-                  .attr("class", "numText")
-                  .text("count goes here")
+                  .attr("class", "numText");
+                 /* .text("node count goes here")*/
 
 var edgeCountText = svg.append("text")
-                  .attr("x", 0)
+                   .attr("x", 0)
                   .attr("y", "35%")
-                  .attr("class", "numText")
-                  .text("edge count goes here")
+                  .attr("class", "numText");
+                /*  .text("edge count goes here")*/
 
-var keyStartY = height/2
+var keyStartY = height/2.3
 
 var keyGroup = svg.append("g")
                   .attr("class", "key");
@@ -286,7 +286,7 @@ function startItUp(graph) {
         maxPapers = nodes[i].paper_count;
     }
 
-    maxSize = Math.min(70, 2300/nodes.length);
+    maxSize = Math.min(40, 2300/nodes.length);
     minSize = maxSize/3
     nodeScale.domain([minPapers, maxPapers])
               .range([minSize, maxSize])
@@ -381,14 +381,14 @@ function startItUp(graph) {
               .attr("r", radius)
               .style("fill", arr[i][0])
               .style("stroke", "black")
-              .attr("cx", radius)
+              .attr("cx", radius + 10)
               .attr("cy", yValue);
 
 
       keyGroup.append("text")
               .attr("class", "keyText")
               .text(arr[i][1])
-              .attr("x", radius*2 + 5)
+              .attr("x", radius*2 + 15)
               .attr("y", yValue + radius/2);
     }
   }
@@ -587,7 +587,10 @@ function startItUp(graph) {
     searchText = this.value.toLowerCase();
     d3.selectAll(".nodeCircle").style("stroke", function(d) {
       if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
-        return "orange"; })
+        return "orange"; 
+      else
+        return "black";
+      })
       .style("stroke-width", function(d) {
         if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
           return "3px";
@@ -620,6 +623,17 @@ function startItUp(graph) {
     colourByMetric("deg_cent");
     keyArray = [["white", "least degree centrality"], ["red", "most degree centrality"]];
     makeKey(keyArray);
+    var infoText = "Degree centrality is a measure of etc.etc.<br> \
+              Below is the degree centrality of the nodes in this graph, ranging from 0 to 100 <br>"
+    theNodes = force.nodes()  
+    theNodes.sort(function(a, b) {
+      return b.deg_cent-a.deg_cent;
+    });
+    for(var i=0, len=theNodes.length; i<len; i++) {
+      n = theNodes[i]
+      infoText += n.name + ": " + Math.round(n.deg_cent * 100) + "<br>"
+    }
+    displayInfoBox(infoText)
   });
 
   //TODO change key, text etc.
@@ -634,7 +648,7 @@ function startItUp(graph) {
     colourByMetric("close_cent");
     keyArray = [["white", "least closeness centrality"], ["red", "most closeness centrality"]];
     makeKey(keyArray);
-  })
+  });
 
 
   function colourByMetric(metric) {
@@ -655,9 +669,22 @@ function startItUp(graph) {
   }
 
   d3.select("#community").on("click", function() {
-    d3.selectAll(".nodeCircle").style("fill", function(d) {
+    var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
       return multiColour(d.com);
     })
+    var keyArray = []
+    var commNums =[]
+    theNodes = allNodes
+    for(var i=0, len=theNodes.length; i<len; i++) {
+      commNum = theNodes[i].com
+      if(commNums.indexOf(commNum) < 0) {
+        commNums.push(commNum);
+        console.log("community number:")
+        console.log(commNum);
+        keyArray.push([multiColour(commNum), "a community"]);
+      }
+    }
+    makeKey(keyArray);
   });
 
 
@@ -686,7 +713,6 @@ function startItUp(graph) {
 function getData(name, type) {
   console.log(name)
   $.get('get_json/', {name: name, type: type}, function(data) {
-    //alert("hello");
     graph_data = JSON.parse(data);
     startItUp(graph_data);
   });
@@ -713,8 +739,10 @@ d3.selectAll(".menuChoice").on("click", function() {
   //display background text
   nameText.text(nmtext)
   typeText.text(tptext)
-
+  //Get the new data
   getData(name, type);
+
+  d3.select("#infoArea").style("visibility", "hidden");  
 });
 
-getData("Dental School collab", "collab");
+//getData("Dental School collab", "collab");
