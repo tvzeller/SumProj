@@ -11,11 +11,12 @@ var vizTypes = {
 // Start with author collaboration graph as default on page load
 var currentViz = vizTypes.AUTHOR_COLLAB
 
-var multiColour = d3.scale.category20();
+var multiColour = d3.scale.category10().domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+var moreColour = d3.scale.category20().domain(d3.range(0, 20))
 var metricColour = d3.scale.linear();
 var linkColour = "#bbb";
-var inSchoolColour = "green";
-var nonSchoolColour = "blue";
+var inSchoolColour = Math.floor(Math.random() * 10)
+var nonSchoolColour = Math.abs(inSchoolColour - 5)
 
 var close = "<span id=\"close\">close</span><br>"
 
@@ -292,6 +293,7 @@ function startItUp(graph) {
               .range([minSize, maxSize])
               .base([10]);  
 
+    
     nodeG.append("circle")
       .attr("class", "nodeCircle")
       .attr("r", function(d) {
@@ -303,9 +305,9 @@ function startItUp(graph) {
       .style("fill", function(d, i) {
           //return colors(i);
           if(d.in_school)
-            return inSchoolColour;
+            return multiColour(inSchoolColour);
           else
-            return nonSchoolColour;
+            return multiColour(nonSchoolColour);
       })
       .style("stroke", "black");
 
@@ -357,7 +359,7 @@ function startItUp(graph) {
     edgeCountText.text(links.length + " links");
 
     if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == false) {
-      a = [[inSchoolColour, "school member"], [nonSchoolColour, "non school member"]];
+      a = [[multiColour(inSchoolColour), "school member"], [multiColour(nonSchoolColour), "non school member"]];
       makeKey(a);
     }
 
@@ -619,21 +621,23 @@ function startItUp(graph) {
     });
   }
 
-  d3.select("#deg_cent").on("click", function() {
+  d3.selectAll(".metricListItem").on("click", function() {
+    listItem = d3.select(this);
+    var metric = listItem.attr("id");
+    var name = listItem.attr("data-name");
+    var descrptn = listItem.attr("data-desc");
+    colourByMetric(metric);
+    var keyArray = [["white", "least " + name], ["red", "most " + name]];
+    makeKey(keyArray);
+    displayMetricText(metric, name, descrptn)
+  });
+
+  /*d3.select("#deg_cent").on("click", function() {
     colourByMetric("deg_cent");
     keyArray = [["white", "least degree centrality"], ["red", "most degree centrality"]];
     makeKey(keyArray);
-    var infoText = "Degree centrality is a measure of etc.etc.<br> \
-              Below is the degree centrality of the nodes in this graph, ranging from 0 to 100 <br>"
-    theNodes = force.nodes()  
-    theNodes.sort(function(a, b) {
-      return b.deg_cent-a.deg_cent;
-    });
-    for(var i=0, len=theNodes.length; i<len; i++) {
-      n = theNodes[i]
-      infoText += n.name + ": " + Math.round(n.deg_cent * 100) + "<br>"
-    }
-    displayInfoBox(infoText)
+    dscrptn = "a measure of etc. etc."
+    displayMetricText("deg_cent", "degree centrality", dscrptn)
   });
 
   //TODO change key, text etc.
@@ -642,13 +646,17 @@ function startItUp(graph) {
     colourByMetric("between_cent");
     keyArray = [["white", "least betweenness centrality"], ["red", "most betweenness centrality"]];
     makeKey(keyArray);
+    dscrptn = "a measure of influence bla bla"
+    displayMetricText("between_cent", "betweenness centrality", dscrptn)
   });
 
   d3.select("#close_cent").on("click", function() {
     colourByMetric("close_cent");
     keyArray = [["white", "least closeness centrality"], ["red", "most closeness centrality"]];
     makeKey(keyArray);
-  });
+    dscrptn = "yadda yadda yadda"
+    displayMetricText("close_cent", "closeness centrality", dscrptn)
+  });*/
 
 
   function colourByMetric(metric) {
@@ -668,9 +676,24 @@ function startItUp(graph) {
     });
   }
 
+  function displayMetricText(metric, name, description) {
+    var infoText = description +
+              "<br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
+              (note that this metric is calculated for the full graph, including non-school members)<br><br>"
+    theNodes = force.nodes()  
+    theNodes.sort(function(a, b) {
+      return b[metric]-a[metric];
+    });
+    for(var i=0, len=theNodes.length; i<len; i++) {
+      n = theNodes[i]
+      infoText += n.name + ": " + Math.round(n[metric] * 1000) / 1000 + "<br>"
+    }
+    displayInfoBox(infoText)
+  }
+
   d3.select("#community").on("click", function() {
     var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
-      return multiColour(d.com);
+      return moreColour(d.com);
     })
     var keyArray = []
     var commNums =[]
@@ -681,7 +704,7 @@ function startItUp(graph) {
         commNums.push(commNum);
         console.log("community number:")
         console.log(commNum);
-        keyArray.push([multiColour(commNum), "a community"]);
+        keyArray.push([moreColour(commNum), "a community"]);
       }
     }
     makeKey(keyArray);
@@ -743,6 +766,10 @@ d3.selectAll(".menuChoice").on("click", function() {
   getData(name, type);
 
   d3.select("#infoArea").style("visibility", "hidden");  
+  inSchoolColour = Math.floor(Math.random() * 10)
+  nonSchoolColour = Math.floor(Math.random() * 10)
+  while(inSchoolColour == nonSchoolColour)
+    nonSchoolColour = Math.floor(Math.random() * 10)
 });
 
 //getData("Dental School collab", "collab");
