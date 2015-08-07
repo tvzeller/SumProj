@@ -571,7 +571,7 @@ d3.select("#schoolChooser").on("change", function() {
   getData(choice, "collab");
 });
 
-d3.selectAll("#test").on("click", function() {
+d3.selectAll(".menuChoice").on("click", function() {
   var type = d3.select(this).attr("data-type");
   var name = d3.select(this).attr("data-name");
   var nmtext = d3.select(this).attr("data-nametext");
@@ -585,4 +585,4 @@ d3.selectAll("#test").on("click", function() {
   getData(name, type);
 });
 
-getData("Dental School graph", "collab");
+getData("Dental School collab", "collab");

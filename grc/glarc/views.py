@@ -5,7 +5,14 @@ from django.conf import settings
 import json
 
 def index(request):
-	return render(request, 'glarc/index.html')
+	collab_path = os.path.join(settings.GRAPHS_PATH, "collab")
+
+	collab_graphs = os.listdir(collab_path)
+	collab_graphs = [cg.split(".")[0] for cg in collab_graphs]
+	context_dict = {"collab_graphs": collab_graphs}
+	# Add other graphs to dict when available
+
+	return render(request, 'glarc/index.html', context_dict)
 
 def about(request):
 	return HttpResponse("about")

@@ -27,9 +27,11 @@
 						<li>
 							Collaboration
 							<ul>
-								<li id="test" data-type="collab" data-name="cswithattribs2" data-nametext="Computing Science" data-typetext="collaboration graph">	School of Computing Science
-								</li>
-								<li>School of Critical Studies</li>
+								{% for cg in collab_graphs %}
+									<li class="menuChoice" data-type="collab" data-typetext="collaboration graph" data-name="{{ cg }}" data-nametext="{{cg}}"<li>
+										{{cg}}
+									</li>
+								{% endfor %}
 							</ul>
 						</li>
 
