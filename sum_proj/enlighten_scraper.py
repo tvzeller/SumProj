@@ -429,6 +429,9 @@ def get_coauthors_dict(name_url_list, schl_name):
 		paper_info_dict.update(papers_info)
 
 	
+	if "Humanities" in schl_name:
+		schl_name = "School of Humanities"
+
 	with open('../coauthor_data/' + schl_name + ".txt", 'w') as f:
 		json.dump(paper_info_dict, f)
 

@@ -4,18 +4,24 @@ import json
 import tfidf
 import rake
 import time
+import community
 
 class GraphMaker(object):
 
-	def __init__(self, dd, sn=None):
-		self.data_dict = dd
+	def __init__(self, g=None):
+		#self.data_dict = dd
+		self.schl_names = []
+		if g==None:
+			self.graph = nx.Graph()
+		else:
+			self.graph = g
+		#self.populate_graph()
+
+
+	def populate_graph(self, data_dict, sn=None):
 		self.schl_names = sn
-		self.graph = nx.Graph()
-		self.populate_graph()
 
-
-	def populate_graph(self):
-		for title, info in self.data_dict.items():
+		for title, info in data_dict.items():
 			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
 			# Or use subclasses with different implementations of add_vertices here
 			print "title is " + title.encode("utf-8")
@@ -94,12 +100,25 @@ class GraphMaker(object):
 		else:
 			return False
 
+
+	def add_metrics(self, g=None):
+		deg_cent = nx.degree_centrality(self.graph)
+		close_cent = nx.closeness_centrality(self.graph)
+		between_cent = nx.betweenness_centrality(self.graph)
+		com = community.best_partition(self.graph)
+
+		for vertex in self.graph.node.keys():
+			self.graph.node[vertex]["deg_cent"] = deg_cent[vertex]
+			self.graph.node[vertex]["close_cent"] = close_cent[vertex]
+			self.graph.node[vertex]["between_cent"] = between_cent[vertex]
+			self.graph.node[vertex]["com"] = com[vertex]
+
 	
 	def get_graph(self):
 		return self.graph
 
 	# TODO change this path later
-	def write_to_file(self, filename):
+	def write_to_file(self, path):
 		graph_data = json_graph.node_link_data(self.graph)
-		with open("../d3/" + filename + ".json", 'w') as f:
+		with open(path, 'w') as f:
 			json.dump(graph_data, f)
