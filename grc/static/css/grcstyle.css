@@ -1,6 +1,12 @@
+html, body {
+  padding:0;
+  margin:0;
+}
+
 #container {
   margin-left: 5%;
   margin-right: 5%;
+  margin-top:0;
 }
 
 /*#titleArea {
@@ -11,13 +17,17 @@
 }*/
 
 #logo {
-  height: 75px;
-  width: 225px;
- /* float: right;
-  bottom:50px;*/
+  height: 35%;
+  width: 10%;
+  /*float: right;
+  bottom:100px;*/
   position: absolute;
-  top: 6%;
+  top: 15%;
   left: 75%;
+}
+
+h1 {
+  margin-top:0;
 }
 
 #title {
@@ -32,13 +42,15 @@
 }
 
 #mainBar {
-  position: static;
-  height: 105px;
+  position: relative;
+  margin:0;
+  height: 110px;
   width: 100%;
   /*background-color: #2c3e50;*/
   background-color: #003965;
   font-family: sans-serif;
   color: white;
+
 }
 
 
@@ -55,7 +67,7 @@ li {
   padding-top:5px;
   /*display: inline; */
   list-style: none;
-  position: relative; 
+  position: relative;
 }
 
 
@@ -86,6 +98,9 @@ li:hover > ul li:hover {
 ul ul ul {
   left: 100%;
   top: 0;
+  padding-right:20px;
+  overflow-y:auto;
+  max-height: 500px;
 }
 
 /*.menudrop {
@@ -131,11 +146,24 @@ ul ul ul {
   border:2px solid blue;
 }*/
 
+#searchBox {
+  position:absolute;
+  right:5%;
+  top:22%;
+  height: 5%;
+  width: 20%;
+  padding-left:5px;
+  background-color: #f5f5f5;
+  box-shadow: none;
+  border:none;
+  border-radius: 0;
+  outline: none;
+}
 
 #infoArea {
   position: absolute;
   right:5%;
-  top:140px;
+  top:30%;
   width: 320px;
   font-family: sans-serif;
   color:white;
@@ -165,7 +193,7 @@ ul ul ul {
 
 .displayText {
   font-family: sans-serif;
-  font-size: 50px;
+  font-size: 45px;
   fill: #e0e0e0;
 }
 
@@ -181,6 +209,10 @@ ul ul ul {
 .keyText {
   font-family: sans-serif;
   fill: #c0c0c0;
+}
+
+.clickable {
+  cursor: pointer;
 }
 
 

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>GRC</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <!--<link rel="stylesheet" href="{% static "css/jquery-ui.min.css" %}" />-->
+        <!--<link rel="stylesheet" href="{% static "css/grcstyle.css" %}" />-->
+    </head>
+
+    <body>
+	    <nav id="myNavbar" class="navbar navbar-default" role="navigation">
+	        <!-- Brand and toggle get grouped for better mobile display -->
+	        <div class="container">
+	            <div class="navbar-header">
+	                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+	                    <span class="sr-only">Toggle navigation</span>
+	                    <span class="icon-bar"></span>
+	                    <span class="icon-bar"></span>
+	                    <span class="icon-bar"></span>
+	                </button>
+	                <a class="navbar-brand" href="#">Brand</a>
+	            </div>
+	            <!-- Collect the nav links, forms, and other content for toggling -->
+	            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	                <ul class="nav navbar-nav">
+	                    <li><a href="#">Home</a></li>
+	                    <li><a href="#">Profile</a></li>
+	                    <li class="dropdown">
+	                        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Messages <b class="caret"></b></a>
+	                        <ul class="dropdown-menu">
+	                            <li><a href="#">Inbox</a></li>
+	                            <li><a href="#">Drafts</a></li>
+	                            <li><a href="#">Sent Items</a></li>
+	                            <li class="divider"></li>
+	                            <li><a href="#">Trash</a></li>
+	                        </ul>
+	                    </li>
+	                </ul>
+	                <ul class="nav navbar-nav navbar-right">
+	                    <li class="dropdown">
+	                        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Admin <b class="caret"></b></a>
+	                        <ul class="dropdown-menu">
+	                            <li><a href="#">Action</a></li>
+	                            <li><a href="#">Another action</a></li>
+	                            <li class="divider"></li>
+	                            <li><a href="#">Settings</a></li>
+	                        </ul>
+	                    </li>
+	                </ul>
+	            </div><!-- /.navbar-collapse -->
+	        </div>
+   		 </nav>
+
+
+
+		    <!--		<h1 id="title">Glasgow Research Connections</h1>
+					<a href="http://www.gla.ac.uk" target="_blank"><img id="logo" src="{% static "images/logo2.png" %}" alt="the logo"/></a>
+		    		<ul>
+						<li class="topItem">
+							<span class="topText">Choose visualisation</span>
+							<ul>
+								<li>
+									Collaboration
+									<ul>
+										{% for cg in collab_graphs %}
+											<li class="menuChoice" data-type="collab" data-typetext="collaboration graph" data-name="{{ cg }}" data-nametext="{{cg}}"<li>
+												{{cg}}
+											</li>
+										{% endfor %}
+									</ul>
+								</li>
+
+								<li>
+									Similarity
+									<ul>
+										<li>School of Computing Science</li>
+										<li>School of Critical Studies</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+			
+						<li class="topItem">
+							<span class="topText">Options</span>
+							<ul>
+								<li id="filter">toggle between school members and everybody</li>
+								<li id="togLabels">toggle labels</li>
+								<li>
+									colours
+									<ul>
+										<li>something</li>
+										<li>something else</li>
+									</ul>
+								</li>
+								<li id="freeze">freeze/defrost</li>
+							</ul>
+						</li>
+						<li class="topItem">
+							<span class="topText">Metrics</span>
+							<ul>
+								<li id="community">Communities</li>
+								<li class="metricListItem" id="deg_cent" data-name="degree centrality" data-desc="degree centrality is a measure of bla di bla">
+									Degree centrality
+								</li>
+								<li class="metricListItem" id="between_cent"  data-name="betweenness centrality" data-desc="betweenness centrality is a measure of etc">	Betweenness centrality
+								</li>
+								<li class="metricListItem" id="close_cent" data-name="closeness centrality" data-desc="closeness centrality is a measure of ...">
+									Closeness centrality
+								</li>
+								<li id="bff">Most frequent collaborators</li>				
+							</ul>
+					</ul>
+					<div id="searchContainer">
+						<input type="text" id="searchBox" placeholder="search for an author"/>
+					</div>  
+				-->
+
+
+			</div> <!-- container -->
+	  		
+	  	</nav>
+
+	  	<div class="container">
+
+	  		<div id="svgDiv"></div>
+
+	        <div id="infoArea"></div>
+		</div>   		
+
+      	
+      	<script type="text/javascript" src="{% static "js/d3/d3.v3.js" %}"></script>
+      	<script type="text/javascript" src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+      	<script type="text/javascript" src="{% static "js/jquery-ui.min.js" %}"></script>
+    	<script type="text/javascript" src="{% static "js/vizcode.js" %}"></script>
+    </body>
+
+
+
+</html>   
+
+
+
+
+
+
+
