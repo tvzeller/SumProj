@@ -414,10 +414,11 @@ function startItUp(graph) {
       node.style("opacity", function(o) {
         if (neighbours(d, o))
           return 1.0
+        else if(d==o)
+          return 1.0
         else
           return 0.2
       });
-      d3.select(this).style("opacity", 1.0);
     }
   }
 
@@ -438,7 +439,7 @@ function startItUp(graph) {
   }
 
   var showCollabInfo = function(d) {
-    var info = d.name + "</br></br>Collaborators:</br>"
+    var info = getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>Collaborators:</br></br>"
     var connections = []
     link.each(function(l) {
       if(l.source == d || l.target == d) {
@@ -455,16 +456,18 @@ function startItUp(graph) {
       var con = connections[i]
       if(d == con.source)
         info += getAuthorNameHtml(con.target) + con.target.name + "</span> (<span class=\"clickable numCollabs\" id=\"" + 
-          con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
+          con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br></br>"
       else
         info += getAuthorNameHtml(con.source) + con.source.name + "</span> (<span class=\"clickable numCollabs\" id=\"" + 
-          con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
+          con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br></br>"
     }
 
     displayInfoBox(info);
  
 
-    d3.selectAll(".authorName").on("click", displayInfoForThisNode);
+    d3.selectAll(".authorName").on("click", displayInfoForThisNode)
+                                    .on("mouseover", highlightThisNode)
+                                    .on("mouseout", lowlight);
 
     d3.selectAll(".numCollabs").on("click", showTitles);
   }
@@ -489,7 +492,9 @@ function startItUp(graph) {
         
         displayInfoBox(titleString);
         d3.selectAll(".authorName").on("click", displayInfoForThisNode)
-        
+                                    .on("mouseover", highlightThisNode)
+                                    .on("mouseout", lowlight);
+   
       }
     });
   }
@@ -501,13 +506,23 @@ function startItUp(graph) {
   }
 
   var displayInfoForThisNode = function() {
-      var storedId = d3.select(this).attr("id")
-      var theNodes = force.nodes();
-      var namedNode;
-      for(var i=0; i<theNodes.length; i++) {
-        if(theNodes[i].id == storedId)
-          showCollabInfo(theNodes[i]);
-      }
+      var storedId = d3.select(this).attr("id");
+      var theNode = getNodeFromId(storedId);
+      showCollabInfo(theNode);
+  }
+
+  var highlightThisNode = function() {
+    var storedId = d3.select(this).attr("id");
+    var theNode = getNodeFromId(storedId);
+    highlight(theNode)
+  }
+
+  function getNodeFromId(nodeId) {
+    var theNodes = force.nodes();
+    for(var i=0; i<theNodes.length; i++) {
+      if(theNodes[i].id == nodeId)
+        return theNodes[i];
+    }
   }
 
   function displayInfoBox(text) {
