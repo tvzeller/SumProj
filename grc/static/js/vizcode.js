@@ -18,7 +18,8 @@ var linkColour = "#bbb";
 var inSchoolColour = Math.floor(Math.random() * 10)
 var nonSchoolColour = Math.abs(inSchoolColour - 5)
 
-var close = "<span id=\"close\">close</span><br>"
+
+var close = "<span class=\"clickable\" id=\"close\">close</span><br>";
 
 var svg = d3.select("#svgDiv")
     .append("svg")
@@ -354,7 +355,6 @@ function startItUp(graph) {
   }
 
   function updateInfoText(links, nodes) {
-    console.log("UPDAAAATE")
     nodeCountText.text(nodes.length + " nodes");
     edgeCountText.text(links.length + " links");
 
@@ -450,20 +450,64 @@ function startItUp(graph) {
       return (b.num_collabs - a.num_collabs) 
     });
     
+    
     for(var i=0; i<connections.length; i++) {
       var con = connections[i]
       if(d == con.source)
-        info += con.target.name + " (<span class=\"numCollabs\" id=\"" + 
+        info += getAuthorNameHtml(con.target) + con.target.name + "</span> (<span class=\"clickable numCollabs\" id=\"" + 
           con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
       else
-        info += con.source.name + " (<span class=\"numCollabs\" id=\"" + 
+        info += getAuthorNameHtml(con.source) + con.source.name + "</span> (<span class=\"clickable numCollabs\" id=\"" + 
           con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br>"
     }
 
     displayInfoBox(info);
+ 
+
+    d3.selectAll(".authorName").on("click", displayInfoForThisNode);
 
     d3.selectAll(".numCollabs").on("click", showTitles);
-      
+  }
+
+  function showTitles() {
+    var elemId = this.id;
+    // Need to get the link which corresponds to this number of papers...
+    // there must be a nicer way of doing this?
+    link.each(function(l) {
+      console.log(l.source.id + "-" + l.target.id)
+      if(l.source.id + "-" + l.target.id === elemId) {
+        var title_urls = l.collab_title_urls;
+        console.log(title_urls)
+        
+        var titleString = "<strong>Papers connecting " + getAuthorNameHtml(l.source) + l.source.name + 
+        "</span> and " + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
+        console.log("BAAAFSDFSDAFSDAF");
+        console.log(titleString);
+        
+        for(var i = 0; i < title_urls.length; i++)
+          titleString += title_urls[i][0] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
+        
+        displayInfoBox(titleString);
+        d3.selectAll(".authorName").on("click", displayInfoForThisNode)
+        
+      }
+    });
+  }
+
+
+  //helper function
+  function getAuthorNameHtml(theNode) {
+    return "<span class=\"clickable authorName\" id=\"" + theNode.id + "\">"
+  }
+
+  var displayInfoForThisNode = function() {
+      var storedId = d3.select(this).attr("id")
+      var theNodes = force.nodes();
+      var namedNode;
+      for(var i=0; i<theNodes.length; i++) {
+        if(theNodes[i].id == storedId)
+          showCollabInfo(theNodes[i]);
+      }
   }
 
   function displayInfoBox(text) {
@@ -598,28 +642,9 @@ function startItUp(graph) {
           return "3px";
       });           
   });
-  
-  function showTitles() {
-    var elemId = this.id;
-    // Need to get the link which corresponds to this number of papers...
-    // there must be a nicer way of doing this?
-    link.each(function(l) {
-      console.log(l.source.id + "-" + l.target.id)
-      if(l.source.id + "-" + l.target.id === elemId) {
-        var title_urls = l.collab_title_urls;
-        console.log(title_urls)
-        
-        var titleString = "<strong>Papers connecting " + l.source.name + " and " + l.target.name + "</strong><br><br>";
-        
-        for(var i = 0; i < title_urls.length; i++)
-          titleString += title_urls[i][0] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
-        
-        //d3.select("#infoArea").html(close + titleString);
-        displayInfoBox(titleString);
-        //d3.select("#close").on("click", closeBox);
-      }
-    });
-  }
+
+
+
 
   d3.selectAll(".metricListItem").on("click", function() {
     listItem = d3.select(this);

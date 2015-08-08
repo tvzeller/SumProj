@@ -181,9 +181,13 @@ ul ul ul {
 
 
 #close {
-  position:relative;
-  left:260px;
+  float:right;
   color: #e74c3c;
+}
+
+#back {
+  color: #e74c3c;
+  visibility: hidden;
 }
 
 .numCollabs {

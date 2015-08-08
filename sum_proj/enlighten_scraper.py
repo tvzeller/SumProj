@@ -58,11 +58,23 @@ def get_names(url):
 	# get html element tree
 	tree = get_tree(url)
 	# get list of last names
-	last_names = tree.xpath('//*[@id="research-teachinglist"]/li/a/strong/text()')
+	#last_names = tree.xpath('//*[@id="research-teachinglist"]/li/a//strong/text()')
 	# get list of (titled) first names
-	titled_first_names = tree.xpath('//*[@id="research-teachinglist"]/li/a/text()')
+	#titled_first_names = tree.xpath('//*[@id="research-teachinglist"]/li/a//text()')
+	# The above paths 
+	#for name in titled_first_names[:]:
+	#	if name in last_names:
+	#		titled_first_names.remove(name)
 	# make list of "Last Name, Title First Name" strings
-	full_names = ["%s%s" % (first, last) for first, last in zip(last_names, titled_first_names)]
+	#full_names = ["%s%s" % (first, last) for first, last in zip(last_names, titled_first_names)]
+	
+	# Names are text within <a> elements in this list
+	# xpath returns a list with alternating last and first names as elements
+	# Concatenate each last name and first name pair and put in new list as full name
+	names = tree.xpath('//*[@id="research-teachinglist"]/li//a//text()')
+	full_names = []
+	for i in range(0, len(names)-1, 2):
+		full_names.append(names[i] + names[i+1])
 
 	print full_names
 	return full_names
