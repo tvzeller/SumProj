@@ -5,6 +5,7 @@ from django.conf import settings
 import json
 import networkx as nx
 from networkx.readwrite import json_graph
+import threading
 
 def index(request):
 	collab_path = os.path.join(settings.GRAPHS_PATH, "collab")
@@ -69,7 +70,8 @@ def shortest_path(request):
 	newdata = json.dumps(graphdata)
 
 	print "and got here"
-	print newdata
+
+	print threading.active_count()
 
 	return HttpResponse(newdata, content_type='application/json')
 

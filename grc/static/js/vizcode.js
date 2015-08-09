@@ -686,8 +686,6 @@ function startItUp(graph) {
   });
 
 
-
-
   d3.selectAll(".metricListItem").on("click", function() {
     listItem = d3.select(this);
     var metric = listItem.attr("id");
@@ -699,33 +697,7 @@ function startItUp(graph) {
     displayMetricText(metric, name, descrptn)
   });
 
-  /*d3.select("#deg_cent").on("click", function() {
-    colourByMetric("deg_cent");
-    keyArray = [["white", "least degree centrality"], ["red", "most degree centrality"]];
-    makeKey(keyArray);
-    dscrptn = "a measure of etc. etc."
-    displayMetricText("deg_cent", "degree centrality", dscrptn)
-  });
-
-  //TODO change key, text etc.
-
-  d3.select("#bet_cent").on("click", function() {
-    colourByMetric("between_cent");
-    keyArray = [["white", "least betweenness centrality"], ["red", "most betweenness centrality"]];
-    makeKey(keyArray);
-    dscrptn = "a measure of influence bla bla"
-    displayMetricText("between_cent", "betweenness centrality", dscrptn)
-  });
-
-  d3.select("#close_cent").on("click", function() {
-    colourByMetric("close_cent");
-    keyArray = [["white", "least closeness centrality"], ["red", "most closeness centrality"]];
-    makeKey(keyArray);
-    dscrptn = "yadda yadda yadda"
-    displayMetricText("close_cent", "closeness centrality", dscrptn)
-  });*/
-
-
+ 
   function colourByMetric(metric) {
     theNodes = force.nodes()
     max = Math.max.apply(Math,theNodes.map(function(n){
@@ -778,6 +750,18 @@ function startItUp(graph) {
   });
 
 
+  d3.select("#shortest").on("click", function() {
+    info = "Find the shortest path between two authors.<br> Please input the Enlighten urls of the source and target authors. You can find an author's \
+            url <a href=\"http://eprints.gla.ac.uk/view/author/\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
+            <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button>"
+   
+    displayInfoBox(info);
+    d3.select("#shortestButton").on("click", getShortest);
+
+  });
+
+
+
 }
 
 
@@ -818,14 +802,14 @@ function getData(name, type) {
   });
 }*/
 
-d3.select("#shortest").on("click", function() {
-  info = "blablabla shortestpath blabla<br><input type=\"text\" id=\"sourceInput\"/><br><br> \
-          <input type=\"text\" id=\"targetInput\"/><br><br>"
 
-  displayInfoBox(info)
+var getShortest = function() {
 
+    var sourceInfo = $("#sourceInput").val();
+    var targetInfo = $("#targetInput").val();
+    console.log(sourceInfo);
 
-  $.get('shortest_path/', {source: "http://eprints.gla.ac.uk/view/author/15034.html", target: "http://eprints.gla.ac.uk/view/author/1503.html"}, function(data) {
+  $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
     //graph_data = JSON.parse(data);
     currentViz = vizTypes.SHORTEST;
     var sourceName = "";
@@ -845,7 +829,7 @@ d3.select("#shortest").on("click", function() {
     
     startItUp(data);
   });
-});
+}
   
 
 
