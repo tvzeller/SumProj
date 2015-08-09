@@ -305,10 +305,12 @@ function startItUp(graph) {
     nodeG.append("circle")
       .attr("class", "nodeCircle")
       .attr("r", function(d) {
-        if(d.paper_count != undefined)
+        if(currentViz == vizTypes.AUTHOR_COLLAB && d.paper_count != undefined)
           return nodeScale(d.paper_count);
         else if(currentViz == vizTypes.SHORTEST)
           return 20;
+        else if(currentViz == vizTypes.SINGLE)
+          return width / 2 / nodes.length
         else
           return 10;
       })
@@ -330,7 +332,10 @@ function startItUp(graph) {
               return "green";
           }
           if(currentViz == vizTypes.SINGLE) {
-            return "blue";
+            if(d.centre)
+              return "red";
+            else
+              return "blue";
           }
       })
       .style("stroke", "black");
@@ -757,7 +762,7 @@ function startItUp(graph) {
 
 
   d3.select("#shortest").on("click", function() {
-    shortestPathBox(false);
+    shortestPathBox();
   });
 
   // TODO using a global variable here as a quick fix, please revise
@@ -775,18 +780,34 @@ function startItUp(graph) {
     d3.select("#shortestButton").on("click", getShortest);
   }
 
+  d3.select("#single").on("click", function() {
+    singleAuthorBox();
+  })
+
+  singleAuthorBox = function(error) {
+    var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please input the unique Enlighten numbers \
+        of author whose graph you want to see. You can find out an author's identifier by checking their \
+        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" placeholder=\"source\"/><br><br> \
+        Choose how far you want the graph to reach <input type=\"number\" id=\"cutoffInput\"/><br><br><button type=\"button\" id=\"singleButton\">Submit</button>"
+
+    if(error)
+      info += "<br><br>Sorry, the author was not found"
+
+    displayInfoBox(info);
+    d3.select("#singleButton").on("click", getSingle);
+  }
 
 
-}
+} // THIS IS THE END OF STARTMEUP
 
-d3.select("#single").on("click", function() {
+/*d3.select("#single").on("click", function() {
   $.get('author_search/', {author: "15034", cutoff: 3}, function(data) {
     console.log("SIINGLE")
     console.log(data.nodes);
     currentViz = vizTypes.SINGLE;
     startItUp(data);
   });
-});
+});*/
 
 // Using jquery to make get request to server as was having trouble passing parameters in d3 requests
 // get_json is the url which maps to the django view which loads the json file and returns the data
@@ -798,15 +819,6 @@ function getData(name, type) {
   });
 }
 
-/*function getShortest() {
-  $.get('shortest_path/', {source: "http://eprints.gla.ac.uk/view/author/15034.html", target: "http://eprints.gla.ac.uk/view/author/6086.html"}, function(data) {
-    console.log("hooooooha");
-    console.log(data)
-    //graph_data = JSON.parse(data);
-    currentViz = vizTypes.SHORTEST;
-    startItUp(data);
-  });
-}*/
 
 
 var getShortest = function() {
@@ -823,7 +835,6 @@ var getShortest = function() {
       var sourceName = "";
       var targetName = "";
       for(var i=0; i<data.nodes.length; i++) {
-        console.log("what");
         if(data.nodes[i].isSource) {
           sourceName = data.nodes[i].name;
         }
@@ -843,7 +854,30 @@ var getShortest = function() {
       shortestPathBox(true);
     }
   });
+}
 
+var getSingle = function() {
+  var authorInfo = $("#singleInput").val()
+  var cutoff = $("#cutoffInput").val()
+  console.log("CUTOFF")
+  console.log(cutoff)
+  $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
+    if(data) {
+      currentViz = vizTypes.SINGLE
+      var name;
+      for(var i=0; i<data.nodes.length; i++) {
+        if(data.nodes[i].centre) {
+          name = data.nodes[i].name;
+        }
+      }
+      nameText.text(name);
+      typeText.text("Cutoff of " + cutoff);
+      startItUp(data)
+    }
+    else {
+      shortestPathBox(true);
+    }
+  });
 }
   
 

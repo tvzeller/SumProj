@@ -93,9 +93,10 @@ def author_search(request):
 # TODO deal with names as well as number
 	if request.method == 'GET':
 		author_num = request.GET.get("author")
-		cutoff = request.GET.get("cutoff") 
+		cutoff = int(request.GET.get("cutoff")) 
 
-	print author_num
+	print "author_num is",  author_num
+	print "cutoff is", cutoff
 
 	graphpath = 'collab/The University of Glasgow.json'
 	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
@@ -106,19 +107,19 @@ def author_search(request):
 
 	author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
 
-
-
 	if author_id not in unigraph.node:
 		return HttpResponse({})
 
 	nodes = [author_id,]
-	neighbours = nx.single_source_shortest_path_length(unigraph, author_id, 3)
+	neighbours = nx.single_source_shortest_path_length(unigraph, author_id, cutoff)
 	
 	nodes.extend(neighbours.keys())
 
 	print nodes
 
-	author_graph = unigraph.subgraph(nodes)
+	# Making a new subgraph out of the old graph so that changes in attributes are not reflected in full graph
+	author_graph = nx.Graph(unigraph.subgraph(nodes))
+	author_graph.node[author_id]["centre"] = 1
 	print author_graph.nodes()
 	print author_graph.edges()
 
