@@ -751,14 +751,23 @@ function startItUp(graph) {
 
 
   d3.select("#shortest").on("click", function() {
-    info = "Find the shortest path between two authors.<br> Please input the Enlighten urls of the source and target authors. You can find an author's \
-            url <a href=\"http://eprints.gla.ac.uk/view/author/\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
-            <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button>"
-   
+    shortestPathBox(false);
+  });
+
+  // TODO using a global variable here as a quick fix, please revise
+  shortestPathBox = function(error) {
+    console.log("getting hereeeeeeeeeeeeeeeeeAAOROASDF");
+    var info = "Find the shortest path between two authors anywhere within the university.<br> Please input the unique Enlighten numbers \
+        of the source and target authors. You can find out an author's identifier by checking their \
+        url <a href=\"http://eprints.gla.ac.uk/view/author/\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
+        <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button>"
+
+    if(error)
+      info += "<br><br>Sorry, no path was found between those authors or they don't exist in the graph, can't tell you which right now"
+
     displayInfoBox(info);
     d3.select("#shortestButton").on("click", getShortest);
-
-  });
+  }
 
 
 
@@ -769,18 +778,7 @@ function startItUp(graph) {
 //}
 
 
-// get_json is the url which maps to the django view which loads the json file and returns the data
-/*d3.json('get_json/', function(error, data) {
-  //for some reason d3.json() is not parsing the data, have to parse it
-  var thing = JSON.parse(data)
-  //console.log(thing.links);
-  //console.log("bla blue blee")
-  startItUp(thing)
-});*/
 
-/*d3.xhr('get_json/').header("Content-Type", "application/x-www-form-urlencoded").post("a=2", function(error, data) {
-  console.log(data)
-})*/
 
 // Using jquery to make get request to server as was having trouble passing parameters in d3 requests
 // get_json is the url which maps to the django view which loads the json file and returns the data
@@ -805,30 +803,39 @@ function getData(name, type) {
 
 var getShortest = function() {
 
-    var sourceInfo = $("#sourceInput").val();
-    var targetInfo = $("#targetInput").val();
-    console.log(sourceInfo);
+  var sourceInfo = $("#sourceInput").val();
+  var targetInfo = $("#targetInput").val();
+  console.log(sourceInfo);
 
   $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
     //graph_data = JSON.parse(data);
-    currentViz = vizTypes.SHORTEST;
-    var sourceName = "";
-    var targetName = "";
-    for(var i=0; i<data.nodes.length; i++) {
-      console.log("what");
-      if(data.nodes[i].isSource) {
-        sourceName = data.nodes[i].name;
+    console.log("SHORTEST");
+    if(data) {
+      currentViz = vizTypes.SHORTEST;
+      var sourceName = "";
+      var targetName = "";
+      for(var i=0; i<data.nodes.length; i++) {
+        console.log("what");
+        if(data.nodes[i].isSource) {
+          sourceName = data.nodes[i].name;
+        }
+        if(data.nodes[i].isTarget) {
+          targetName = data.nodes[i].name;
+        }
       }
-      if(data.nodes[i].isTarget) {
-        targetName = data.nodes[i].name;
-      }
+      console.log(sourceName)
+      nameText.text(sourceName + " to")
+      typeText.text(targetName)
+      shortestPathBox();
+      // TODO in this case do not have to JSON.parse data - find out why
+      startItUp(data);
+
     }
-    console.log(sourceName)
-    nameText.text(sourceName + " to")
-    typeText.text(targetName)
-    
-    startItUp(data);
+    else {
+      shortestPathBox(true);
+    }
   });
+
 }
   
 

@@ -41,8 +41,8 @@ def shortest_path(request):
 	# TODO doing this with node id's rather than names - ask users to enter enlighten url?
 	# would make sure we get the right person
 	if request.method == 'GET':
-		sourceId = request.GET.get('source')
-		targetId = request.GET.get('target')
+		sourceNum = request.GET.get('source')
+		targetNum = request.GET.get('target')
 
 	graphpath = 'collab/The University of Glasgow.json'
 	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
@@ -50,7 +50,19 @@ def shortest_path(request):
 
 
 	unigraph = json_graph.node_link_graph(data)
-	s_path = nx.shortest_path(unigraph, sourceId, targetId)
+	sourceId = "http://eprints.gla.ac.uk/view/author/" + sourceNum + ".html"
+	targetId = "http://eprints.gla.ac.uk/view/author/" + targetNum + ".html"
+	# CHECK IF NODES IN GRAPH
+
+	if sourceId not in unigraph.node or targetId not in unigraph.node:
+		return HttpResponse({})
+	
+
+	try:
+		s_path = nx.shortest_path(unigraph, sourceId, targetId)
+	except nx.NetworkXNoPath:
+		return HttpResponse({})
+	
 	path_graph = nx.Graph()
 	for i in range(0, len(s_path)-1):
 		author1 = s_path[i]
@@ -59,7 +71,6 @@ def shortest_path(request):
 		path_graph.add_node(author2, {"name": unigraph.node[author2]["name"]})
 		path_graph.add_edge(author1, author2)
 
-		print "getting heeeeere"
 
 		if author1 == s_path[0]:
 			path_graph.node[author1]["isSource"] = 1
@@ -72,6 +83,7 @@ def shortest_path(request):
 	print "and got here"
 
 	print threading.active_count()
+
 
 	return HttpResponse(newdata, content_type='application/json')
 
