@@ -78,7 +78,7 @@ def shortest_path(request):
 	# 		path_graph.node[author1]["isSource"] = 1
 	# 	if author2 == s_path[-1]:
 	# 		path_graph.node[author2]["isTarget"] = 1
-	path_graph = make_path_graph(s_path)
+	path_graph = make_path_graph(s_path, unigraph)
 
 	graphdata = json_graph.node_link_data(path_graph)
 	newdata = json.dumps(graphdata)
