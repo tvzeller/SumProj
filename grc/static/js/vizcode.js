@@ -340,8 +340,8 @@ function startItUp(graph) {
       })
       .style("stroke", "black");
 
-    if(labeled)
-      addLabels(nodeG);
+    /*if(labeled)
+      addLabels(nodeG);*/
 
     nodeG.append("title")
     .text(function(d) {
@@ -366,15 +366,21 @@ function startItUp(graph) {
   }
 
 
-  var addLabels = function(sel) {
+  var addLabels = function(sel, label) {
     sel.append("text")
       .attr("font-size", "10px")
       .attr("font-family", "sans-serif")
       .text(function(d) { 
-        if(d.name)
-          return d.name
-        else
-          return d.id
+        // TODO magic numbers...
+        if(label=="nameLabels") {
+          if(d.name)
+            return d.name
+          else
+            return d.id
+        }
+        else if(label=="idLabels") {
+          return d.id;
+        }
       })
       .attr("dy", ".35em")
       .attr("text-anchor", "middle")
@@ -398,6 +404,16 @@ function startItUp(graph) {
 
     if(currentViz == vizTypes.SHORTEST) {
       a = [["blue", "source"], ["red", "target"]];
+      makeKey(a);
+    }
+
+    if(currentViz == vizTypes.SINGLE) {
+      var name = "";
+      for(var i=0; i<nodes.length; i++) {
+        if(nodes[i].centre)
+          name = nodes[i].name;
+      }
+      a = [["red", name], ["blue", "everyone else"]];
       makeKey(a);
     }
   }
@@ -611,7 +627,7 @@ function startItUp(graph) {
               return 60;
             else
               return [0.8/k];
-          })
+          });
 
     startForce(nodes, links);
     // force simulation is running in background, position of things is changing with each tick
@@ -655,17 +671,13 @@ function startItUp(graph) {
     }
   });
 
-  d3.select('#togLabels').on("click", function() {
-    if(labeled) {
-      svg.selectAll(".label").remove();
-      labeled = false;
-    }
-    else {
-      addLabels(node);
 
-      labeled = true;
-    }
+  d3.selectAll(".labelChoice").on('click', function() {
+    svg.selectAll(".label").remove();
+    var type = d3.select(this).attr("id");
+    addLabels(node, type)
   });
+
 
   d3.select("#bff").on("click", function() {
     bffs = force.links()
@@ -771,13 +783,17 @@ function startItUp(graph) {
     var info = "Find the shortest path between two authors anywhere within the university.<br> Please input the unique Enlighten numbers \
         of the source and target authors. You can find out an author's identifier by checking their \
         url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
-        <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button>"
+        <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button><br><br>"
 
     if(error)
-      info += "<br><br>Sorry, no path was found between those authors or they don't exist in the graph, can't tell you which right now"
+      info += "<br><br>Sorry, no path was found between those authors or they don't exist in the graph, can't tell you which right now<br><br>"
+
+    info += "You can also find the longest shortest path for an author. How far do their connections go?<br><br><input type=\"text\" id=\"longestInput\" \
+            placeholder=\"source\"/><br><br><button type=\"button\" id=\"longestButton\">Submit</button>"
 
     displayInfoBox(info);
     d3.select("#shortestButton").on("click", getShortest);
+    d3.select("#longestButton").on("click", getLongest);
   }
 
   d3.select("#single").on("click", function() {
@@ -798,16 +814,8 @@ function startItUp(graph) {
   }
 
 
-} // THIS IS THE END OF STARTMEUP
+} // THIS IS THE END OF STARTITUP
 
-/*d3.select("#single").on("click", function() {
-  $.get('author_search/', {author: "15034", cutoff: 3}, function(data) {
-    console.log("SIINGLE")
-    console.log(data.nodes);
-    currentViz = vizTypes.SINGLE;
-    startItUp(data);
-  });
-});*/
 
 // Using jquery to make get request to server as was having trouble passing parameters in d3 requests
 // get_json is the url which maps to the django view which loads the json file and returns the data
@@ -829,7 +837,9 @@ var getShortest = function() {
 
   $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
     //graph_data = JSON.parse(data);
-    console.log("SHORTEST");
+    doShortestViz(data);
+
+  /*  console.log("SHORTEST");
     if(data) {
       currentViz = vizTypes.SHORTEST;
       var sourceName = "";
@@ -852,8 +862,44 @@ var getShortest = function() {
     }
     else {
       shortestPathBox(true);
-    }
+    }*/
   });
+}
+
+var getLongest = function() {
+  var source = $("#longestInput").val();
+  console.log("ELEPHANTS")
+  console.log(source);
+  $.get('longest_path/', {source: source}, function(data) {
+      doShortestViz(data);
+  });
+}
+
+function doShortestViz(data) {
+  console.log("SHORTEST");
+  if(data) {
+    currentViz = vizTypes.SHORTEST;
+    var sourceName = "";
+    var targetName = "";
+    for(var i=0; i<data.nodes.length; i++) {
+      if(data.nodes[i].isSource) {
+        sourceName = data.nodes[i].name;
+      }
+      if(data.nodes[i].isTarget) {
+        targetName = data.nodes[i].name;
+      }
+    }
+    console.log(sourceName)
+    nameText.text(sourceName + " to")
+    typeText.text(targetName)
+    shortestPathBox();
+    // TODO in this case do not have to JSON.parse data - find out why
+    startItUp(data);
+
+  }
+  else {
+    shortestPathBox(true);
+  }
 }
 
 var getSingle = function() {
@@ -871,29 +917,17 @@ var getSingle = function() {
         }
       }
       nameText.text(name);
-      typeText.text("Cutoff of " + cutoff);
+      typeText.text("cutoff of " + cutoff);
       startItUp(data)
     }
     else {
-      shortestPathBox(true);
+      singleAuthorBox(true);
     }
   });
 }
   
 
 
-
-$(function() {
-  $('#dragtest').draggable({
-    zIndex: 100
-  });
-});
-
-
-d3.select("#schoolChooser").on("change", function() {
-  var choice = this.value
-  getData(choice, "collab");
-});
 
 d3.selectAll(".collabListItem").on("click", function() {
   var type = d3.select(this).attr("data-type");
@@ -917,5 +951,4 @@ d3.selectAll(".collabListItem").on("click", function() {
 });
 
 
-
-//getData("Dental School collab", "collab");
+getData("School of Computing Science", "collab");
