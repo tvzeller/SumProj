@@ -41,8 +41,8 @@ def shortest_path(request):
 	# TODO doing this with node id's rather than names - ask users to enter enlighten url?
 	# would make sure we get the right person
 	if request.method == 'GET':
-		sourceNum = request.GET.get('source')
-		targetNum = request.GET.get('target')
+		source_num = request.GET.get('source')
+		target_num = request.GET.get('target')
 
 	graphpath = 'collab/The University of Glasgow.json'
 	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
@@ -50,16 +50,17 @@ def shortest_path(request):
 
 
 	unigraph = json_graph.node_link_graph(data)
-	sourceId = "http://eprints.gla.ac.uk/view/author/" + sourceNum + ".html"
-	targetId = "http://eprints.gla.ac.uk/view/author/" + targetNum + ".html"
+	# TODO change this - once we start using just number as node ids in graphs
+	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
+	target_id = "http://eprints.gla.ac.uk/view/author/" + target_num + ".html"
+	
 	# CHECK IF NODES IN GRAPH
-
-	if sourceId not in unigraph.node or targetId not in unigraph.node:
+	if source_id not in unigraph.node or target_id not in unigraph.node:
 		return HttpResponse({})
 	
 
 	try:
-		s_path = nx.shortest_path(unigraph, sourceId, targetId)
+		s_path = nx.shortest_path(unigraph, source_id, target_id)
 	except nx.NetworkXNoPath:
 		return HttpResponse({})
 	
@@ -87,3 +88,42 @@ def shortest_path(request):
 
 	return HttpResponse(newdata, content_type='application/json')
 
+
+def author_search(request):
+# TODO deal with names as well as number
+	if request.method == 'GET':
+		author_num = request.GET.get("author")
+		cutoff = request.GET.get("cutoff") 
+
+	print author_num
+
+	graphpath = 'collab/The University of Glasgow.json'
+	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
+		data = json.load(f)
+
+	unigraph = json_graph.node_link_graph(data)
+	
+
+	author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
+
+
+
+	if author_id not in unigraph.node:
+		return HttpResponse({})
+
+	nodes = [author_id,]
+	neighbours = nx.single_source_shortest_path_length(unigraph, author_id, 3)
+	
+	nodes.extend(neighbours.keys())
+
+	print nodes
+
+	author_graph = unigraph.subgraph(nodes)
+	print author_graph.nodes()
+	print author_graph.edges()
+
+	graphdata = json_graph.node_link_data(author_graph)
+	newdata = json.dumps(graphdata)
+
+
+	return HttpResponse(newdata, content_type='application/json')

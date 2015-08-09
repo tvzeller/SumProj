@@ -7,6 +7,7 @@ var vizTypes = {
   AUTHOR_COLLAB: 1,
   SIMILARITY: 2,
   SHORTEST: 3,
+  SINGLE: 4,
   // etc.
 }
 // Start with author collaboration graph as default on page load
@@ -86,7 +87,7 @@ var force = d3.layout.force()
 //TODO n.b. just_school is always true by default so put inside functions
 //var just_school = true;
 var frozen = false;
-var labeled = true;
+var labeled = false;
 
 var nodeSelected = false;
 var clickedNodeId;
@@ -306,6 +307,8 @@ function startItUp(graph) {
       .attr("r", function(d) {
         if(d.paper_count != undefined)
           return nodeScale(d.paper_count);
+        else if(currentViz == vizTypes.SHORTEST)
+          return 20;
         else
           return 10;
       })
@@ -325,6 +328,9 @@ function startItUp(graph) {
               return "red";
             else
               return "green";
+          }
+          if(currentViz == vizTypes.SINGLE) {
+            return "blue";
           }
       })
       .style("stroke", "black");
@@ -759,7 +765,7 @@ function startItUp(graph) {
     console.log("getting hereeeeeeeeeeeeeeeeeAAOROASDF");
     var info = "Find the shortest path between two authors anywhere within the university.<br> Please input the unique Enlighten numbers \
         of the source and target authors. You can find out an author's identifier by checking their \
-        url <a href=\"http://eprints.gla.ac.uk/view/author/\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
+        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
         <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button>"
 
     if(error)
@@ -773,12 +779,14 @@ function startItUp(graph) {
 
 }
 
-
-  //});
-//}
-
-
-
+d3.select("#single").on("click", function() {
+  $.get('author_search/', {author: "15034", cutoff: 3}, function(data) {
+    console.log("SIINGLE")
+    console.log(data.nodes);
+    currentViz = vizTypes.SINGLE;
+    startItUp(data);
+  });
+});
 
 // Using jquery to make get request to server as was having trouble passing parameters in d3 requests
 // get_json is the url which maps to the django view which loads the json file and returns the data
