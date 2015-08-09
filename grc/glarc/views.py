@@ -58,6 +58,13 @@ def shortest_path(request):
 		path_graph.add_node(author2, {"name": unigraph.node[author2]["name"]})
 		path_graph.add_edge(author1, author2)
 
+		print "getting heeeeere"
+
+		if author1 == s_path[0]:
+			path_graph.node[author1]["isSource"] = 1
+		if author2 == s_path[-1]:
+			path_graph.node[author2]["isTarget"] = 1
+
 	graphdata = json_graph.node_link_data(path_graph)
 	newdata = json.dumps(graphdata)
 

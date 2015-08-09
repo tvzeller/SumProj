@@ -311,10 +311,21 @@ function startItUp(graph) {
       })
       .style("fill", function(d, i) {
           //return colors(i);
-          if(d.in_school)
-            return multiColour(inSchoolColour);
-          else
-            return multiColour(nonSchoolColour);
+          if(currentViz == vizTypes.AUTHOR_COLLAB) {
+            if(d.in_school)
+              return multiColour(inSchoolColour);
+            else
+              return multiColour(nonSchoolColour);
+          }
+
+          if(currentViz == vizTypes.SHORTEST) {
+            if(d.isSource)
+              return "blue";
+            else if(d.isTarget)
+              return "red";
+            else
+              return "green";
+          }
       })
       .style("stroke", "black");
 
@@ -372,6 +383,11 @@ function startItUp(graph) {
     if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == true) {
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
+    }
+
+    if(currentViz == vizTypes.SHORTEST) {
+      a = [["blue", "source"], ["red", "target"]];
+      makeKey(a);
     }
   }
 
@@ -579,7 +595,12 @@ function startItUp(graph) {
     force.gravity(70 * k)
           .charge(-10/k)
           //.linkDistance([120])
-          .linkDistance([0.8/k])
+          .linkDistance(function() {
+            if(currentViz == vizTypes.SHORTEST)
+              return 60;
+            else
+              return [0.8/k];
+          })
 
     startForce(nodes, links);
     // force simulation is running in background, position of things is changing with each tick
@@ -787,7 +808,7 @@ function getData(name, type) {
   });
 }
 
-function getShortest() {
+/*function getShortest() {
   $.get('shortest_path/', {source: "http://eprints.gla.ac.uk/view/author/15034.html", target: "http://eprints.gla.ac.uk/view/author/6086.html"}, function(data) {
     console.log("hooooooha");
     console.log(data)
@@ -795,11 +816,38 @@ function getShortest() {
     currentViz = vizTypes.SHORTEST;
     startItUp(data);
   });
-}
+}*/
 
 d3.select("#shortest").on("click", function() {
-  getShortest();
+  info = "blablabla shortestpath blabla<br><input type=\"text\" id=\"sourceInput\"/><br><br> \
+          <input type=\"text\" id=\"targetInput\"/><br><br>"
+
+  displayInfoBox(info)
+
+
+  $.get('shortest_path/', {source: "http://eprints.gla.ac.uk/view/author/15034.html", target: "http://eprints.gla.ac.uk/view/author/1503.html"}, function(data) {
+    //graph_data = JSON.parse(data);
+    currentViz = vizTypes.SHORTEST;
+    var sourceName = "";
+    var targetName = "";
+    for(var i=0; i<data.nodes.length; i++) {
+      console.log("what");
+      if(data.nodes[i].isSource) {
+        sourceName = data.nodes[i].name;
+      }
+      if(data.nodes[i].isTarget) {
+        targetName = data.nodes[i].name;
+      }
+    }
+    console.log(sourceName)
+    nameText.text(sourceName + " to")
+    typeText.text(targetName)
+    
+    startItUp(data);
+  });
 });
+  
+
 
 
 $(function() {
@@ -814,11 +862,13 @@ d3.select("#schoolChooser").on("change", function() {
   getData(choice, "collab");
 });
 
-d3.selectAll(".menuChoice").on("click", function() {
+d3.selectAll(".collabListItem").on("click", function() {
   var type = d3.select(this).attr("data-type");
   var name = d3.select(this).attr("data-name");
   var nmtext = d3.select(this).attr("data-nametext");
   var tptext = d3.select(this).attr("data-typetext");
+
+  currentViz = vizTypes.AUTHOR_COLLAB;
 
   //display background text
   nameText.text(nmtext)
