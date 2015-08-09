@@ -6,6 +6,7 @@ var height = 650
 var vizTypes = {
   AUTHOR_COLLAB: 1,
   SIMILARITY: 2,
+  SHORTEST: 3,
   // etc.
 }
 // Start with author collaboration graph as default on page load
@@ -234,6 +235,9 @@ function startItUp(graph) {
 
   // Used to bind new node data to visual elements and display
   function updateNodes(nodes) {
+    console.log("HELLOOOOO");
+    console.log(nodes)
+
     // First remove nodes that are already present.
     // This is because a node may be present as a non-school member in one graph, but then
     // be a school member in the next. But would still be visualised as a non-school member as the visualisation
@@ -279,21 +283,23 @@ function startItUp(graph) {
         .call(force.drag);
         //.call(drag);
 
-    var maxPapers = nodes[0].paper_count
-    var minPapers = nodes[0].paper_count
-    for(var i=1, len=nodes.length; i<len; i++) {
-      if(nodes[i].paper_count < minPapers)
-        minPapers = nodes[i].paper_count;
-      else if(nodes[i].paper_count > maxPapers)
-        maxPapers = nodes[i].paper_count;
-    }
+    if(nodes[0].paper_count != undefined) {
+      var maxPapers = nodes[0].paper_count
+      var minPapers = nodes[0].paper_count
+      for(var i=1, len=nodes.length; i<len; i++) {
+        if(nodes[i].paper_count < minPapers)
+          minPapers = nodes[i].paper_count;
+        else if(nodes[i].paper_count > maxPapers)
+          maxPapers = nodes[i].paper_count;
+      }
 
-    maxSize = Math.min(40, 2300/nodes.length);
-    minSize = maxSize/3
-    nodeScale.domain([minPapers, maxPapers])
-              .range([minSize, maxSize])
-              .base([10]);  
-
+      maxSize = Math.min(40, 2300/nodes.length);
+      minSize = maxSize/3
+      nodeScale.domain([minPapers, maxPapers])
+                .range([minSize, maxSize])
+                .base([10]);
+    }  
+    
     
     nodeG.append("circle")
       .attr("class", "nodeCircle")
@@ -781,6 +787,21 @@ function getData(name, type) {
   });
 }
 
+function getShortest() {
+  $.get('shortest_path/', {source: "http://eprints.gla.ac.uk/view/author/15034.html", target: "http://eprints.gla.ac.uk/view/author/6086.html"}, function(data) {
+    console.log("hooooooha");
+    console.log(data)
+    //graph_data = JSON.parse(data);
+    currentViz = vizTypes.SHORTEST;
+    startItUp(data);
+  });
+}
+
+d3.select("#shortest").on("click", function() {
+  getShortest();
+});
+
+
 $(function() {
   $('#dragtest').draggable({
     zIndex: 100
@@ -811,5 +832,7 @@ d3.selectAll(".menuChoice").on("click", function() {
   while(inSchoolColour == nonSchoolColour)
     nonSchoolColour = Math.floor(Math.random() * 10)
 });
+
+
 
 //getData("Dental School collab", "collab");

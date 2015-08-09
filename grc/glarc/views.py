@@ -3,6 +3,8 @@ from django.http import HttpResponse
 import os
 from django.conf import settings
 import json
+import networkx as nx
+from networkx.readwrite import json_graph
 
 def index(request):
 	collab_path = os.path.join(settings.GRAPHS_PATH, "collab")
@@ -32,4 +34,35 @@ def get_json(request):
 	json_file.close()
 
 	return HttpResponse(data, content_type='application/json')
+
+def shortest_path(request):
+	print "pancakes"
+	# TODO doing this with node id's rather than names - ask users to enter enlighten url?
+	# would make sure we get the right person
+	if request.method == 'GET':
+		sourceId = request.GET.get('source')
+		targetId = request.GET.get('target')
+
+	graphpath = 'collab/The University of Glasgow.json'
+	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
+		data = json.load(f)
+
+
+	unigraph = json_graph.node_link_graph(data)
+	s_path = nx.shortest_path(unigraph, sourceId, targetId)
+	path_graph = nx.Graph()
+	for i in range(0, len(s_path)-1):
+		author1 = s_path[i]
+		author2 = s_path[i+1]
+		path_graph.add_node(author1, {"name": unigraph.node[author1]["name"]})
+		path_graph.add_node(author2, {"name": unigraph.node[author2]["name"]})
+		path_graph.add_edge(author1, author2)
+
+	graphdata = json_graph.node_link_data(path_graph)
+	newdata = json.dumps(graphdata)
+
+	print "and got here"
+	print newdata
+
+	return HttpResponse(newdata, content_type='application/json')
 
