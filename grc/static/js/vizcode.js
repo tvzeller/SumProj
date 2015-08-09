@@ -710,7 +710,7 @@ function startItUp(graph) {
 
 
   d3.selectAll(".metricListItem").on("click", function() {
-    listItem = d3.select(this);
+    var listItem = d3.select(this);
     var metric = listItem.attr("id");
     var name = listItem.attr("data-name");
     var descrptn = listItem.attr("data-desc");
@@ -771,6 +771,37 @@ function startItUp(graph) {
     }
     makeKey(keyArray);
   });
+
+  d3.selectAll(".colourChoice").on("click", function() {
+    var choice = d3.select(this).attr("id");
+    console.log("the choice was" + choice)
+    if(choice == "schoolNonSchool")
+      colourBySchool();
+    else if(choice == "schoolColours")
+      colourBySchool();
+  });
+
+  function colourBySchool() {
+    console.log("COLOURS");
+    var keyArray = []
+    var schools = []
+    d3.selectAll(".nodeCircle").style("fill", function(d) {
+      if(d.school) {
+        console.log(d.school);
+        if(schools.indexOf(d.school) < 0) {
+          console.log(d.school)
+          schools.push(d.school);
+          keyArray.push([moreColour(d.school), d.school])
+        }
+        return moreColour(d.school);
+      }
+      else {
+        return "white";
+      }
+    });
+    keyArray.push(["white", "School not known"]);
+    makeKey(keyArray);
+  }
 
 
   d3.select("#shortest").on("click", function() {
