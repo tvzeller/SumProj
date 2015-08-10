@@ -88,7 +88,9 @@ def make_path_graph(path, full_graph):
 			author2 = path[i+1]
 			path_graph.add_node(author1, {"name": full_graph.node[author1]["name"], "school": full_graph.node[author1]["school"]})
 			path_graph.add_node(author2, {"name": full_graph.node[author2]["name"], "school": full_graph.node[author2]["school"]})
-			path_graph.add_edge(author1, author2)
+			path_graph.add_edge(author1, author2, {
+													"num_collabs": full_graph[author1][author2]["num_collabs"],
+													"collab_title_urls": full_graph[author1][author2]["collab_title_urls"]})
 
 			if author1 == path[0]:
 				path_graph.node[author1]["isSource"] = 1
