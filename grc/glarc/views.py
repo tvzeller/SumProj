@@ -50,28 +50,22 @@ def shortest_path(request):
 	target_id = "http://eprints.gla.ac.uk/view/author/" + target_num + ".html"
 	
 	# CHECK IF NODES IN GRAPH
-	if source_id not in unigraph.node or target_id not in unigraph.node:
-		return HttpResponse({})
-	
-
+	if source_id not in unigraph.node and target_id not in unigraph.node:
+		errorMessage = json.dumps({"error": "Sorry, neither author was found"})
+		return HttpResponse(errorMessage, content_type='application/json')
+	elif source_id not in unigraph.node:
+		errorMessage = json.dumps({"error": "Sorry, the source author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')
+	elif target_id not in unigraph.node:
+		errorMessage = json.dumps({"error": "Sorry, the target author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')		
+		
 	try:
 		s_path = nx.shortest_path(unigraph, source_id, target_id)
 	except nx.NetworkXNoPath:
-		return HttpResponse({})
+		errorMessage = json.dumps({"error": "Sorry, no path was found between the authors"})
+		return HttpResponse(errorMessage, content_type='application/json')	
 	
-	# path_graph = nx.Graph()
-	# for i in range(0, len(s_path)-1):
-	# 	author1 = s_path[i]
-	# 	author2 = s_path[i+1]
-	# 	path_graph.add_node(author1, {"name": unigraph.node[author1]["name"]})
-	# 	path_graph.add_node(author2, {"name": unigraph.node[author2]["name"]})
-	# 	path_graph.add_edge(author1, author2)
-
-
-	# 	if author1 == s_path[0]:
-	# 		path_graph.node[author1]["isSource"] = 1
-	# 	if author2 == s_path[-1]:
-	# 		path_graph.node[author2]["isTarget"] = 1
 	path_graph = make_path_graph(s_path, unigraph)
 
 	graphdata = json_graph.node_link_data(path_graph)
@@ -87,20 +81,29 @@ def shortest_path(request):
 def make_path_graph(path, full_graph):
 	print "make path graph"
 	path_graph = nx.Graph()
-	for i in range(0, len(path)-1):
-		author1 = path[i]
-		author2 = path[i+1]
-		path_graph.add_node(author1, {"name": full_graph.node[author1]["name"], "school": full_graph.node[author1]["school"]})
-		path_graph.add_node(author2, {"name": full_graph.node[author2]["name"], "school": full_graph.node[author2]["school"]})
-		path_graph.add_edge(author1, author2)
+	# Check if path is longer than 1 - author may not have any collaborators
+	if len(path) > 1:
+		for i in range(0, len(path)-1):
+			author1 = path[i]
+			author2 = path[i+1]
+			path_graph.add_node(author1, {"name": full_graph.node[author1]["name"], "school": full_graph.node[author1]["school"]})
+			path_graph.add_node(author2, {"name": full_graph.node[author2]["name"], "school": full_graph.node[author2]["school"]})
+			path_graph.add_edge(author1, author2)
 
-
-		if author1 == path[0]:
-			path_graph.node[author1]["isSource"] = 1
-		if author2 == path[-1]:
-			path_graph.node[author2]["isTarget"] = 1
+			if author1 == path[0]:
+				path_graph.node[author1]["isSource"] = 1
+			if author2 == path[-1]:
+				path_graph.node[author2]["isTarget"] = 1
 	
-	print "okokokok"
+	elif len(path) == 1:
+		author = path[0]
+		path_graph.add_node(author, {
+									"name": full_graph.node[author]["name"], 
+									"school": full_graph.node[author]["school"],
+									"isSource": 1,
+									"isTarget": 1})
+	
+	
 	return path_graph
 
 
@@ -113,21 +116,27 @@ def longest_path(request):
 	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
 
 	if source_id not in unigraph.node:
-		return HttpResponse({})
+		errorMessage = json.dumps({"error": "Sorry, the author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')	
 
 	paths = nx.single_source_shortest_path(unigraph, source_id)
+	#print "paths is"
+	#print paths
 	path_len = {}
 	for target, path in paths.items():
 		path_len[target] = len(path)
 
 	furthest_targets = [target for target in path_len.keys() if path_len[target] == max(path_len.values())]
 	chosen_target = random.choice(furthest_targets)
+	print "chosen is"
+	print chosen_target
 
 	#sorted_targets = sorted(paths, key=lambda t: len(paths[t]))
 	#longest_path = paths[sorted_targets[-1]]
 	
 	longest_path = paths[chosen_target]
 	path_graph = make_path_graph(longest_path, unigraph)
+
 
 	graphdata = json_graph.node_link_data(path_graph)
 	newdata = json.dumps(graphdata)
@@ -149,7 +158,7 @@ def author_search(request):
 	author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
 
 	if author_id not in unigraph.node:
-		errorMessage = json.dumps({"error": "sorry, the author was not found"})
+		errorMessage = json.dumps({"error": "Sorry, the author was not found"})
 		return HttpResponse(errorMessage, content_type='application/json')
 
 	nodes = [author_id,]

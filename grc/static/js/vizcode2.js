@@ -906,21 +906,21 @@ function startItUp(graph) {
   });
 
   // TODO using a global variable here as a quick fix, please revise
-  shortestPathBox = function(error) {
-    console.log("getting hereeeeeeeeeeeeeeeeeAAOROASDF");
+  // e.g. put this outside startitup
+  shortestPathBox = function(errorType, errorMessage) {
     var info = "Find the shortest path between two authors anywhere within the university.<br> Please input the unique Enlighten numbers \
         of the source and target authors. You can find out an author's identifier by checking their \
         url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
         <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
 
-    if(error == SHORTESTPATHERROR)
-      info += "<br>Sorry, no path was found between those authors or they don't exist in the graph, can't tell you which right now<br>"
+    if(errorType == SHORTESTPATHERROR)
+      info += "<br>" + errorMessage + "<br>";
 
     info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br><br><input type=\"text\" id=\"longestInput\" \
-            placeholder=\"source\"/><br><br><button type=\"button\" id=\"longestButton\">Submit</button>"
+            placeholder=\"source\"/><br><br><button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
 
-    if(error == LONGESTPATHERROR)
-      info += "<br><br>Sorry, the author was not found<br>"
+    if(errorType == LONGESTPATHERROR)
+      info += errorMessage
 
     displayInfoBox(info);
     d3.select("#shortestButton").on("click", getShortest);
@@ -931,7 +931,7 @@ function startItUp(graph) {
     singleAuthorBox();
   })
 
-  singleAuthorBox = function(error) {
+  singleAuthorBox = function(errorMessage) {
     var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please input the unique Enlighten numbers \
         of author whose graph you want to see. You can find out an author's identifier by checking their \
         url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
@@ -963,29 +963,35 @@ function getData(name, type) {
 
 
 var getShortest = function() {
-
   var sourceInfo = $("#sourceInput").val();
   var targetInfo = $("#targetInput").val();
   console.log(sourceInfo);
-
-  $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
-    //graph_data = JSON.parse(data);
-    doShortestViz(data, SHORTESTPATHERROR);
-  });
+  if(!sourceInfo || !targetInfo)
+    shortestPathBox(SHORTESTPATHERROR, "please enter both authors");
+  else {
+    $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
+      //graph_data = JSON.parse(data);
+      doShortestViz(data, SHORTESTPATHERROR);
+    });
+  }
 }
 
 var getLongest = function() {
   var source = $("#longestInput").val();
-  console.log("ELEPHANTS")
-  console.log(source);
-  $.get('longest_path/', {source: source}, function(data) {
-      doShortestViz(data, LONGESTPATHERROR);
-  });
+  if(!source)
+    shortestPathBox(LONGESTPATHERROR, "please enter an author");
+  else {
+    $.get('longest_path/', {source: source}, function(data) {
+        doShortestViz(data, LONGESTPATHERROR);
+    });
+  }
 }
 
-function doShortestViz(data, error) {
-  console.log("SHORTEST");
-  if(data) {
+function doShortestViz(data, errorType) {
+  if(data.error) {
+    shortestPathBox(errorType, data.error);
+  }
+  else if(data) {
     currentViz = vizTypes.SHORTEST;
     var sourceName = "";
     var targetName = "";
@@ -1003,10 +1009,8 @@ function doShortestViz(data, error) {
     shortestPathBox();
 
     //d3.select("#metricsMenu").style("visibility", "hidden");
-
     // TODO in this case do not have to JSON.parse data - find out why
     startItUp(data);
-
   }
   else {
     shortestPathBox(error);
