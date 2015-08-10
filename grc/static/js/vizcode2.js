@@ -438,7 +438,17 @@ function startItUp(graph) {
         if(currentNodes[i].centre)
           name = currentNodes[i].name;
       }
-      a = [["red", name], ["blue", "everyone else"]];
+      a = [[multiColour(0), name],];
+
+      numHops = $("#cutoffInput").val()
+      for(var i=1; i<=numHops; i++) {
+        if(i==1)
+          var hopString = " hop away";
+        else
+          var hopString = " hops away"
+        a.push([multiColour(i), i + hopString]);
+      }
+
       makeKey(a);
     }
   }
@@ -860,9 +870,9 @@ function startItUp(graph) {
       }
       if(currentViz == vizTypes.SINGLE) {
         if(d.centre)
-          return "red";
+          return multiColour(0);
         else
-          return "blue";
+          return multiColour(d.hops);
       }
     });
     updateKey()

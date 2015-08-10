@@ -7,6 +7,7 @@ import networkx as nx
 from networkx.readwrite import json_graph
 import threading
 import operator
+import random
 
 def index(request):
 	collab_path = os.path.join(settings.GRAPHS_PATH, "collab")
@@ -43,12 +44,7 @@ def shortest_path(request):
 		source_num = request.GET.get('source')
 		target_num = request.GET.get('target')
 
-	graphpath = 'collab/The University of Glasgow.json'
-	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
-		data = json.load(f)
-
-
-	unigraph = json_graph.node_link_graph(data)
+	unigraph = get_unigraph()
 	# TODO change this - once we start using just number as node ids in graphs
 	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
 	target_id = "http://eprints.gla.ac.uk/view/author/" + target_num + ".html"
@@ -112,13 +108,7 @@ def longest_path(request):
 	if request.method == 'GET':
 		source_num = request.GET.get('source')
 
-
-	graphpath = 'collab/The University of Glasgow.json'
-	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
-		data = json.load(f)
-
-
-	unigraph = json_graph.node_link_graph(data)
+	unigraph = get_unigraph()
 
 	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
 
@@ -126,8 +116,17 @@ def longest_path(request):
 		return HttpResponse({})
 
 	paths = nx.single_source_shortest_path(unigraph, source_id)
-	sorted_targets = sorted(paths, key=lambda t: len(paths[t]))
-	longest_path = paths[sorted_targets[-1]]
+	path_len = {}
+	for target, path in paths.items():
+		path_len[target] = len(path)
+
+	furthest_targets = [target for target in path_len.keys() if path_len[target] == max(path_len.values())]
+	chosen_target = random.choice(furthest_targets)
+
+	#sorted_targets = sorted(paths, key=lambda t: len(paths[t]))
+	#longest_path = paths[sorted_targets[-1]]
+	
+	longest_path = paths[chosen_target]
 	path_graph = make_path_graph(longest_path, unigraph)
 
 	graphdata = json_graph.node_link_data(path_graph)
@@ -145,12 +144,7 @@ def author_search(request):
 	print "author_num is",  author_num
 	print "cutoff is", cutoff
 
-	graphpath = 'collab/The University of Glasgow.json'
-	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
-		data = json.load(f)
-
-	unigraph = json_graph.node_link_graph(data)
-	
+	unigraph = get_unigraph()
 
 	author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
 
@@ -167,11 +161,23 @@ def author_search(request):
 	# Making a new subgraph out of the old graph so that changes in attributes are not reflected in full graph
 	author_graph = nx.Graph(unigraph.subgraph(nodes))
 	author_graph.node[author_id]["centre"] = 1
-	print author_graph.nodes()
-	print author_graph.edges()
+	for neighbour, hops in neighbours.items():
+		author_graph.node[neighbour]["hops"] = hops
+
+	#print author_graph.nodes()
+	#print author_graph.edges()
 
 	graphdata = json_graph.node_link_data(author_graph)
 	newdata = json.dumps(graphdata)
 
 
 	return HttpResponse(newdata, content_type='application/json')
+
+def get_unigraph():
+	graphpath = 'collab/The University of Glasgow.json'
+	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
+		data = json.load(f)
+
+	unigraph = json_graph.node_link_graph(data)
+	return unigraph
+
