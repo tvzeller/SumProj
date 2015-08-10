@@ -20,7 +20,7 @@
 				<!--<a href="http://www.gla.ac.uk" target="_blank"><img id="logo" src="{% static "images/logo2.png" %}" alt="the logo"/></a>-->
 	    		<ul>
 					<li class="topItem">
-						<span class="topText">Choose visualisation</span>
+						<span class="topText">Visualisation</span>
 						<ul>
 							<li>
 								Collaboration
@@ -63,7 +63,7 @@
 							<li>
 								colours
 								<ul>
-									<li class="colourChoice clickable" id="schoolNonSchool">School vs Non School</li>
+									<li class="colourChoice clickable" id="defaultColours">Default Colours</li>
 									<li class="colourChoice clickable" id="schoolColours">School Colours</li>
 								</ul>
 							</li>
@@ -71,7 +71,7 @@
 						</ul>
 					</li>
 					<li class="topItem">
-						<span class="topText">Metrics</span>
+						<span class="topText" id="metricsMenu">Metrics</span>
 						<ul>
 							<li id="community" class="clickable">Communities</li>
 							<li class="metricListItem clickable" id="deg_cent" data-name="degree centrality" data-desc="degree centrality is a measure of bla di bla">
@@ -84,6 +84,8 @@
 							</li>
 							<li id="bff">Most frequent collaborators</li>		
 						</ul>
+					</li>
+					<li id="about" class="clickable">About/Help</li>
 				</ul>
 
 				<input type="text" id="#authorSearch" placeholder="search for an author"/>
@@ -105,7 +107,7 @@
       	<script type="text/javascript" src="{% static "js/d3/d3.v3.js" %}"></script>
       	<script type="text/javascript" src="{% static "js/jquery-1.11.3.min.js" %}"></script>
       	<script type="text/javascript" src="{% static "js/jquery-ui.min.js" %}"></script>
-    	<script type="text/javascript" src="{% static "js/vizcode.js" %}"></script>
+    	<script type="text/javascript" src="{% static "js/vizcode2.js" %}"></script>
     </body>
 
 

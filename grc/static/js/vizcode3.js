@@ -81,10 +81,10 @@ var nodeGroup = svg.append("g").attr("id", "node_display");
 var k = Math.sqrt(57 / (width * height));
 
 var force = d3.layout.force()
-    .gravity(100 * k)
+    /*.gravity(100 * k)
     //.distance(200) TODO what is this?
     .linkDistance([100])
-    .charge(-10/k)
+    .charge(-10/k)*/
     .size([width, height]);
 
 // OPTIONS
@@ -122,7 +122,6 @@ function startItUp(graph) {
 // d3.json('get_json/', function(error, graph)  {
   
  
-
   if(isNew) {
     introText = "Welcome to Glasgow Research Connections.<br><br>Explanation explanation etc etc<br><br>Enjoy";
     displayInfoBox(introText);
@@ -217,11 +216,7 @@ function startItUp(graph) {
               return linkScale(d.num_collabs);
             else
               return 1;
-          })
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+          });
 
     link.exit().remove()
     console.log("getting here")
@@ -366,8 +361,6 @@ function startItUp(graph) {
       else
         return d.id
     });
-
-    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
       
     // Remove the elements that no longer have data attached - i.e. the nodes that aren't in filtered nodes
     //TODO this is no longer needed - removing above
@@ -379,7 +372,6 @@ function startItUp(graph) {
       //node.on("dblclick", highlight);
       //node.on("dblclick", fixNode)
       node.on("dblclick", showCollabInfo);
-      node.call(staticDrag);
 
     // nodeCountText.text(node[0].length + " nodes");
   }
@@ -654,18 +646,14 @@ function startItUp(graph) {
   }
 
   function update(links, nodes) {
+    setTimeout(function() {
+      freeze();
+    }, 10000);
+
     //TODO change back to filtered
     console.log("in update")
     console.log(links)
-    d3.selectAll(".node").remove()
-    d3.selectAll(".link").remove()
 
-    var loading = svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", height / 2)
-    .attr("dy", ".35em")
-    .style("text-anchor", "middle")
-    .text("Simulating. One moment please…");
     //TODO set charge depending on size of node?
 
     // Formula to set appropriate gravity and charge as a function of the number of nodes
@@ -682,24 +670,18 @@ function startItUp(graph) {
               return [0.8/k];
           });
 
-    setTimeout(function() {
-      //startForce(nodes, links);
-      force.nodes(nodes)
-            .links(links)
-            .start();  
-      // force simulation is running in background, position of things is changing with each tick
-      // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
-      for(var i=10000; i>0; --i)
-        force.tick();
-      force.stop()
+    //startForce(nodes, links);
+    force.nodes(nodes)
+          .links(links)
+          .start();  
+    // force simulation is running in background, position of things is changing with each tick
+    // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
 
-     // force.on("tick", tick);
-     
-      updateLinks(links);
-      updateNodes(nodes);
-      updateInfoText(links, nodes);
-      loading.remove();
-    }, 100);
+    force.on("tick", tick);
+   
+    updateLinks(links);
+    updateNodes(nodes);
+    updateInfoText(links, nodes);
   }
 
   update(currentLinks, currentNodes)
@@ -711,7 +693,7 @@ function startItUp(graph) {
         .attr("y2", function(d) { return d.target.y; });
     // same with g elements, but these have no x and y, have to be translated
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-  } 
+  }  
 
 
   d3.select("#filter").on("click", function() {                
@@ -1037,8 +1019,6 @@ var getSingle = function() {
   });
 }
   
-
-
 
 d3.selectAll(".collabListItem").on("click", function() {
   var type = d3.select(this).attr("data-type");

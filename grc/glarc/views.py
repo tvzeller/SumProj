@@ -12,7 +12,7 @@ def index(request):
 	collab_path = os.path.join(settings.GRAPHS_PATH, "collab")
 
 	collab_graphs = os.listdir(collab_path)
-	collab_graphs = [cg.split(".")[0] for cg in collab_graphs]
+	collab_graphs = [cg.split(".")[0] for cg in collab_graphs if "University" not in cg]
 	context_dict = {"collab_graphs": collab_graphs}
 	# Add other graphs to dict when available
 
@@ -23,8 +23,6 @@ def about(request):
 
 # TODO what if json file not found? Display error message
 def get_json(request):
-	print "got here"
-	print "BLAAAAAAAAA"
 	if request.method == 'GET':
 		graphname = request.GET.get('name')
 		graphtype = request.GET.get('type')
@@ -91,12 +89,13 @@ def shortest_path(request):
 	return HttpResponse(newdata, content_type='application/json')
 
 def make_path_graph(path, full_graph):
+	print "make path graph"
 	path_graph = nx.Graph()
 	for i in range(0, len(path)-1):
 		author1 = path[i]
 		author2 = path[i+1]
-		path_graph.add_node(author1, {"name": full_graph.node[author1]["name"]})
-		path_graph.add_node(author2, {"name": full_graph.node[author2]["name"]})
+		path_graph.add_node(author1, {"name": full_graph.node[author1]["name"], "school": full_graph.node[author1]["school"]})
+		path_graph.add_node(author2, {"name": full_graph.node[author2]["name"], "school": full_graph.node[author2]["school"]})
 		path_graph.add_edge(author1, author2)
 
 
@@ -105,14 +104,14 @@ def make_path_graph(path, full_graph):
 		if author2 == path[-1]:
 			path_graph.node[author2]["isTarget"] = 1
 	
+	print "okokokok"
 	return path_graph
 
 
 def longest_path(request):
-	print "start of func"
 	if request.method == 'GET':
 		source_num = request.GET.get('source')
-	print source_num
+
 
 	graphpath = 'collab/The University of Glasgow.json'
 	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
@@ -120,21 +119,16 @@ def longest_path(request):
 
 
 	unigraph = json_graph.node_link_graph(data)
-	print "made graph"
+
 	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
 
 	if source_id not in unigraph.node:
 		return HttpResponse({})
 
-	print "source is good"
-
 	paths = nx.single_source_shortest_path(unigraph, source_id)
-	print "got short"
 	sorted_targets = sorted(paths, key=lambda t: len(paths[t]))
-	print "sorted the targets"
 	longest_path = paths[sorted_targets[-1]]
 	path_graph = make_path_graph(longest_path, unigraph)
-	print "got the path graph"
 
 	graphdata = json_graph.node_link_data(path_graph)
 	newdata = json.dumps(graphdata)
