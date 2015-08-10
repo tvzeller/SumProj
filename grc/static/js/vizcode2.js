@@ -319,36 +319,23 @@ function startItUp(graph) {
           return nodeScale(d.paper_count);
         else if(currentViz == vizTypes.SHORTEST)
           return 20;
-        else if(currentViz == vizTypes.SINGLE)
-          return width / 2 / nodes.length
+        else if(currentViz == vizTypes.SINGLE) {
+          if(d.centre) {
+            console.log("CENTTTTTTRE");
+            return Math.max(Math.min((width / nodes.length), 40), 8);
+          }
+          else
+            return Math.max(Math.min((width / 2 / nodes.length), 20), 4);
+        }
         else
           return 10;
       })
-      .style("fill", function(d, i) {
-          //return colors(i);
-          if(currentViz == vizTypes.AUTHOR_COLLAB) {
-            if(d.in_school)
-              return multiColour(inSchoolColour);
-            else
-              return multiColour(nonSchoolColour);
-          }
-
-          if(currentViz == vizTypes.SHORTEST) {
-            if(d.isSource)
-              return "blue";
-            else if(d.isTarget)
-              return "red";
-            else
-              return "green";
-          }
-          if(currentViz == vizTypes.SINGLE) {
-            if(d.centre)
-              return "red";
-            else
-              return "blue";
-          }
-      })
+      /*.style("fill", function(d, i) {
+          colourByDefault();
+      })*/
       .style("stroke", "black");
+
+      colourByDefault();
 
     /*if(labeled)
       addLabels(nodeG);*/
@@ -435,7 +422,7 @@ function startItUp(graph) {
       makeKey(a);
     }
 
-        if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == true) {
+    if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == true) {
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
     }
@@ -447,9 +434,9 @@ function startItUp(graph) {
 
     if(currentViz == vizTypes.SINGLE) {
       var name = "";
-      for(var i=0; i<nodes.length; i++) {
-        if(nodes[i].centre)
-          name = nodes[i].name;
+      for(var i=0; i<currentNodes.length; i++) {
+        if(currentNodes[i].centre)
+          name = currentNodes[i].name;
       }
       a = [["red", name], ["blue", "everyone else"]];
       makeKey(a);
@@ -649,21 +636,45 @@ function startItUp(graph) {
           //.charge((-10/k)
             //TODO still be be revised
             .charge(function(d) {
-              if(nodeScale(d.paper_count) > 15)
-                return (-12/k);
-              else
-                return (-10/k)
-
+              if(currentViz == vizTypes.SINGLE) {
+                if(d.centre)
+                  return -20/k
+                else
+                  return -10/k
+              }
+              else {
+                if(nodeScale(d.paper_count) > 20)
+                  return -12/k;
+                else
+                  return -10/k;
+              }
             })
           //.charge(-350)
           //.linkDistance([120])
-          .linkDistance(function() {
+          .linkDistance(function(d) {
             if(currentViz == vizTypes.SHORTEST)
               return 60;
+            else if(currentViz == vizTypes.SINGLE) {
+              if(d.centre)
+                return 5/5;
+              else
+                return 0.5/k
+            }
+
             else
               //return 3;
-              return [0.8/k];
+              return 0.8/k;
           });
+
+    if(currentViz == vizTypes.SINGLE) {
+      for(var i=0; i<nodes.length; i++) {
+        if(nodes[i].centre) {
+          nodes[i].fixed = true;
+          nodes[i].x = width/2
+          nodes[i].y = height/2
+        }
+      }
+    }
 
     //startForce(nodes, links);
     force.nodes(nodes)
@@ -833,8 +844,10 @@ function startItUp(graph) {
       if(currentViz == vizTypes.AUTHOR_COLLAB) {
         if(d.in_school)
           return multiColour(inSchoolColour);
-        else
+        else {
+          console.log(d.name)
           return multiColour(nonSchoolColour);
+        }
       }
 
       if(currentViz == vizTypes.SHORTEST) {
@@ -1043,6 +1056,7 @@ d3.selectAll(".collabListItem").on("click", function() {
 d3.select("#about").on("click", function() {
   displayInfoBox(introText);
 });
+
 
 function displayInfoBox(text) {
   d3.select("#infoArea")
