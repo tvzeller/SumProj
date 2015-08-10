@@ -934,11 +934,13 @@ function startItUp(graph) {
   singleAuthorBox = function(error) {
     var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please input the unique Enlighten numbers \
         of author whose graph you want to see. You can find out an author's identifier by checking their \
-        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" placeholder=\"source\"/><br><br> \
-        Choose how far you want the graph to reach <input type=\"number\" id=\"cutoffInput\"/><br><br><button type=\"button\" id=\"singleButton\">Submit</button>"
+        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
+        placeholder=\"source\"/><br><br> \
+        Choose how far you want the graph to reach <input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
+        <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
 
     if(error)
-      info += "<br><br>Sorry, the author was not found"
+      info += error
 
     displayInfoBox(info);
     d3.select("#singleButton").on("click", getSingle);
@@ -1017,7 +1019,11 @@ var getSingle = function() {
   console.log("CUTOFF")
   console.log(cutoff)
   $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
-    if(data) {
+    console.log("SINGLEERROR");
+    console.log(data);
+    if(data.error)
+      singleAuthorBox(data.error)
+    else if(data) {
       currentViz = vizTypes.SINGLE
       var name;
       for(var i=0; i<data.nodes.length; i++) {

@@ -134,7 +134,7 @@ def longest_path(request):
 	return HttpResponse(newdata, content_type='application/json')
 
 
-
+# TODO limit this to cutoff of 3
 def author_search(request):
 # TODO deal with names as well as number
 	if request.method == 'GET':
@@ -149,17 +149,17 @@ def author_search(request):
 	author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
 
 	if author_id not in unigraph.node:
-		return HttpResponse({})
+		errorMessage = json.dumps({"error": "sorry, the author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')
 
 	nodes = [author_id,]
 	neighbours = nx.single_source_shortest_path_length(unigraph, author_id, cutoff)
 	
 	nodes.extend(neighbours.keys())
 
-	print nodes
-
 	# Making a new subgraph out of the old graph so that changes in attributes are not reflected in full graph
 	author_graph = nx.Graph(unigraph.subgraph(nodes))
+
 	author_graph.node[author_id]["centre"] = 1
 	for neighbour, hops in neighbours.items():
 		author_graph.node[neighbour]["hops"] = hops
