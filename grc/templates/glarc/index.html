@@ -18,9 +18,9 @@
     		<div id="mainBar">
 	    		<h1 id="title">Glasgow Research Connections</h1>
 				<!--<a href="http://www.gla.ac.uk" target="_blank"><img id="logo" src="{% static "images/logo2.png" %}" alt="the logo"/></a>-->
-	    		<ul>
-					<li class="topItem">
-						<span class="topText">Visualisation</span>
+	    		<ul class="menuList">
+					<li class="hoverable topItem">
+						<span class="hoverable">Visualisation</span>
 						<ul>
 							<li>
 								Collaboration
@@ -49,7 +49,7 @@
 					</li>
 		
 					<li class="topItem">
-						<span class="topText">Options</span>
+						<span class="hoverable">Options</span>
 						<ul>
 							<li>
 								Labels
@@ -71,18 +71,18 @@
 						</ul>
 					</li>
 					<li class="topItem">
-						<span class="topText" id="metricsMenu">Metrics</span>
-						<ul>
-							<li id="community" class="clickable">Communities</li>
-							<li class="metricListItem clickable" id="deg_cent" data-name="degree centrality" data-desc="degree centrality is a measure of bla di bla">
+						<span class="hoverable metricsMenu">Metrics</span>
+						<ul id="metricsList">
+							<li id="community" class="clickable metricsMenu">Communities</li>
+							<li class="metricListItem clickable metricsMenu" id="deg_cent" data-name="degree centrality" data-desc="degree centrality is a measure of bla di bla">
 								Degree centrality
 							</li>
-							<li class="metricListItem clickable" id="between_cent"  data-name="betweenness centrality" data-desc="betweenness centrality is a measure of etc">	Betweenness centrality
+							<li class="metricListItem clickable metricsMenu" id="between_cent"  data-name="betweenness centrality" data-desc="betweenness centrality is a measure of etc">	Betweenness centrality
 							</li>
-							<li class="metricListItem clickable" id="close_cent" data-name="closeness centrality" data-desc="closeness centrality is a measure of ...">
+							<li class="metricListItem clickable metricsMenu" id="close_cent" data-name="closeness centrality" data-desc="closeness centrality is a measure of ...">
 								Closeness centrality
 							</li>
-							<li id="bff">Most frequent collaborators</li>		
+							<li class="metricsMenu" id="bff">Most frequent collaborators</li>		
 						</ul>
 					</li>
 					<li id="about" class="clickable">About/Help</li>

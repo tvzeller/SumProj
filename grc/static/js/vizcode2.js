@@ -28,6 +28,8 @@ var introText = "Welcome to Glasgow Research Connections.<br><br>Explanation exp
 
 var close = "<span class=\"clickable\" id=\"close\">close</span><br>";
 
+var metricsHtml;
+
 var svg = d3.select("#svgDiv")
     .append("svg")
     .attr("height", height)
@@ -936,11 +938,11 @@ function startItUp(graph) {
         of author whose graph you want to see. You can find out an author's identifier by checking their \
         url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
         placeholder=\"source\"/><br><br> \
-        Choose how far you want the graph to reach <input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
+        Choose how far you want the graph to reach (up to 3 hops)<br><br><input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
         <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
 
-    if(error)
-      info += error
+    if(errorMessage)
+      info += errorMessage
 
     displayInfoBox(info);
     d3.select("#singleButton").on("click", getSingle);
@@ -1008,7 +1010,10 @@ function doShortestViz(data, errorType) {
     typeText.text(targetName)
     shortestPathBox();
 
-    //d3.select("#metricsMenu").style("visibility", "hidden");
+    var metricsList = d3.select("#metricsList");
+    metricsHtml = metricsList.html()
+    console.log(metricsHtml)
+    metricsList.html("<li>No metrics available for shortest path graph</li>")
     // TODO in this case do not have to JSON.parse data - find out why
     startItUp(data);
   }
@@ -1020,31 +1025,34 @@ function doShortestViz(data, errorType) {
 var getSingle = function() {
   var authorInfo = $("#singleInput").val()
   var cutoff = $("#cutoffInput").val()
-  console.log("CUTOFF")
-  console.log(cutoff)
-  $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
-    console.log("SINGLEERROR");
-    console.log(data);
-    if(data.error)
-      singleAuthorBox(data.error)
-    else if(data) {
-      currentViz = vizTypes.SINGLE
-      var name;
-      for(var i=0; i<data.nodes.length; i++) {
-        if(data.nodes[i].centre) {
-          name = data.nodes[i].name;
-        }
-      }
-      nameText.text(name);
-      typeText.text("cutoff of " + cutoff);
-      //d3.select("#metricsMenu").style("visibility", "hidden");
+  if(cutoff > 3)
+    singleAuthorBox("Please enter a number up to 3")
+  else {
+      $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
+        console.log("SINGLEERROR");
+        console.log(data);
+        if(data.error)
+          singleAuthorBox(data.error)
+        else if(data) {
+          currentViz = vizTypes.SINGLE
+          var name;
+          for(var i=0; i<data.nodes.length; i++) {
+            if(data.nodes[i].centre) {
+              name = data.nodes[i].name;
+            }
+          }
+          nameText.text(name);
+          typeText.text("cutoff of " + cutoff);
+          //d3.selectAll(".metricsMenu").style("visibility", "hidden");
 
-      startItUp(data)
-    }
-    else {
-      singleAuthorBox(true);
-    }
-  });
+          startItUp(data)
+        }
+      // TODO do we need this else to catch other situations?
+      else {
+        singleAuthorBox(true);
+      }
+    });
+  }
 }
   
 
@@ -1064,7 +1072,7 @@ d3.selectAll(".collabListItem").on("click", function() {
   //Get the new data
   getData(name, type);
 
-  //d3.select("#metricsMenu").style("visibility", "visible");
+  d3.select("#metricsList").html(metricsHtml);
 
   d3.select("#infoArea").style("visibility", "hidden");  
   inSchoolColour = Math.floor(Math.random() * 10)
