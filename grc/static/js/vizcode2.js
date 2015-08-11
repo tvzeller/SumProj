@@ -8,6 +8,7 @@ var vizTypes = {
   SIMILARITY: 2,
   SHORTEST: 3,
   SINGLE: 4,
+  INTER: 5,
   // etc.
 }
 
@@ -28,7 +29,7 @@ var introText = "Welcome to Glasgow Research Connections.<br><br>Explanation exp
 
 var close = "<span class=\"clickable\" id=\"close\">close</span><br>";
 
-var metricsHtml;
+var metricsHtml = d3.select("#metricsList").html();
 
 var svg = d3.select("#svgDiv")
     .append("svg")
@@ -453,15 +454,31 @@ function startItUp(graph) {
 
       makeKey(a);
     }
+
+    if(currentViz == vizTypes.INTER) {
+      a = []
+      for(var i=0; i<currentNodes.length; i++)
+        a.push([moreColour(currentNodes[i].name), currentNodes[i].name]);
+      //TODO call makeKey(a) only once, at the end, after all the ifs
+      makeKey(a)
+    }
+
   }
 
   function makeKey(arr) {
     //First remove existing key
     d3.selectAll(".keyCircle").remove();
     d3.selectAll(".keyText").remove();
+    if(arr.length > 15) {
+      var radius = 4.5;
+      var textSize = 12;
+    }
+    else {
+      var radius = 6;
+      var textSize = 15;
+    }
 
     for(var i=0; i<arr.length; i++) {
-      var radius = 6;
       var yValue = keyStartY + (i * radius * 4)
       
       keyGroup.append("circle")
@@ -469,15 +486,16 @@ function startItUp(graph) {
               .attr("r", radius)
               .style("fill", arr[i][0])
               .style("stroke", "black")
-              .attr("cx", radius + 10)
+              .attr("cx", radius + 1)
               .attr("cy", yValue);
 
 
       keyGroup.append("text")
               .attr("class", "keyText")
               .text(arr[i][1])
-              .attr("x", radius*2 + 15)
-              .attr("y", yValue + radius/2);
+              .attr("x", radius*2 + 10)
+              .attr("y", yValue + radius/2)
+              .attr("font-size", 15);
     }
   }
 
@@ -870,13 +888,18 @@ function startItUp(graph) {
         else
           return "green";
       }
+
       if(currentViz == vizTypes.SINGLE) {
         if(d.centre)
           return multiColour(0);
         else
           return multiColour(d.hops);
       }
+
+      if(currentViz == vizTypes.INTER)
+        return moreColour(d.name)
     });
+
     updateKey()
   }
 
@@ -1011,8 +1034,6 @@ function doShortestViz(data, errorType) {
     shortestPathBox();
 
     var metricsList = d3.select("#metricsList");
-    metricsHtml = metricsList.html()
-    console.log(metricsHtml)
     metricsList.html("<li>No metrics available for shortest path graph</li>")
     // TODO in this case do not have to JSON.parse data - find out why
     startItUp(data);
@@ -1064,7 +1085,10 @@ d3.selectAll(".collabListItem").on("click", function() {
   var nmtext = d3.select(this).attr("data-nametext");
   var tptext = d3.select(this).attr("data-typetext");
 
-  currentViz = vizTypes.AUTHOR_COLLAB;
+  if(name == "Inter School")
+    currentViz = vizTypes.INTER;
+  else
+    currentViz = vizTypes.AUTHOR_COLLAB;
 
   //display background text
   nameText.text(nmtext)
@@ -1080,6 +1104,7 @@ d3.selectAll(".collabListItem").on("click", function() {
   while(inSchoolColour == nonSchoolColour)
     nonSchoolColour = Math.floor(Math.random() * 10)
 });
+
 
 d3.select("#about").on("click", function() {
   displayInfoBox(introText);
@@ -1097,6 +1122,7 @@ function displayInfoBox(text) {
 
   $("#infoArea").draggable();   
 }
+
 
 
 
