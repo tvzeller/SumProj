@@ -41,25 +41,25 @@ var svg = d3.select("#svgDiv")
 
 var nameText = svg.append("text")
                   .attr("x", 0)
-                  .attr("y", "10%")
+                  .attr("y", "8%")
                   .attr("class", "displayText")
                   .text("hello");
 
 var typeText = svg.append("text")
                   .attr("x", 0)
-                  .attr("y", "20%")
+                  .attr("y", "12%")
                   .attr("class", "displayText")
                   .text("world");
 
 var nodeCountText = svg.append("text")
                   .attr("x", 0)
-                  .attr("y", "30%")
+                  .attr("y", "25%")
                   .attr("class", "numText");
                  /* .text("node count goes here")*/
 
 var edgeCountText = svg.append("text")
                    .attr("x", 0)
-                  .attr("y", "35%")
+                  .attr("y", "30%")
                   .attr("class", "numText");
                 /*  .text("edge count goes here")*/
 

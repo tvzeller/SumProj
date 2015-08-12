@@ -38,19 +38,62 @@ def get_json(request):
 
 	return HttpResponse(data, content_type='application/json')
 
+
 def shortest_path(request):
-	print "pancakes"
 	# TODO doing this with node id's rather than names - ask users to enter enlighten url?
 	# would make sure we get the right person
 	if request.method == 'GET':
-		source_num = request.GET.get('source')
-		target_num = request.GET.get('target')
+		source_info = request.GET.get('source')
+		target_info = request.GET.get('target')
 
 	unigraph = get_unigraph()
-	# TODO change this - once we start using just number as node ids in graphs
-	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
-	target_id = "http://eprints.gla.ac.uk/view/author/" + target_num + ".html"
+	source_id = ""
+	target_id = ""
+	source_candidates = []
+	target_candidates = []
+	if numerical(source_info):
+		# TODO change this - once we start using just number as node ids in graphs
+		source_id = "http://eprints.gla.ac.uk/view/author/" + source_info + ".html"
+	else:
+		source_candidates = get_matching_nodes(source_info, unigraph)
+
+	if numerical(target_info):
+		target_id = "http://eprints.gla.ac.uk/view/author/" + target_info + ".html"
+	else:
+		target_candidates = get_matching_nodes(target_info, unigraph)
+
+	if source_id and target_id:
+		return with_node_id(source_id, target_id, unigraph)
+
 	
+
+	if len(source_candidates) == 0 and len(target_candidates) == 0:
+		errorMessage = json.dumps({"error": "Sorry, neither author was found"})
+		return HttpResponse(errorMessage, content_type='application/json')
+	elif len(source_candidates) == 0:
+		errorMessage = json.dumps({"error": "Sorry, the source author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')
+	elif len(target_candidates) == 0:
+		errorMessage = json.dumps({"error": "Sorry, the target author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')
+
+	candidates = []
+	if len(source_candidates) > 1:
+		candidates.append(source_candidates)
+	if len(target_candidates) > 1:
+		candidates.append(target_candidates)
+
+	if candidates:
+		print candidates
+		return HttpResponse(json.dumps({"candidates": candidates}), content_type='application/json')
+
+	print "past all that"
+	print source_candidates[0][1], target_candidates[0][1]
+
+	# At this point we know we have just one matching author for source and target
+	return with_node_id(source_candidates[0][1], target_candidates[0][1], unigraph)
+	
+def with_node_id(source_id, target_id, unigraph):
 	# CHECK IF NODES IN GRAPH
 	if source_id not in unigraph.node and target_id not in unigraph.node:
 		errorMessage = json.dumps({"error": "Sorry, neither author was found"})
@@ -73,10 +116,7 @@ def shortest_path(request):
 	graphdata = json_graph.node_link_data(path_graph)
 	newdata = json.dumps(graphdata)
 
-	print "and got here"
-
-	print threading.active_count()
-
+	#print threading.active_count()
 
 	return HttpResponse(newdata, content_type='application/json')
 
@@ -109,6 +149,16 @@ def make_path_graph(path, full_graph):
 	
 	
 	return path_graph
+
+
+
+def get_matching_nodes(info, graph):
+	candidates = []
+	for nodeid in graph.node:
+		if info in graph.node[nodeid]["name"].lower():
+			candidates.append([graph.node[nodeid]["name"], nodeid])
+
+	return candidates
 
 
 def longest_path(request):
@@ -219,6 +269,13 @@ def kw_search(request):
 
 	return HttpResponse("")
  
+
+def numerical(info):
+	try:
+		int(info)
+		return True
+	except:
+		return False
 
 	
 
