@@ -8,6 +8,8 @@ from networkx.readwrite import json_graph
 import threading
 import operator
 import random
+import search
+import shelve
 
 def index(request):
 	collab_path = os.path.join(settings.GRAPHS_PATH, "collab")
@@ -191,4 +193,33 @@ def get_unigraph():
 
 	unigraph = json_graph.node_link_graph(data)
 	return unigraph
+
+
+def kw_search(request):
+	print "got here"
+	if request.method == 'GET':
+		query = request.GET.get('query')
+
+	print query
+	# TODO make index path
+	path = os.path.join(settings.INDICES_PATH + "\invindex5.db")
+	print path
+
+	srch = search.Search(path)
+
+	if query[0] == "\"" and query[-1] == "\"":
+		pass
+
+	elif 'AND' in query:
+		query = query.replace('AND', '')
+		print srch.and_search(query)
+
+	else:
+		print srch.or_search(query)
+
+	return HttpResponse("")
+ 
+
+	
+
 

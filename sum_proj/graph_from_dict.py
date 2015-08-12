@@ -102,6 +102,7 @@ class GraphMaker(object):
 
 
 	def add_metrics(self, g=None):
+		print "getting the metrics..."
 		deg_cent = nx.degree_centrality(self.graph)
 		close_cent = nx.closeness_centrality(self.graph)
 		between_cent = nx.betweenness_centrality(self.graph)

@@ -1124,8 +1124,18 @@ function displayInfoBox(text) {
 }
 
 
-
+d3.select("#kwSearch").on("keyup", function() {
+  if(d3.event.keyCode == 13) {
+    var query = this.value
+    console.log(query)
+    $.get('kw_search/', {query: query}, function() {
+      //alert("made request");
+    });
+  }
+});
 
 //Initial Configuration
 displayInfoBox(introText);
 getData("School of Computing Science", "collab");
+nameText.text("School of Computing Science");
+typeText.text("collaboration graph");
