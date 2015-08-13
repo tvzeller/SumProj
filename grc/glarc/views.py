@@ -204,7 +204,8 @@ def longest_path(request):
 		return HttpResponse(json.dumps({"candidates": candidates}), content_type='application/json')
 
 	source_id = source_candidates[0]["id"]
-	return longest_from_id(source_id)
+	
+	return longest_from_id(source_id, unigraph)
 	
 
 def longest_from_id(source_num, unigraph):
