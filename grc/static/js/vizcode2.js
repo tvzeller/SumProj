@@ -844,22 +844,40 @@ function startItUp(graph) {
 
   d3.select("#community").on("click", function() {
     var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
-      return moreColour(d.com);
+      //console.log("COMM NUMBERS")
+      //console.log(d.school_com)
+      if(just_school)
+        return moreColour(d.school_com);
+      else
+        return moreColour(d.com)
     })
     var keyArray = []
     var commNums = []
     var communityArray = []
-    theNodes = allNodes
+    theNodes = force.nodes()
+    // Sorting the nodes by community so that colours get attributed in the right order for the key
+    theNodes.sort(function(a, b) {
+      if(just_school)
+        return a.school_com - b.school_com;
+      else
+        return a.com - b.com;
+    })
+
     for(var i=0, len=theNodes.length; i<len; i++) {
-      commNum = theNodes[i].com
+      if(just_school)
+        var commNum = theNodes[i].school_com
+      else
+        var commNum = theNodes[i].com
+      
       if(communityArray[commNum])
         communityArray[commNum].push(theNodes[i]);
       else
         communityArray[commNum] = [theNodes[i],];
+      
       if(commNums.indexOf(commNum) < 0) {
         commNums.push(commNum);
-        console.log("community number:")
-        console.log(commNum);
+        //console.log("community number:")
+        //console.log(commNum);
         keyArray.push([moreColour(commNum), "a community"]);
       }
     }
@@ -1184,7 +1202,7 @@ function doComViz(comNumber) {
   //alert(comNumber);
   var currentSchool = nameText.text()
   //alert(currentSchool)
-  $.get("community_viz/", {"school":currentSchool, "com_num": comNumber}, function(data) {
+  $.get("community_viz/", {"school":currentSchool, "com_num": comNumber, "just_school":just_school}, function(data) {
     console.log(data)
     startItUp(data);
   });

@@ -114,6 +114,16 @@ class GraphMaker(object):
 			self.graph.node[vertex]["between_cent"] = between_cent[vertex]
 			self.graph.node[vertex]["com"] = com[vertex]
 
+
+	def add_just_school_community(self, g=None):
+		print "adding just school community"
+		school_nodes = [node for node in self.graph.node if self.graph.node[node]["in_school"]]
+		just_school_graph = self.graph.subgraph(school_nodes)
+		com = community.best_partition(just_school_graph)
+
+		for vertex in just_school_graph.node.keys():
+			self.graph.node[vertex]["school_com"] = com[vertex]
+
 	
 	def get_graph(self):
 		return self.graph

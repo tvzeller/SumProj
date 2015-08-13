@@ -306,6 +306,7 @@ def community_viz(request):
 	if request.method == 'GET':
 		school = request.GET.get("school")
 		com_num = int(request.GET.get("com_num"))
+		just_school = request.GET.get("just_school")
 
 	print "com num is", com_num
 	graphpath = 'collab/' + school + '.json'
@@ -315,9 +316,13 @@ def community_viz(request):
 
 	school_graph = json_graph.node_link_graph(data)
 
-	com_nodes = [node for node in school_graph.node if school_graph.node[node]["com"] == com_num]
-	print "the community is"
-	print com_nodes
+	if just_school:
+		# TODO using .get because not all nodes have school_com key in attributes - maybe add one for everyone, with false if not in school
+		com_nodes = [node for node in school_graph.node if school_graph.node[node].get("school_com") == com_num]
+	else:
+		com_nodes = [node for node in school_graph.node if school_graph.node[node]["com"] == com_num]
+	#print "the community is"
+	#print com_nodes
 
 	com_graph = school_graph.subgraph(com_nodes)
 
