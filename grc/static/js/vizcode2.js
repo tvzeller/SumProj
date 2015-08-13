@@ -935,17 +935,21 @@ function startItUp(graph) {
   shortestPathBox = function(errorType, errorMessage) {
     var info = "Find the shortest path between two authors anywhere within the university.<br> Please input the unique Enlighten numbers \
         of the source and target authors. You can find out an author's identifier by checking their \
-        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/><br><br> \
-        <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
+        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/>\
+        <br><br><span id=\"sourceCandidates\"></span> \
+        <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
+        <span id=\"targetCandidates\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
 
-    if(errorType == SHORTESTPATHERROR)
-      info += "<br>" + errorMessage + "<br>";
+    /*if(errorType == SHORTESTPATHERROR)
+      info += "<br>" + errorMessage + "<br>";*/
+      info += "<span id=\"shortestError\"></span>"
 
     info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br><br><input type=\"text\" id=\"longestInput\" \
             placeholder=\"source\"/><br><br><button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
 
-    if(errorType == LONGESTPATHERROR)
-      info += errorMessage
+    /*if(errorType == LONGESTPATHERROR)
+      info += errorMessage*/
+    info += "<span id=\"longestError\"></span>"
 
     displayInfoBox(info);
     d3.select("#shortestButton").on("click", getShortest);
@@ -991,6 +995,7 @@ var getShortest = function() {
   var sourceInfo = $("#sourceInput").val();
   var targetInfo = $("#targetInput").val();
   console.log(sourceInfo);
+  console.log(targetInfo)
   if(!sourceInfo || !targetInfo)
     shortestPathBox(SHORTESTPATHERROR, "please enter both authors");
   else {
@@ -1014,7 +1019,22 @@ var getLongest = function() {
 
 function doShortestViz(data, errorType) {
   if(data.error) {
-    shortestPathBox(errorType, data.error);
+    //shortestPathBox(errorType, data.error);
+    if(errorType == SHORTESTPATHERROR)
+      d3.select("#shortestError").html("<br>" + data.error + "<br>");
+    else if(errorType == LONGESTPATHERROR)
+      d3.select("#longestError").html("<br>" + data.error + "<br>");
+  }
+  else if(data.candidates) {
+    //shortestPathBox(errorType, data.candidates[0][0])
+    if(data.candidates.source_candidates) {
+      var slctn = d3.select("#sourceCandidates");
+      displayCandidates(slctn, data.candidates.source_candidates);
+    }
+    if(data.candidates.target_candidates) {
+      var slctn = d3.select("#targetCandidates");
+      displayCandidates(slctn, data.candidates.target_candidates);
+    }
   }
   else if(data) {
     currentViz = vizTypes.SHORTEST;
@@ -1041,6 +1061,29 @@ function doShortestViz(data, errorType) {
   else {
     shortestPathBox(error);
   }
+}
+
+function displayCandidates(sel, candidates) {
+  var info = "Did you mean: <br>"
+  for(var i=0; i<candidates.length; i++) {
+    var name = candidates[i].name;
+    if(candidates[i].school)
+      var school = candidates[i].school;
+    else
+      var school = "school not known";
+    var id = candidates[i].id;
+    info += "<span class=\"candidate clickable\" id=\"" + id + "\">" + name + "</span><br>(" + school + ")<br><br>"
+  }
+  sel.html(info);
+  d3.selectAll(".candidate").on("click", function() {
+    var authorId = d3.select(this).attr("id");
+    if(sel.attr("id") == "sourceCandidates")
+      $("#sourceInput").val(authorId);
+    else if(sel.attr("id") == "targetCandidates") {
+      //console.log(d3.select("#targetInput").value)
+      $("#targetInput").val(String(authorId));
+    }
+  });
 }
 
 var getSingle = function() {

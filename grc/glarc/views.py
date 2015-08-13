@@ -10,6 +10,7 @@ import operator
 import random
 import search
 import shelve
+import re
 
 def index(request):
 	collab_path = os.path.join(settings.GRAPHS_PATH, "collab")
@@ -52,48 +53,63 @@ def shortest_path(request):
 	source_candidates = []
 	target_candidates = []
 	if numerical(source_info):
-		# TODO change this - once we start using just number as node ids in graphs
-		source_id = "http://eprints.gla.ac.uk/view/author/" + source_info + ".html"
+		#source_id = "http://eprints.gla.ac.uk/view/author/" + source_info + ".html"
+		source_id = source_info
 	else:
 		source_candidates = get_matching_nodes(source_info, unigraph)
 
 	if numerical(target_info):
-		target_id = "http://eprints.gla.ac.uk/view/author/" + target_info + ".html"
+		#target_id = "http://eprints.gla.ac.uk/view/author/" + target_info + ".html"
+		target_id = target_info
 	else:
 		target_candidates = get_matching_nodes(target_info, unigraph)
 
 	if source_id and target_id:
-		return with_node_id(source_id, target_id, unigraph)
+		return path_graph_from_ids(source_id, target_id, unigraph)
 
 	
 
 	if len(source_candidates) == 0 and len(target_candidates) == 0:
 		errorMessage = json.dumps({"error": "Sorry, neither author was found"})
 		return HttpResponse(errorMessage, content_type='application/json')
-	elif len(source_candidates) == 0:
+	elif len(source_candidates) == 0 and not source_id:
 		errorMessage = json.dumps({"error": "Sorry, the source author was not found"})
 		return HttpResponse(errorMessage, content_type='application/json')
-	elif len(target_candidates) == 0:
+	elif len(target_candidates) == 0 and not target_id:
 		errorMessage = json.dumps({"error": "Sorry, the target author was not found"})
 		return HttpResponse(errorMessage, content_type='application/json')
 
-	candidates = []
+	candidates = {}
 	if len(source_candidates) > 1:
-		candidates.append(source_candidates)
+		candidates["source_candidates"] = source_candidates
 	if len(target_candidates) > 1:
-		candidates.append(target_candidates)
+		candidates["target_candidates"] = target_candidates
+
+	print "PAST adding to candidates"
 
 	if candidates:
 		print candidates
 		return HttpResponse(json.dumps({"candidates": candidates}), content_type='application/json')
 
 	print "past all that"
-	print source_candidates[0][1], target_candidates[0][1]
+	#print source_candidates[0][1], target_candidates[0][1]
+	if not source_id:
+		print "don't have source id"
+		print source_candidates
+		source_id = source_candidates[0]["id"]
+	if not target_id:
+		target_id = target_candidates[0]["id"]
+
+	print "got past assigning ids"
 
 	# At this point we know we have just one matching author for source and target
-	return with_node_id(source_candidates[0][1], target_candidates[0][1], unigraph)
+	return path_graph_from_ids(source_id, target_id, unigraph)
 	
-def with_node_id(source_id, target_id, unigraph):
+def path_graph_from_ids(source_num, target_num, unigraph):
+	# TODO change this - once we start using just number as node ids in graphs
+	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
+	target_id = "http://eprints.gla.ac.uk/view/author/" + target_num + ".html"
+
 	# CHECK IF NODES IN GRAPH
 	if source_id not in unigraph.node and target_id not in unigraph.node:
 		errorMessage = json.dumps({"error": "Sorry, neither author was found"})
@@ -156,7 +172,8 @@ def get_matching_nodes(info, graph):
 	candidates = []
 	for nodeid in graph.node:
 		if info in graph.node[nodeid]["name"].lower():
-			candidates.append([graph.node[nodeid]["name"], nodeid])
+			simpleid = re.search("[0-9]+", nodeid).group()
+			candidates.append({"name": graph.node[nodeid]["name"], "id": simpleid, "school": graph.node[nodeid]["school"]})
 
 	return candidates
 
@@ -274,7 +291,7 @@ def numerical(info):
 	try:
 		int(info)
 		return True
-	except:
+	except ValueError:
 		return False
 
 	
