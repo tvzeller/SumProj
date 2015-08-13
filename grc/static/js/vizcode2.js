@@ -1064,7 +1064,7 @@ function doShortestViz(data, errorType) {
 }
 
 function displayCandidates(sel, candidates) {
-  var info = "Did you mean: <br>"
+  var info = "Did you mean:<br><br>"
   for(var i=0; i<candidates.length; i++) {
     var name = candidates[i].name;
     if(candidates[i].school)
@@ -1078,15 +1078,18 @@ function displayCandidates(sel, candidates) {
   sel.html(info);
   d3.selectAll(".candidate").on("click", function() {
     var authorId = d3.select(this).attr("id");
-    console.log("GIRAFFE")
-    console.log(sel.attr("id"));
-    //if(sel.attr("id") == "sourceCandidates")
-    if(d3.select(this).attr("data-pos") == "sourceCandidates")
+    // data-pos holds the id of the selection (sourceCandidates or targetCandidates) in which this candidate element is positioned
+    // need to keep this data somewhere as if we just use the sel argument to get it, it will use the last value of sel passed,
+    // which would always be targetCandidates if there are in fact target candidates present
+    var pos = d3.select(this).attr("data-pos");
+    if(pos == "sourceCandidates") {
       $("#sourceInput").val(authorId);
-    //else if(sel.attr("id") == "targetCandidates") {
-    else if(d3.select(this).attr("data-pos") == "targetCandidates") {
-      //console.log(d3.select("#targetInput").value)
+      d3.select("#" + pos).html("");
+    }
+
+    else if(pos == "targetCandidates") {
       $("#targetInput").val(authorId);
+      d3.select("#" + pos).html("");
     }
   });
 }
