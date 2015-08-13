@@ -833,20 +833,29 @@ function startItUp(graph) {
     });
     for(var i=0, len=theNodes.length; i<len; i++) {
       n = theNodes[i]
-      infoText += n.name + ": " + Math.round(n[metric] * 1000) / 1000 + "<br>"
+      infoText += getAuthorNameHtml(n) + n.name + "</span>: " + Math.round(n[metric] * 1000) / 1000 + "<br><br>"
     }
     displayInfoBox(infoText)
+    d3.selectAll(".authorName").on("mouseover", highlightThisNode)
+                                .on("mouseout", lowlight);
   }
+
+  
 
   d3.select("#community").on("click", function() {
     var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
       return moreColour(d.com);
     })
     var keyArray = []
-    var commNums =[]
+    var commNums = []
+    var communityArray = []
     theNodes = allNodes
     for(var i=0, len=theNodes.length; i<len; i++) {
       commNum = theNodes[i].com
+      if(communityArray[commNum])
+        communityArray[commNum].push(theNodes[i]);
+      else
+        communityArray[commNum] = [theNodes[i],];
       if(commNums.indexOf(commNum) < 0) {
         commNums.push(commNum);
         console.log("community number:")
@@ -854,8 +863,36 @@ function startItUp(graph) {
         keyArray.push([moreColour(commNum), "a community"]);
       }
     }
+    console.log("COMMUNITIES:");
+    console.log(communityArray);
     makeKey(keyArray);
+    displayCommunityText(communityArray)
   });
+
+  function displayCommunityText(arr) {
+    var infoText = "below are the communities<br><br>"
+    for(var i=0; i<arr.length; i++) {
+      infoText += "<strong><span id=\"" + i + "\" class=\"comTitle\">Community " + i + "</strong><br><br>";
+      var thisCommunity = arr[i];
+      for(var j=0; j < thisCommunity.length; j++) {
+        var author = thisCommunity[j];
+        if(just_school) {
+          if(author.in_school)
+            infoText += getAuthorNameHtml(author) + author.name + "</span><br>";
+        }
+        else
+          infoText += getAuthorNameHtml(author) + author.name + "</span><br>"; 
+      }
+      infoText += "<br>";
+    }
+    displayInfoBox(infoText);
+    d3.selectAll(".authorName").on("mouseover", highlightThisNode)
+                                .on("mouseout", lowlight);
+
+    d3.selectAll(".comTitle")
+  }
+
+
 
   d3.selectAll(".colourChoice").on("click", function() {
     var choice = d3.select(this).attr("id");
@@ -946,7 +983,7 @@ function startItUp(graph) {
 
     info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br> \
             <br><input type=\"text\" id=\"longestInput\" \
-            placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span>
+            placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span> \
             <button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
 
     /*if(errorType == LONGESTPATHERROR)
@@ -964,8 +1001,8 @@ function startItUp(graph) {
 
   singleAuthorBox = function(errorMessage) {
     var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please enter the name or, for more \
-        accurate results, the unique Enlighten numbers \
-        of author whose graph you want to see. You can find out an author's identifier by checking their \
+        accurate results, the unique Enlighten number \
+        of the author whose graph you want to see. You can find out an author's identifier by checking their \
         url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
         placeholder=\"source\"/><br><br> \
         <span id=\"singleCandidates\" data-input=\"singleInput\"></span> \
@@ -1128,7 +1165,8 @@ var getSingle = function() {
           nameText.text(name);
           typeText.text("cutoff of " + cutoff);
           //d3.selectAll(".metricsMenu").style("visibility", "hidden");
-
+          var metricsList = d3.select("#metricsList");
+          metricsList.html("<li>No metrics available for single author graph</li>")
           startItUp(data)
         }
       // TODO do we need this else to catch other situations?

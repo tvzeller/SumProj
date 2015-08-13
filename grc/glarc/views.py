@@ -223,10 +223,10 @@ def longest_from_id(source_num, unigraph):
 	for target, path in paths.items():
 		path_len[target] = len(path)
 
+	# Get the targests the longest path away from the source author
 	furthest_targets = [target for target in path_len.keys() if path_len[target] == max(path_len.values())]
+	# Choose a random furthest target
 	chosen_target = random.choice(furthest_targets)
-	print "chosen is"
-	print chosen_target
 
 	#sorted_targets = sorted(paths, key=lambda t: len(paths[t]))
 	#longest_path = paths[sorted_targets[-1]]
@@ -253,7 +253,6 @@ def author_search(request):
 	unigraph = get_unigraph()
 
 	if numerical(author_info):
-		print "is numerical"
 		author_id = author_info
 		return single_from_id(author_id, unigraph, cutoff)
 	#author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
