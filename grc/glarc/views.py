@@ -69,7 +69,7 @@ def shortest_path(request):
 
 	
 
-	if len(source_candidates) == 0 and len(target_candidates) == 0:
+	if len(source_candidates) == 0 and not source_id and len(target_candidates) == 0 and not target_id:
 		errorMessage = json.dumps({"error": "Sorry, neither author was found"})
 		return HttpResponse(errorMessage, content_type='application/json')
 	elif len(source_candidates) == 0 and not source_id:

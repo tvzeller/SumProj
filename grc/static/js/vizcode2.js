@@ -1072,16 +1072,21 @@ function displayCandidates(sel, candidates) {
     else
       var school = "school not known";
     var id = candidates[i].id;
-    info += "<span class=\"candidate clickable\" id=\"" + id + "\">" + name + "</span><br>(" + school + ")<br><br>"
+    var pos = sel.attr("id");
+    info += "<span class=\"candidate clickable\" id=\"" + id + "\" data-pos=\""  + pos + "\">" + name + "</span><br>(" + school + ")<br><br>"
   }
   sel.html(info);
   d3.selectAll(".candidate").on("click", function() {
     var authorId = d3.select(this).attr("id");
-    if(sel.attr("id") == "sourceCandidates")
+    console.log("GIRAFFE")
+    console.log(sel.attr("id"));
+    //if(sel.attr("id") == "sourceCandidates")
+    if(d3.select(this).attr("data-pos") == "sourceCandidates")
       $("#sourceInput").val(authorId);
-    else if(sel.attr("id") == "targetCandidates") {
+    //else if(sel.attr("id") == "targetCandidates") {
+    else if(d3.select(this).attr("data-pos") == "targetCandidates") {
       //console.log(d3.select("#targetInput").value)
-      $("#targetInput").val(String(authorId));
+      $("#targetInput").val(authorId);
     }
   });
 }
