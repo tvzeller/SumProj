@@ -301,6 +301,35 @@ def single_from_id(author_num, unigraph, cutoff):
 	return HttpResponse(newdata, content_type='application/json')
 
 
+def community_viz(request):
+	if request.method == 'GET':
+		school = request.GET.get("school")
+		com_num = int(request.GET.get("com_num"))
+
+	print "com num is", com_num
+	graphpath = 'collab/' + school + '.json'
+
+	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
+		data = json.load(f)
+
+	school_graph = json_graph.node_link_graph(data)
+
+	com_nodes = [node for node in school_graph.node if school_graph.node[node]["com"] == com_num]
+	print "the community is"
+	print com_nodes
+
+	com_graph = school_graph.subgraph(com_nodes)
+
+	# TODO make this into a function, it is repeated in 3 or 4 places
+	graphdata = json_graph.node_link_data(com_graph)
+	newdata = json.dumps(graphdata)
+
+	return HttpResponse(newdata, content_type='application/json')
+
+
+
+
+
 
 
 def get_unigraph():

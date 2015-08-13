@@ -889,9 +889,11 @@ function startItUp(graph) {
     d3.selectAll(".authorName").on("mouseover", highlightThisNode)
                                 .on("mouseout", lowlight);
 
-    d3.selectAll(".comTitle")
+    d3.selectAll(".comTitle").on("click", function() {
+      var comNum = d3.select(this).attr("id");
+      doComViz(comNum);
+    });
   }
-
 
 
   d3.selectAll(".colourChoice").on("click", function() {
@@ -1176,7 +1178,17 @@ var getSingle = function() {
     });
   }
 }
-  
+
+
+function doComViz(comNumber) {
+  //alert(comNumber);
+  var currentSchool = nameText.text()
+  //alert(currentSchool)
+  $.get("community_viz/", {"school":currentSchool, "com_num": comNumber}, function(data) {
+    console.log(data)
+    startItUp(data);
+  });
+}
 
 
 

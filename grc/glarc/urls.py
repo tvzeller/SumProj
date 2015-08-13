@@ -9,4 +9,5 @@ urlpatterns = patterns('',
         url(r'author_search/$', views.author_search, name='author_search'),
         url(r'longest_path/$', views.longest_path, name='longest_path'),
         url(r'kw_search/$', views.kw_search, name='kw_search'),
+        url(r'community_viz/$', views.community_viz, name='community_viz'),
         )
