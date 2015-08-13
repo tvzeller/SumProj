@@ -180,11 +180,37 @@ def get_matching_nodes(info, graph):
 
 def longest_path(request):
 	if request.method == 'GET':
-		source_num = request.GET.get('source')
+		source_info = request.GET.get('source')
 
 	unigraph = get_unigraph()
 
+	#source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
+	source_id = ""
+	source_candidates = []
+	if numerical(source_info):
+		source_id = source_info
+		return longest_from_id(source_id, unigraph)
+	else:
+		source_candidates = get_matching_nodes(source_info, unigraph)
+		
+	
+	if len(source_candidates) == 0:
+		errorMessage = json.dumps({"error": "Sorry, the source author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')
+
+	candidates = {}
+	if len(source_candidates) > 1:
+		candidates["longest_candidates"] = source_candidates
+		return HttpResponse(json.dumps({"candidates": candidates}), content_type='application/json')
+
+	source_id = source_candidates[0]["id"]
+	return longest_from_id(source_id)
+	
+
+def longest_from_id(source_num, unigraph):
+	
 	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
+	print source_id
 
 	if source_id not in unigraph.node:
 		errorMessage = json.dumps({"error": "Sorry, the author was not found"})
@@ -211,21 +237,43 @@ def longest_path(request):
 
 	graphdata = json_graph.node_link_data(path_graph)
 	newdata = json.dumps(graphdata)
-	return HttpResponse(newdata, content_type='application/json')
+	return HttpResponse(newdata, content_type='application/json')	
 
 
 # TODO limit this to cutoff of 3
 def author_search(request):
 # TODO deal with names as well as number
 	if request.method == 'GET':
-		author_num = request.GET.get("author")
+		author_info = request.GET.get("author")
 		cutoff = int(request.GET.get("cutoff")) 
 
-	print "author_num is",  author_num
+	#print "author_num is",  author_num
 	print "cutoff is", cutoff
 
 	unigraph = get_unigraph()
 
+	if numerical(author_info):
+		print "is numerical"
+		author_id = author_info
+		return single_from_id(author_id, unigraph, cutoff)
+	#author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
+	else:
+		candidates = get_matching_nodes(author_info, unigraph)
+
+	if len(candidates) == 0:
+		errorMessage = json.dumps({"error": "Sorry, the source author was not found"})
+		return HttpResponse(errorMessage, content_type='application/json')
+
+	if len(candidates) > 1:
+		return HttpResponse(json.dumps({"candidates": candidates}), content_type='application/json')
+
+	author_id = candidates[0]["id"]
+	return single_from_id(author_id, unigraph, cutoff)
+
+
+
+def single_from_id(author_num, unigraph, cutoff):
+	# TODO change once using just id instead of url
 	author_id = "http://eprints.gla.ac.uk/view/author/" + author_num + ".html"
 
 	if author_id not in unigraph.node:
@@ -252,6 +300,9 @@ def author_search(request):
 
 
 	return HttpResponse(newdata, content_type='application/json')
+
+
+
 
 def get_unigraph():
 	graphpath = 'collab/The University of Glasgow.json'

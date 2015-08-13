@@ -933,19 +933,21 @@ function startItUp(graph) {
   // TODO using a global variable here as a quick fix, please revise
   // e.g. put this outside startitup
   shortestPathBox = function(errorType, errorMessage) {
-    var info = "Find the shortest path between two authors anywhere within the university.<br> Please input the unique Enlighten numbers \
-        of the source and target authors. You can find out an author's identifier by checking their \
-        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" placeholder=\"source\"/>\
-        <br><br><span id=\"sourceCandidates\"></span> \
+    var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the name or, for more accurate \
+        results, the unique Enlighten numbers of the source and target authors. You can find out an author's identifier by checking their \
+        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" \
+        placeholder=\"source\"/><br><br><span id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
         <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
-        <span id=\"targetCandidates\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
+        <span id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
 
     /*if(errorType == SHORTESTPATHERROR)
       info += "<br>" + errorMessage + "<br>";*/
       info += "<span id=\"shortestError\"></span>"
 
-    info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br><br><input type=\"text\" id=\"longestInput\" \
-            placeholder=\"source\"/><br><br><button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
+    info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br> \
+            <br><input type=\"text\" id=\"longestInput\" \
+            placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span>
+            <button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
 
     /*if(errorType == LONGESTPATHERROR)
       info += errorMessage*/
@@ -961,15 +963,17 @@ function startItUp(graph) {
   })
 
   singleAuthorBox = function(errorMessage) {
-    var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please input the unique Enlighten numbers \
+    var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please enter the name or, for more \
+        accurate results, the unique Enlighten numbers \
         of author whose graph you want to see. You can find out an author's identifier by checking their \
         url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
         placeholder=\"source\"/><br><br> \
+        <span id=\"singleCandidates\" data-input=\"singleInput\"></span> \
         Choose how far you want the graph to reach (up to 3 hops)<br><br><input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
         <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
 
-    if(errorMessage)
-      info += errorMessage
+    //if(errorMessage)
+    info += "<span id=\"singleError\"></span>"
 
     displayInfoBox(info);
     d3.select("#singleButton").on("click", getSingle);
@@ -1035,6 +1039,10 @@ function doShortestViz(data, errorType) {
       var slctn = d3.select("#targetCandidates");
       displayCandidates(slctn, data.candidates.target_candidates);
     }
+    if(data.candidates.longest_candidates) {
+      var slctn = d3.select("#longestCandidates");
+      displayCandidates(slctn, data.candidates.longest_candidates);
+    }
   }
   else if(data) {
     currentViz = vizTypes.SHORTEST;
@@ -1073,7 +1081,9 @@ function displayCandidates(sel, candidates) {
       var school = "school not known";
     var id = candidates[i].id;
     var pos = sel.attr("id");
-    info += "<span class=\"candidate clickable\" id=\"" + id + "\" data-pos=\""  + pos + "\">" + name + "</span><br>(" + school + ")<br><br>"
+    var input = sel.attr("data-input")
+    info += "<span class=\"candidate clickable\" id=\"" + id + "\" data-pos=\""  + pos + "\" data-input=\"" + input + "\">" + name + "</span> \
+    <br>(" + school + ")<br><br>"
   }
   sel.html(info);
   d3.selectAll(".candidate").on("click", function() {
@@ -1082,15 +1092,9 @@ function displayCandidates(sel, candidates) {
     // need to keep this data somewhere as if we just use the sel argument to get it, it will use the last value of sel passed,
     // which would always be targetCandidates if there are in fact target candidates present
     var pos = d3.select(this).attr("data-pos");
-    if(pos == "sourceCandidates") {
-      $("#sourceInput").val(authorId);
-      d3.select("#" + pos).html("");
-    }
-
-    else if(pos == "targetCandidates") {
-      $("#targetInput").val(authorId);
-      d3.select("#" + pos).html("");
-    }
+    var input = d3.select(this).attr("data-input")
+    $("#" + input).val(authorId);
+    d3.select("#" + pos).html("");
   });
 }
 
@@ -1098,13 +1102,21 @@ var getSingle = function() {
   var authorInfo = $("#singleInput").val()
   var cutoff = $("#cutoffInput").val()
   if(cutoff > 3)
-    singleAuthorBox("Please enter a number up to 3")
+    d3.select("#singleError").html("Please enter a number up to 3");
   else {
       $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
         console.log("SINGLEERROR");
         console.log(data);
         if(data.error)
-          singleAuthorBox(data.error)
+          d3.select("#singleError").html(data.error);
+        else if(data.candidates) {
+          console.log("CANDIDATES")
+          console.log(data.candidates)
+          var slctn = d3.select("#singleCandidates");
+          displayCandidates(slctn, data.candidates)
+          //COMPLETE
+        }
+
         else if(data) {
           currentViz = vizTypes.SINGLE
           var name;
