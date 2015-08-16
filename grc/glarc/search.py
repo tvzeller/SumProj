@@ -11,14 +11,14 @@ from nltk import stem
 
 class Search(object):
 	
-	def __init__(self, index_path=None, akw_path=None):
+	def __init__(self, index_path=None, tkw_path=None):
 		#print "in init, index_path is", index_path
 		if index_path == None:
 			self.index_path = defaultdict(set)
 		else:
 			self.index_path = index_path
 			print "path is", self.index_path
-			self.akw_path = akw_path
+			self.tkw_path = tkw_path
 			#she = shelve.open(path)
 			#print she["programming"]
 
@@ -90,20 +90,83 @@ class Search(object):
 		author_sets = []
 		for term in q:
 			if term in she:
-				print term
-				print "term in she"
+				#print term
+				#print "term in she"
 				#print she[term]
 				author_sets.append(she[term])
 		#result = [she[term] for term in self.process_text(q)]
 		she.close()
 		return author_sets
 
+	def get_title_sets(self, q):
+		data = shelve.open(self.index_path)
+		#with open(self.index_path) as f:
+		#	data = json.load(f)
+		#print "opened json file"
+		q = [term.encode("utf-8") for term in self.process_text(q)]
+		title_sets = []
+		for term in q:
+			if term in data:
+				#print term
+				#print "term in she"
+				#print data[term]
+				title_sets.append(data[term])
+		#result = [she[term] for term in self.process_text(q)]
+		data.close()
+		#print title_sets
+		return title_sets
+
+
+
 	def and_search(self, q):
-		return set.intersection(*self.get_author_sets(q))
+		title_sets = self.get_title_sets(q)
+		#print title_sets
+		author_sets = []
+		author_papers = []
+		tkw_index = shelve.open(self.tkw_path)
+		print "opened tkw"
+		
+		for index, title_set in enumerate(title_sets):
+			author_sets.append([])
+			for title in title_set:
+				title = title.encode("utf-8")
+				
+				if title in tkw_index:
+					authors = tkw_index[title]["authors"]
+					for author in authors:
+						author = tuple(author)
+						author_sets[index].append(author)
+						author_papers.append((author, title))
+			
+			author_sets[index] = set(author_sets[index])
+			
+
+		tkw_index.close()
+		#print author_sets
+		matching_authors = set.intersection(*author_sets)
+		final_result = [author_paper for author_paper in author_papers if author_paper[0] in matching_authors]
+		
+		print final_result
+			 
+		
+
+		#return set.intersection(*self.get_title_sets(q))
 
 	def or_search(self, q):
 		print "or searching"
-		return set.union(*self.get_author_sets(q))
+		titles = set.union(*self.get_title_sets(q))
+		authors = []
+		author_papers = []
+		tkw_index = shelve.open(self.tkw_path)
+		for title in titles:
+			title = title.encode("utf-8")
+			authors = tkw_index[title]["authors"]
+			for author in authors:
+				author = tuple(author)
+				author_papers.append((author, title))
+
+		print author_papers
+		return author_papers
 
 	def phrase_search(self, q):
 		print "phrase searching"

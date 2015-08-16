@@ -9,6 +9,7 @@ var vizTypes = {
   SHORTEST: 3,
   SINGLE: 4,
   INTER: 5,
+  TERMSEARCH: 6,
   // etc.
 }
 
@@ -392,31 +393,6 @@ function startItUp(graph) {
     nodeCountText.text(nodes.length + " nodes");
     edgeCountText.text(links.length + " links");
     updateKey();
-
-    /*if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == false) {
-      a = [[multiColour(inSchoolColour), "school member"], [multiColour(nonSchoolColour), "non school member"]];
-      makeKey(a);
-    }
-
-    if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == true) {
-      d3.selectAll(".keyCircle").remove();
-      d3.selectAll(".keyText").remove();
-    }
-
-    if(currentViz == vizTypes.SHORTEST) {
-      a = [["blue", "source"], ["red", "target"]];
-      makeKey(a);
-    }
-
-    if(currentViz == vizTypes.SINGLE) {
-      var name = "";
-      for(var i=0; i<nodes.length; i++) {
-        if(nodes[i].centre)
-          name = nodes[i].name;
-      }
-      a = [["red", name], ["blue", "everyone else"]];
-      makeKey(a);
-    }*/
   }
 
   function updateKey() {
@@ -955,6 +931,13 @@ function startItUp(graph) {
 
       if(currentViz == vizTypes.INTER)
         return moreColour(d.name)
+
+      if(currentViz == vizTypes.TERMSEARCH) {
+        if(d.isTerm)
+          return "white";
+        else
+          return "blue";
+      }
     });
 
     updateKey()
@@ -1259,8 +1242,12 @@ d3.select("#kwSearch").on("keyup", function() {
   if(d3.event.keyCode == 13) {
     var query = this.value
     console.log(query)
-    $.get('kw_search/', {query: query}, function() {
+    $.get('kw_search/', {query: query}, function(data) {
       //alert("made request");
+      console.log("THEDAAAAAAAAAAAAATA")
+      console.log(data)
+      currentViz = vizTypes.TERMSEARCH
+      startItUp(data)
     });
   }
 });

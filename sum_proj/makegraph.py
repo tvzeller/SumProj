@@ -240,11 +240,14 @@ def make_schools_graph():
 	return schools_graph
 
 
-def make_inv_index():
+def make_indices():
 	data_path = ("../coauthor_data/")
 	data_files = os.listdir(data_path)
-
+	full_dict = {}
 	for data_file in data_files:
+		if "full" in data_file:
+			continue
+
 		with open(data_path + data_file) as f:
 			dd = json.load(f)
 
@@ -254,18 +257,47 @@ def make_inv_index():
 		srch.make_index(dd)
 		indx = srch.get_index()
 
-		she = shelve.open("../grc/indices/invindex5.db")
+
+
+		# she = shelve.open("../grc/indices/invindex8.db")
+		# for term in indx:
+		# # 	if term == "programming":
+		#  #		print indx[term]
+		#  	if term in she:
+		#  		she[term] = she[term].union(indx[term])
+		#  	else:
+		#  		she[term] = indx[term]
+	
+		# she.close()
+
+		# #akw_indx = srch.make_author_kw_index(dd)
+		# tkw_indx = srch.make_title_kw_index(dd)
+		# she = shelve.open("../grc/indices/titlekwindex.db")
+		# #she.update(akw_indx)
+		# for title in tkw_indx:
+		# 	she[title] = tkw_indx[title]
+		# 	# if title in she:
+		# 	# 	she[author] += akw_indx[author]
+		# 	# else:
+		# 	# 	she[author] = akw_indx[author]
+		# she.close()
+
 		for term in indx:
-			if term == "programming":
-				print indx[term]
-			if term in she:
-				she[term] = she[term].union(indx[term])
-			else:
-				she[term] = indx[term]
-		#she.update(indx)
-		she.close()
+		 	if term in full_dict:
+		 		full_dict[term] = full_dict[term].union(indx[term])
+		 	else:
+		 		full_dict[term] = indx[term]
+
+	for term, papers in full_dict.items():
+		full_dict[term] = list(papers)
 
 
+	with open(data_path + "full.json", 'w') as f:
+		json.dump(full_dict, f)
+	
+
+
+#def make_akw():
 
 
 if __name__ == "__main__":

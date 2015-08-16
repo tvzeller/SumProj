@@ -354,23 +354,40 @@ def kw_search(request):
 
 	print query
 	# TODO make index path
-	path = os.path.join(settings.INDICES_PATH + "\invindex5.db")
+	path = os.path.join(settings.INDICES_PATH + "\invindex8.db")
 	print path
-	akw_path = os.path.join(settings.INDICES_PATH + "\\authorkwindex2.db")
+	#akw_path = os.path.join(settings.INDICES_PATH + "\\authorkwindex2.db")
+	tkw_path = os.path.join(settings.INDICES_PATH + "\\titlekwindex.db")
 
-	srch = search.Search(path, akw_path)
+	srch = search.Search(path, tkw_path)
 
 	if query[0] == "\"" and query[-1] == "\"":
-		query = query[1:-1]
-		print srch.phrase_search(query)
+		q = query[1:-1]
+		authors = srch.phrase_search(q)
 
 	elif 'AND' in query:
-		query = query.replace('AND', '')
-		print srch.and_search(query)
+		q = query.replace('AND', '')
+		titles = srch.and_search(q)
+		print titles
 
 	else:
-		print srch.or_search(query)
+		authors = srch.or_search(query)
 
+	# term_graph = nx.Graph()
+	# term_graph.add_node(query, {"name":query, "isTerm":True})
+	# print "AUTHORS"
+	# print authors
+	# for author in authors:
+	# 	print "adding node"
+	# 	term_graph.add_node(author, {"name": author})
+	# 	term_graph.add_edge(query, author)
+
+	# graphdata = json_graph.node_link_data(term_graph)
+	# newdata = json.dumps(graphdata)
+	# print "NEWDATA"
+	# print newdata
+
+	# return HttpResponse(newdata, content_type='application/json')
 	return HttpResponse("")
  
 
