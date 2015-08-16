@@ -356,11 +356,13 @@ def kw_search(request):
 	# TODO make index path
 	path = os.path.join(settings.INDICES_PATH + "\invindex5.db")
 	print path
+	akw_path = os.path.join(settings.INDICES_PATH + "\\authorkwindex2.db")
 
-	srch = search.Search(path)
+	srch = search.Search(path, akw_path)
 
 	if query[0] == "\"" and query[-1] == "\"":
-		pass
+		query = query[1:-1]
+		print srch.phrase_search(query)
 
 	elif 'AND' in query:
 		query = query.replace('AND', '')

@@ -11,13 +11,14 @@ from nltk import stem
 
 class Search(object):
 	
-	def __init__(self, index_path=None):
+	def __init__(self, index_path=None, akw_path=None):
 		#print "in init, index_path is", index_path
 		if index_path == None:
 			self.index_path = defaultdict(set)
 		else:
 			self.index_path = index_path
 			print "path is", self.index_path
+			self.akw_path = akw_path
 			#she = shelve.open(path)
 			#print she["programming"]
 
@@ -103,6 +104,23 @@ class Search(object):
 	def or_search(self, q):
 		print "or searching"
 		return set.union(*self.get_author_sets(q))
+
+	def phrase_search(self, q):
+		print "phrase searching"
+		candidates = set.intersection(*self.get_author_sets(q))
+		#print candidates
+		akwindex = shelve.open(self.akw_path)
+		matches = set()
+		for author in candidates:
+			author = author.encode("utf-8")
+			print "query is", q
+			print "author is", author
+			#print "keyword string is", akwindex[author]
+			if author in akwindex:
+				if q in akwindex[author]:
+					matches.add(author)
+
+		return matches
 
 
 
