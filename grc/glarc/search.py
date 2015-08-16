@@ -117,7 +117,8 @@ class Search(object):
 		return title_sets
 
 
-
+	# Return authors where each of the query terms is found in at least one of their papers
+	# NB query terms do not have to all appear in one paper - the AND is at the author level, not the paper level
 	def and_search(self, q):
 		title_sets = self.get_title_sets(q)
 		#print title_sets
@@ -132,11 +133,12 @@ class Search(object):
 				title = title.encode("utf-8")
 				
 				if title in tkw_index:
+					url = tkw_index[title]["url"]
 					authors = tkw_index[title]["authors"]
 					for author in authors:
 						author = tuple(author)
 						author_sets[index].append(author)
-						author_papers.append((author, title))
+						author_papers.append((author, (title, url)))
 			
 			author_sets[index] = set(author_sets[index])
 			
@@ -147,6 +149,7 @@ class Search(object):
 		final_result = [author_paper for author_paper in author_papers if author_paper[0] in matching_authors]
 		
 		print final_result
+		return final_result
 			 
 		
 
@@ -160,30 +163,38 @@ class Search(object):
 		tkw_index = shelve.open(self.tkw_path)
 		for title in titles:
 			title = title.encode("utf-8")
+			url = tkw_index[title]["url"]
 			authors = tkw_index[title]["authors"]
 			for author in authors:
 				author = tuple(author)
-				author_papers.append((author, title))
+				author_papers.append((author, (title, url)))
+
+		#print author_papers
+		return author_papers
+
+	# Return authors where the query phrase is present in the keywords of at least one of their papers
+	def phrase_search(self, q):
+		print "phrase searching"
+		#candidates = set.intersection(*self.get_author_sets(q))
+		#print candidates
+		titles = set.intersection(*self.get_title_sets(q))
+		tkw_index = shelve.open(self.tkw_path)
+		author_papers = []
+		for title in titles:
+			title = title.encode("utf-8")
+			print "query is", q
+			#print "author is", author
+			#print "keyword string is", akwindex[author]
+			if title in tkw_index:
+				if q in "|".join(tkw_index[title]["keywords"]):
+					authors = tkw_index[title]["authors"]
+					url = tkw_index[title]["url"]
+					for author in authors:
+						author = tuple(author)
+						author_papers.append((author, (title, url)))
 
 		print author_papers
 		return author_papers
-
-	def phrase_search(self, q):
-		print "phrase searching"
-		candidates = set.intersection(*self.get_author_sets(q))
-		#print candidates
-		akwindex = shelve.open(self.akw_path)
-		matches = set()
-		for author in candidates:
-			author = author.encode("utf-8")
-			print "query is", q
-			print "author is", author
-			#print "keyword string is", akwindex[author]
-			if author in akwindex:
-				if q in akwindex[author]:
-					matches.add(author)
-
-		return matches
 
 
 

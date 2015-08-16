@@ -362,33 +362,55 @@ def kw_search(request):
 	srch = search.Search(path, tkw_path)
 
 	if query[0] == "\"" and query[-1] == "\"":
-		q = query[1:-1]
-		authors = srch.phrase_search(q)
+		query = query[1:-1]
+		author_titles = srch.phrase_search(query)
 
 	elif 'AND' in query:
 		q = query.replace('AND', '')
-		titles = srch.and_search(q)
-		print titles
+		author_titles = srch.and_search(q)
+		#print author_titles
 
 	else:
-		authors = srch.or_search(query)
+		author_titles = srch.or_search(query)
 
-	# term_graph = nx.Graph()
-	# term_graph.add_node(query, {"name":query, "isTerm":True})
-	# print "AUTHORS"
-	# print authors
-	# for author in authors:
-	# 	print "adding node"
-	# 	term_graph.add_node(author, {"name": author})
-	# 	term_graph.add_edge(query, author)
+	term_graph = nx.Graph()
+	term_graph.add_node(query, {"name":query, "isTerm":True})
+	#print "AUTHORS"
+	#print author_titles
+	for author_title in author_titles:
+		#print "adding node"
+		name, authorid = author_title[0]
+		#print authorid, name
+		title_url = author_title[1]
+		#print title_url
+		if authorid not in term_graph.node:
+			term_graph.add_node(authorid, {"name": name, "paper_count": 1})
+			#print "added node", name
+		else:
+			term_graph.node[authorid]["paper_count"] += 1
 
-	# graphdata = json_graph.node_link_data(term_graph)
-	# newdata = json.dumps(graphdata)
-	# print "NEWDATA"
-	# print newdata
+		if term_graph.has_edge(query, authorid):
+			term_graph[query][authorid]["num_collabs"] += 1
+			term_graph[query][authorid]["collab_title_urls"].append(title_url)
+		else:
+			term_graph.add_edge(query, authorid, {"num_collabs":1, "collab_title_urls": [title_url,]})
+	
+	if len(term_graph.nodes()) > 30:
+		print "TOO MANY NODES"
+		nodes_to_sort = [node for node in term_graph.nodes() if node != query]
+		sorted_nodes = sorted(nodes_to_sort, key=lambda k: term_graph.node[k]["paper_count"], reverse=True)
+		sorted_nodes = sorted_nodes[:29]
+		print sorted_nodes
+		sorted_nodes.append(query)
+		term_graph = term_graph.subgraph(sorted_nodes)
 
-	# return HttpResponse(newdata, content_type='application/json')
-	return HttpResponse("")
+	graphdata = json_graph.node_link_data(term_graph)
+	newdata = json.dumps(graphdata)
+	print "NEWDATA"
+	print newdata
+
+	return HttpResponse(newdata, content_type='application/json')
+	#return HttpResponse("")
  
 
 def numerical(info):
