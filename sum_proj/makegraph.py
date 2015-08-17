@@ -252,6 +252,11 @@ def make_indices():
 			dd = json.load(f)
 
 		dd = textutils2.add_kw_to_data(dd)
+
+		for title, data in dd.items():
+			authors = data["authors"]
+			newauthors = [(anu[0].split(", ")[1] + " " + anu[0].split(", ")[0], anu[1]) for anu in authors]
+			dd[title]["authors"] = newauthors
 		
 		srch = search.Search()
 		srch.make_index(dd)
@@ -259,41 +264,41 @@ def make_indices():
 
 
 
-		# she = shelve.open("../grc/indices/invindex8.db")
-		# for term in indx:
-		# # 	if term == "programming":
-		#  #		print indx[term]
-		#  	if term in she:
-		#  		she[term] = she[term].union(indx[term])
-		#  	else:
-		#  		she[term] = indx[term]
-	
-		# she.close()
-
-		# #akw_indx = srch.make_author_kw_index(dd)
-		# tkw_indx = srch.make_title_kw_index(dd)
-		# she = shelve.open("../grc/indices/titlekwindex.db")
-		# #she.update(akw_indx)
-		# for title in tkw_indx:
-		# 	she[title] = tkw_indx[title]
-		# 	# if title in she:
-		# 	# 	she[author] += akw_indx[author]
-		# 	# else:
-		# 	# 	she[author] = akw_indx[author]
-		# she.close()
-
+		she = shelve.open("../grc/indices/invindex9.db")
 		for term in indx:
-		 	if term in full_dict:
-		 		full_dict[term] = full_dict[term].union(indx[term])
+		# 	if term == "programming":
+		 #		print indx[term]
+		 	if term in she:
+		 		she[term] = she[term].union(indx[term])
 		 	else:
-		 		full_dict[term] = indx[term]
+		 		she[term] = indx[term]
+	
+		she.close()
 
-	for term, papers in full_dict.items():
-		full_dict[term] = list(papers)
+		#akw_indx = srch.make_author_kw_index(dd)
+		tkw_indx = srch.make_title_kw_index(dd)
+		she = shelve.open("../grc/indices/titlekwindex2.db")
+		#she.update(akw_indx)
+		for title in tkw_indx:
+			she[title] = tkw_indx[title]
+			# if title in she:
+			# 	she[author] += akw_indx[author]
+			# else:
+			# 	she[author] = akw_indx[author]
+		she.close()
+
+	# 	for term in indx:
+	# 	 	if term in full_dict:
+	# 	 		full_dict[term] = full_dict[term].union(indx[term])
+	# 	 	else:
+	# 	 		full_dict[term] = indx[term]
+
+	# for term, papers in full_dict.items():
+	# 	full_dict[term] = list(papers)
 
 
-	with open(data_path + "full.json", 'w') as f:
-		json.dump(full_dict, f)
+	# with open(data_path + "full.json", 'w') as f:
+	# 	json.dump(full_dict, f)
 	
 
 

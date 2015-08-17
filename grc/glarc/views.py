@@ -354,10 +354,10 @@ def kw_search(request):
 
 	print query
 	# TODO make index path
-	path = os.path.join(settings.INDICES_PATH + "\invindex8.db")
+	path = os.path.join(settings.INDICES_PATH + "\invindex9.db")
 	print path
 	#akw_path = os.path.join(settings.INDICES_PATH + "\\authorkwindex2.db")
-	tkw_path = os.path.join(settings.INDICES_PATH + "\\titlekwindex.db")
+	tkw_path = os.path.join(settings.INDICES_PATH + "\\titlekwindex2.db")
 
 	srch = search.Search(path, tkw_path)
 
@@ -372,6 +372,8 @@ def kw_search(request):
 
 	else:
 		author_titles = srch.or_search(query)
+		print "GOT HERE"
+		print author_titles
 
 	term_graph = nx.Graph()
 	term_graph.add_node(query, {"name":query, "isTerm":True})

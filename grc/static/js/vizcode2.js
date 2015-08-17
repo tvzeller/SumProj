@@ -331,6 +331,12 @@ function startItUp(graph) {
           else
             return Math.max(Math.min((width / 2 / nodes.length), 20), 4);
         }
+        else if(currentViz = vizTypes.TERMSEARCH) {
+          if(d.isTerm)
+            return 30;
+          else
+            return 15;
+        }
         else
           return 10;
       })
@@ -343,6 +349,9 @@ function startItUp(graph) {
 
     /*if(labeled)
       addLabels(nodeG);*/
+
+    if(currentViz == vizTypes.TERMSEARCH)
+      addLabels(nodeG, "nameLabels");
 
     nodeG.append("title")
     .text(function(d) {
@@ -935,8 +944,11 @@ function startItUp(graph) {
       if(currentViz == vizTypes.TERMSEARCH) {
         if(d.isTerm)
           return "white";
-        else
-          return "blue";
+        else {
+          var randint = Math.floor(Math.random() * 10);
+          return multiColour(randint);
+        }
+          
       }
     });
 
@@ -1244,9 +1256,11 @@ d3.select("#kwSearch").on("keyup", function() {
     console.log(query)
     $.get('kw_search/', {query: query}, function(data) {
       //alert("made request");
-      console.log("THEDAAAAAAAAAAAAATA")
-      console.log(data)
-      currentViz = vizTypes.TERMSEARCH
+      console.log("THEDAAAAAAAAAAAAATA");
+      console.log(data);
+      currentViz = vizTypes.TERMSEARCH;
+      nameText.text(query);
+      typeText.text("keyword search");
       startItUp(data)
     });
   }

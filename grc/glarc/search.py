@@ -114,6 +114,7 @@ class Search(object):
 		#result = [she[term] for term in self.process_text(q)]
 		data.close()
 		#print title_sets
+		print "GOTTTTTOOOOOHEEEERE"
 		return title_sets
 
 
@@ -157,7 +158,11 @@ class Search(object):
 
 	def or_search(self, q):
 		print "or searching"
-		titles = set.union(*self.get_title_sets(q))
+		titles = []
+		title_sets = self.get_title_sets(q)
+		if title_sets:
+			titles = set.union(*self.get_title_sets(q))
+		print "orororororoorororo"
 		authors = []
 		author_papers = []
 		tkw_index = shelve.open(self.tkw_path)
