@@ -484,6 +484,7 @@ function startItUp(graph) {
     }
   }
 
+
   highlight = function(d) {
    // alert(d.paper_count)
     if(!nodeSelected) {
@@ -1261,6 +1262,9 @@ d3.select("#kwSearch").on("keyup", function() {
       currentViz = vizTypes.TERMSEARCH;
       nameText.text(query);
       typeText.text("keyword search");
+      d3.select("#infoArea").style("visibility", "hidden");
+      d3.selectAll(".keyCircle").remove();
+      d3.selectAll(".keyText").remove();
       startItUp(data)
     });
   }

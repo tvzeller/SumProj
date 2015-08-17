@@ -373,9 +373,12 @@ def kw_search(request):
 	else:
 		author_titles = srch.or_search(query)
 		print "GOT HERE"
-		print author_titles
+		#print author_titles
 
 	term_graph = nx.Graph()
+	unigraph = get_unigraph()
+
+
 	term_graph.add_node(query, {"name":query, "isTerm":True})
 	#print "AUTHORS"
 	#print author_titles
@@ -386,7 +389,7 @@ def kw_search(request):
 		title_url = author_title[1]
 		#print title_url
 		if authorid not in term_graph.node:
-			term_graph.add_node(authorid, {"name": name, "paper_count": 1})
+			term_graph.add_node(authorid, {"name": name, "paper_count": 1, "school":unigraph.node[authorid]["school"]})
 			#print "added node", name
 		else:
 			term_graph.node[authorid]["paper_count"] += 1
@@ -402,14 +405,14 @@ def kw_search(request):
 		nodes_to_sort = [node for node in term_graph.nodes() if node != query]
 		sorted_nodes = sorted(nodes_to_sort, key=lambda k: term_graph.node[k]["paper_count"], reverse=True)
 		sorted_nodes = sorted_nodes[:29]
-		print sorted_nodes
+		#print sorted_nodes
 		sorted_nodes.append(query)
 		term_graph = term_graph.subgraph(sorted_nodes)
 
 	graphdata = json_graph.node_link_data(term_graph)
 	newdata = json.dumps(graphdata)
-	print "NEWDATA"
-	print newdata
+	#print "NEWDATA"
+	#print newdata
 
 	return HttpResponse(newdata, content_type='application/json')
 	#return HttpResponse("")
