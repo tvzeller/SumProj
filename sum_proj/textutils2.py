@@ -156,7 +156,12 @@ def make_author_kw():
 
 
 
-def make_sim_graph(akw):
+def make_sim_graph(akw, name):
+
+	with open("../grc/graphs/collab/" + name) as f:
+		gdata = json.load(f)
+
+	col_graph = json_graph.node_link_graph(gdata)
 
 	sim_graph = nx.Graph()
 
@@ -166,21 +171,42 @@ def make_sim_graph(akw):
 	for i in range (0, len(authors)):
 		author1 = authors[i]
 		author1name = values[i]["name"]
-		sim_graph.add_node(author1, {"name": author1name})
+		sim_graph.add_node(author1, {
+									"name": author1name, 
+									"in_school":col_graph.node[author1]["in_school"],
+									"paper_count":col_graph.node[author1]["paper_count"]
+									})
 
-		keywords = stem_words(values[i]["keywords"])
+		keywords = values[i]["keywords"]
+		stemmed1 = stem_words(keywords[:])
 
 		for j in range(i+1, len(authors)):
 			author2 = authors[j]
 			author2name = values[j]["name"]
-			sim_graph.add_node(author2, {"name":author2name})
+			sim_graph.add_node(author2, {
+										"name":author2name,
+										"in_school":col_graph.node[author1]["in_school"],
+										"paper_count":col_graph.node[author1]["paper_count"]
+										})
 
-			keywords2 = stem_words(values[j]["keywords"])
+			keywords2 = values[j]["keywords"]
+			stemmed2 = stem_words(keywords2[:])
 
-			sim = check_sim(keywords, keywords2)
+			sim = check_sim(stemmed1, stemmed2)
+			ratio = sim[0]
+			indices = sim[1]
+			matched_words = []
+			if len(keywords) > len(keywords2):
+				longest = keywords
+			else:
+				longest = keywords2
 
-			if sim > 0.2:
-				sim_graph.add_edge(author1, author2, {"sim_score":sim})
+
+			for index in indices:
+				matched_words.append(longest[index])
+
+			if ratio > 0.2:
+				sim_graph.add_edge(author1, author2, {"num_collabs":ratio, "sim_kw": matched_words})
 
 	return sim_graph
 
@@ -195,12 +221,15 @@ def check_sim(kw1, kw2):
 		shortest = kw1
 
 	count = 0
-	for word1 in longest:
+	match_indices = []
+	for index, word1 in enumerate(longest):
 		for word2 in shortest:
 			if word1 == word2:
 				count += 1
+				match_indices.append(index)
 
-	return (count*1.0) / len(longest)
+	ratio = (count*1.0) / len(longest)
+	return (ratio, match_indices)
 
 
 
@@ -233,10 +262,11 @@ def make_all_sims():
 	data_path = ("../author_kw/")
 	data_files = os.listdir(data_path)
 	for data_file in data_files:
+		name = data_file.split(".")[0] + ".json"
 		with open(data_path+data_file) as f:
 			akw = json.load(f)
 
-		g = make_sim_graph(akw)
+		g = make_sim_graph(akw, name)
 		simgraphs.append(g)
 
 		gdata = json_graph.node_link_data(g)

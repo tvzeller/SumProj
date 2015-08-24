@@ -13,6 +13,8 @@ var vizTypes = {
   // etc.
 }
 
+var freezeTimeOut;
+
 var SHORTESTPATHERROR = 1;
 var LONGESTPATHERROR = 2;
 
@@ -152,7 +154,7 @@ function startItUp(graph) {
   just_school = true;
   // If viewing an author collaboration graph (the default), allow for filtering between
   // school-only authors and full set (includes authors who collaborate with school-only)
-  if(currentViz == vizTypes.AUTHOR_COLLAB) {
+  if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY) {
     // NB this is the JS array filter() not the d3 filter being used here
     // This gets just the links whose nodes both represent authors belonging to the school being displayed
     var filteredLinks = graph.links.filter(function(l) {
@@ -322,7 +324,7 @@ function startItUp(graph) {
     nodeG.append("circle")
       .attr("class", "nodeCircle")
       .attr("r", function(d) {
-        if(currentViz == vizTypes.AUTHOR_COLLAB && d.paper_count != undefined)
+        if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY && d.paper_count != undefined)
           return nodeScale(d.paper_count);
         else if(currentViz == vizTypes.SHORTEST)
           return 20;
@@ -595,7 +597,10 @@ function startItUp(graph) {
                                     .on("mouseover", highlightThisNode)
                                     .on("mouseout", lowlight);
 
-    d3.selectAll(".numCollabs").on("click", showTitles);
+    if(currentViz == vizTypes.SIMILARITY)
+      d3.selectAll(".numCollabs").on("click", showKeywords)
+    else
+      d3.selectAll(".numCollabs").on("click", showTitles);
   }
 
   function showTitles() {
@@ -606,15 +611,37 @@ function startItUp(graph) {
       console.log(l.source.id + "-" + l.target.id)
       if(l.source.id + "-" + l.target.id === elemId) {
         var title_urls = l.collab_title_urls;
-        console.log(title_urls)
-        
+
         var titleString = "<strong>Papers connecting " + getAuthorNameHtml(l.source) + l.source.name + 
         "</span> and " + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
-        console.log("BAAAFSDFSDAFSDAF");
-        console.log(titleString);
         
         for(var i = 0; i < title_urls.length; i++)
           titleString += title_urls[i][0] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
+        
+        displayInfoBox(titleString);
+        d3.selectAll(".authorName").on("click", displayInfoForThisNode)
+                                    .on("mouseover", highlightThisNode)
+                                    .on("mouseout", lowlight);
+   
+      }
+    });
+  }
+
+  // TODO refactor to use just one method for show titles and show keywords
+  function showKeywords() {
+    var elemId = this.id;
+    // Need to get the link which corresponds to this number of papers...
+    // there must be a nicer way of doing this?
+    link.each(function(l) {
+      console.log(l.source.id + "-" + l.target.id)
+      if(l.source.id + "-" + l.target.id === elemId) {
+        var keywords = l.sim_kw;
+
+        var titleString = "<strong>Keywords connecting " + getAuthorNameHtml(l.source) + l.source.name + 
+        "</span> and " + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
+        
+        for(var i = 0; i < keywords.length; i++)
+          titleString += keywords[i] + "<br><br>"
         
         displayInfoBox(titleString);
         d3.selectAll(".authorName").on("click", displayInfoForThisNode)
@@ -671,7 +698,7 @@ function startItUp(graph) {
   }
 
   function update(links, nodes) {
-    setTimeout(function() {
+    freezeTimeOut = setTimeout(function() {
       freeze();
     }, 10000);
 
@@ -1086,6 +1113,8 @@ function getData(name, type) {
   console.log(name)
   $.get('get_json/', {name: name, type: type}, function(data) {
     graph_data = JSON.parse(data);
+    //TODO experimenting with stopping timeout
+    clearTimeout(freezeTimeOut)
     startItUp(graph_data);
   });
 }
