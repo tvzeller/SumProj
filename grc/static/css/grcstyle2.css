@@ -1,0 +1,250 @@
+html, body {
+  padding:0;
+  margin:0;
+  background-color: #e8e8e8;
+  font-family: 'Open Sans', sans-serif;
+}
+
+#container {
+  margin-left: 5%;
+  margin-right: 5%;
+  margin-top:0;
+}
+
+
+#logo {
+  height: 35%;
+  width: 10%;
+  /*float: right;
+  bottom:100px;*/
+  position: absolute;
+  top: 15%;
+  left: 75%;
+}
+
+h1 {
+  margin-top:0;
+}
+
+h1 a {
+  color: white;
+  text-decoration: none;
+}
+
+#title {
+  position:relative;
+ /* left: 2%;*/
+  padding-left: 5px;
+  top: 10%;
+  width: 450px;
+  color: white;
+  font-size: 25px;
+
+  margin:auto;
+  text-align: center;
+}
+
+#mainBar {
+  position: relative;
+  margin:0;
+  height: 73px;
+  width: 100%;
+  /*background-color: #2c3e50;*/
+  /*background-color: #003965;*/
+  /*background-color: #34495e;*/
+  background-color: #e8e8e8;
+  color: #a0a0a0;
+
+}
+
+.menuList {
+  width:800px;
+  margin: auto;
+  margin-top:5px;
+  /*border:1px solid green;*/
+}
+
+#dropContainer {
+  width:750px;
+ 
+  margin:auto;
+  /*display: inline-block;*/
+}
+
+
+ul { 
+  padding: 0;
+  margin: 0;
+  /*background-color: #2c3e50;*/
+  background-color: white;
+}
+
+li { 
+  float: left;
+  /*width: 120px;*/
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top:5px;
+  /*display: inline; */
+  list-style: none;
+  position: relative;
+}
+
+li:hover {
+  /*background-color: white;*/
+  color:white;
+}
+
+.droparrow:hover {
+  color: #ffcc00;
+}
+
+
+ul ul { 
+  position: absolute; 
+  left: 0; 
+  top: 100%; 
+  display: none; 
+}
+
+li:hover > ul { 
+  color: #a0a0a0;
+  display: block;
+  z-index: 1000; 
+}
+
+li:hover > ul li {
+  padding-top: 20px;
+  padding-bottom: 5px;
+  padding-right:0px;
+  width: 300px;
+}
+
+li:hover > ul li:hover {
+  background: #ffcc00;
+}
+
+
+ul ul ul {
+  left: 100%;
+  top: 0;
+  padding-right:0px;
+  overflow-y:auto;
+  max-height: 500px;
+}}
+
+/* Is this doing anything? */
+#svgArea {
+  position: relative;
+  /*left:100px;*/
+}
+
+
+
+
+
+#countDiv {
+  float:right;
+  position:relative;
+  
+  /*left:75%;
+  top: 50%;*/
+  /*border:2px solid blue;*/
+  /*width: 320px;*/
+  font-size: 70%
+}
+
+
+
+#searchBox {
+  position:absolute;
+  right:5%;
+  top:17%;
+  height: 5%;
+  width: 20%;
+  padding-left:5px;
+  /*background-color: #f5f5f5;*/
+  background-color: #e8e8e8;
+  box-shadow: none;
+  border:none;
+  border: 1px solid black;
+  border-radius: 3%;
+  outline: none;
+  font-family: 'Open Sans', sans-serif;
+}
+
+
+#kwSearch {
+  width:200px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+
+
+#infoArea {
+  position: absolute;
+  right:5%;
+  top:26%;
+  width: 320px;
+  color:#989898;
+  /*background-color: #34495e;*/
+  background-color: #e8e8e8;
+  padding: 5px;
+  visibility: hidden;
+  opacity: 0.8;
+  overflow-y:auto;
+  max-height: 80%;
+  font-size: 15px;
+}
+
+#infoArea a {
+  color:#2ecc71;
+}
+
+
+#close {
+  float:right;
+  color: #e74c3c;
+}
+
+#back {
+  color: #e74c3c;
+  visibility: hidden;
+}
+
+.numCollabs {
+  color: #f39c12;
+  text-decoration: underline;
+}
+
+#spinnerDiv {
+  position:absolute;
+  right:5%;
+  top: 26%;
+  visibility: hidden;
+}
+
+.displayText {
+  font-size: 20px;
+  /*fill: #e0e0e0;*/
+  fill:#c0c0c0;
+}
+
+.numText {
+  fill: #c0c0c0;
+}
+
+.keyCircle {
+  opacity: 0.8;
+}
+
+.keyText {
+  fill: #c0c0c0;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+
+
