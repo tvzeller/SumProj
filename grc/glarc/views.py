@@ -25,7 +25,10 @@ def index(request):
 	context_dict = {"collab_graphs": collab_graphs, "sim_graphs":sim_graphs}
 	# Add other graphs to dict when available
 
-	return render(request, 'glarc/index.html', context_dict)
+	return render(request, 'glarc/newindex.html', context_dict)
+
+
+
 
 def about(request):
 	return HttpResponse("about")

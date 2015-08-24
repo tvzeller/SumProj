@@ -144,11 +144,11 @@ function startItUp(graph) {
   }
 
 
-  var allLinks = graph.links
-  var allNodes = graph.nodes
-  var currentLinks = allLinks
-  var currentNodes = allNodes
-  console.log(allLinks)
+  var allLinks = graph.links;
+  var allNodes = graph.nodes;
+  var currentLinks = allLinks;
+  var currentNodes = allNodes;
+  console.log(allLinks);
 
     
   just_school = true;
@@ -271,7 +271,7 @@ function startItUp(graph) {
 
     // reenable highlighting when finished dragging node
   function dragend(d, i) {
-    node.on("mouseover", highlight)
+    //node.on("mouseover", highlight)
   }
 
   // Used to bind new node data to visual elements and display
@@ -396,13 +396,29 @@ function startItUp(graph) {
     //  node.exit().remove();
 
       // attach event listeners here so they get attached to new nodes as well
-      node.on("mouseover", highlight);
-      node.on("mouseout", lowlight);
-      //node.on("dblclick", highlight);
-      node.on("dblclick", fixNode)
+
+      //node.on("click", fixNode)
       node.on("click", showCollabInfo);
 
+      node.on("click", function(d) {
+        showCollabInfo(d)
+        highlight(d);
+      });
+
+      //node.on("mouseover", highlight);
+      d3.selectAll(".nodeCircle").on("mouseover", highlightJustNode);
+      d3.selectAll(".nodeCircle").on("mouseout", lowlightJustNode);
+      //node.on("mouseover", highlightJustNode);
+     // node.on("mouseout", lowlight);
+      //node.on("dblclick", highlight);
+
+
     // nodeCountText.text(node[0].length + " nodes");
+  }
+
+  var bighlight = function(d) {
+    alert("HASF");
+    console.log("SAFSAFS");
   }
 
 
@@ -517,32 +533,47 @@ function startItUp(graph) {
     }
   }
 
+  highlightJustNode = function(d) {
+    //d3.select(this).style("stroke-width", "3px");
+    //console.log(d3.select(this))
+    //console.log(d);
+    d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
+      if(d == circ)
+        return "3px";
+    })
+  }
+
+  lowlightJustNode = function() {
+    d3.selectAll(".nodeCircle").style("stroke-width", "1px");
+  }
+
 
   highlight = function(d) {
    // alert(d.paper_count)
-    if(!nodeSelected) {
-      link.style("stroke", function(l) {
-        if (l.source == d || l.target == d)
-          return "red";
-        else
-          return linkColour;
-      })
-      .style("opacity", function(l) {
-        if (l.source == d || l.target == d)
-          return 1.0
-        else
-          return 0.2
-      });
+    //if(true) {
+    //alert("clicked");
+    link.style("stroke", function(l) {
+      if (l.source == d || l.target == d)
+        return "red";
+      else
+        return linkColour;
+    })
+    .style("opacity", function(l) {
+      if (l.source == d || l.target == d)
+        return 1.0
+      else
+        return 0.2
+    });
 
-      node.style("opacity", function(o) {
-        if (neighbours(d, o))
-          return 1.0
-        else if(d==o)
-          return 1.0
-        else
-          return 0.2
-      });
-    }
+    node.style("opacity", function(o) {
+      if (neighbours(d, o))
+        return 1.0
+      else if(d==o)
+        return 1.0
+      else
+        return 0.2
+    });
+    //}*/
   }
 
   var lowlight = function(d) {
@@ -618,9 +649,16 @@ function startItUp(graph) {
     displayInfoBox(info);
  
 
-    d3.selectAll(".authorName").on("click", displayInfoForThisNode)
+    d3.selectAll(".authorName").on("click", function() {
+                                    var sel = d3.select(this);
+                                    console.log("SADFSADFASGSGJKJASFDSFDASDF");
+                                    console.log(sel.attr("id"));
+                                    var theId = sel.attr("id");
+                                    displayInfoForThisNode(theId);
+                                    highlightPathsForThisNode(theId);
+                                      })
                                     .on("mouseover", highlightThisNode)
-                                    .on("mouseout", lowlight);
+                                    .on("mouseout", lowlightJustNode);
 
     if(currentViz == vizTypes.SIMILARITY)
       d3.selectAll(".numCollabs").on("click", showKeywords)
@@ -683,8 +721,12 @@ function startItUp(graph) {
     return "<span class=\"clickable authorName\" id=\"" + theNode.id + "\">"
   }
 
-  var displayInfoForThisNode = function() {
-      var storedId = d3.select(this).attr("id");
+  var displayInfoForThisNode = function(anId) {
+      console.log("ASFASFASDFSADF");
+      //var storedId = d3.select(sel).attr("id");
+      //console.log("THEID IS")
+      var storedId = anId;
+      console.log(storedId);
       var theNode = getNodeFromId(storedId);
       showCollabInfo(theNode);
   }
@@ -692,6 +734,12 @@ function startItUp(graph) {
   var highlightThisNode = function() {
     var storedId = d3.select(this).attr("id");
     var theNode = getNodeFromId(storedId);
+    highlightJustNode(theNode)
+  }
+
+  var highlightPathsForThisNode = function(anId) {
+    //var storedId = d3.select(this).attr("id");
+    var theNode = getNodeFromId(anId);
     highlight(theNode)
   }
 
@@ -983,8 +1031,8 @@ function startItUp(graph) {
       infoText += "<br>";
     }
     displayInfoBox(infoText);
-    d3.selectAll(".authorName").on("mouseover", highlightThisNode)
-                                .on("mouseout", lowlight);
+    /*d3.selectAll(".authorName").on("mouseover", highlightThisNode)
+                                .on("mouseout", lowlight);*/
 
     d3.selectAll(".comTitle").on("click", function() {
       var comNum = d3.select(this).attr("id");
