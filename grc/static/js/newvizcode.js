@@ -592,17 +592,18 @@ function startItUp(graph) {
       nodeSelected = true;
   }
 
-  /*d3.select("#svgArea").on("click", function() {
+  d3.select("#svgArea").on("click", function() {
     var coords = d3.mouse(this);
     var xClick = coords[0];
     var yClick = coords[1];
     var circles = d3.selectAll(".nodeCircle");
+    var onCircle = false;
     console.log(circles)
     console.log(node)
     /*for(var i=0; i<circles[0].length; i++) {
       console.log(d3.select(circles[0][i]).attr("r"));
       //console.log(d3.select(circles[0][i]).attr("x"));
-    }
+    }*/
     for(var i=0; i<node[0].length; i++) {
       var xNode = node[0][i].__data__.x
       var yNode = node[0][i].__data__.y
@@ -611,16 +612,11 @@ function startItUp(graph) {
       //TODO credit this stackoverflow
       onCircle = Math.sqrt((xClick - xNode)*(xClick - xNode) + (yClick - yNode) * (yClick - yNode)) < radius
       if(onCircle)
-        console.log("BLA");
+        break;
     }
-    /*node.each(function(n) {
-      console.log(n.f)
-    })
-    /*circles.each(function(c) {
-      console.log(c);
-    })
-
-  });*/
+    if(!onCircle)
+      lowlight()
+  });
 
   var showCollabInfo = function(d) {
     var info = getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>Collaborators:</br></br>"
@@ -650,10 +646,9 @@ function startItUp(graph) {
  
 
     d3.selectAll(".authorName").on("click", function() {
-                                    var sel = d3.select(this);
-                                    console.log("SADFSADFASGSGJKJASFDSFDASDF");
-                                    console.log(sel.attr("id"));
-                                    var theId = sel.attr("id");
+                                    //var sel = d3.select(this);
+                                    //var theId = sel.attr("id");
+                                    var theId = d3.select(this).attr("id");
                                     displayInfoForThisNode(theId);
                                     highlightPathsForThisNode(theId);
                                       })
@@ -682,9 +677,15 @@ function startItUp(graph) {
           titleString += title_urls[i][0] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
         
         displayInfoBox(titleString);
-        d3.selectAll(".authorName").on("click", displayInfoForThisNode)
+        d3.selectAll(".authorName").on("click", function() {
+                                    //var sel = d3.select(this);
+                                    //var theId = sel.attr("id");
+                                    var theId = d3.select(this).attr("id");
+                                    displayInfoForThisNode(theId);
+                                    highlightPathsForThisNode(theId);
+                                      })
                                     .on("mouseover", highlightThisNode)
-                                    .on("mouseout", lowlight);
+                                    .on("mouseout", lowlightJustNode);
    
       }
     });
