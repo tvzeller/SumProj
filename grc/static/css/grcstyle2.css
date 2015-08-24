@@ -26,10 +26,15 @@ h1 {
   margin-top:0;
 }
 
-h1 a {
-  color: white;
+#title a {
+  color: #383838;
   text-decoration: none;
 }
+
+#title a:hover {
+  color: #a0a0a0;
+}
+
 
 #title {
   position:relative;
@@ -39,7 +44,6 @@ h1 a {
   width: 450px;
   color: white;
   font-size: 25px;
-
   margin:auto;
   text-align: center;
 }
@@ -54,7 +58,8 @@ h1 a {
   /*background-color: #34495e;*/
   background-color: #e8e8e8;
   color: #a0a0a0;
-
+  border-bottom:1px solid #383838;
+  padding-bottom: 0;
 }
 
 .menuList {
@@ -66,9 +71,10 @@ h1 a {
 
 #dropContainer {
   width:750px;
- 
+  padding:0;
   margin:auto;
   /*display: inline-block;*/
+  
 }
 
 

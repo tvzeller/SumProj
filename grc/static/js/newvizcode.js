@@ -463,7 +463,7 @@ function startItUp(graph) {
     }
 
     if(currentViz == vizTypes.SHORTEST) {
-      a = [["blue", "source"], ["red", "target"]];
+      a = [["#1f77b4", "source"], ["#d62728", "target"]];
       makeKey(a);
     }
 
@@ -598,8 +598,6 @@ function startItUp(graph) {
     var yClick = coords[1];
     var circles = d3.selectAll(".nodeCircle");
     var onCircle = false;
-    console.log(circles)
-    console.log(node)
     /*for(var i=0; i<circles[0].length; i++) {
       console.log(d3.select(circles[0][i]).attr("r"));
       //console.log(d3.select(circles[0][i]).attr("x"));
@@ -1068,11 +1066,11 @@ function startItUp(graph) {
 
       else if(currentViz == vizTypes.SHORTEST) {
         if(d.isSource)
-          return "blue";
+          return "#1f77b4";
         else if(d.isTarget)
-          return "red";
+          return "#d62728";
         else
-          return "green";
+          return "#2ca02c";
       }
 
       else if(currentViz == vizTypes.SINGLE) {
