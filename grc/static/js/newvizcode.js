@@ -416,11 +416,6 @@ function startItUp(graph) {
     // nodeCountText.text(node[0].length + " nodes");
   }
 
-  var bighlight = function(d) {
-    alert("HASF");
-    console.log("SAFSAFS");
-  }
-
 
   var addLabels = function(sel, label) {
     sel.append("text")
@@ -443,6 +438,7 @@ function startItUp(graph) {
       .attr("font-weight", "bold")
       .attr("class", "label");
   }
+
 
   function updateInfoText(links, nodes) {
     nodeCountText.text(nodes.length + " nodes");
@@ -552,6 +548,7 @@ function startItUp(graph) {
    // alert(d.paper_count)
     //if(true) {
     //alert("clicked");
+    d3.selectAll(".singleLabel").remove()
     link.style("stroke", function(l) {
       if (l.source == d || l.target == d)
         return "red";
@@ -573,6 +570,21 @@ function startItUp(graph) {
       else
         return 0.2
     });
+
+    if(!labeled) {
+      d3.selectAll(".node").append("text")
+                            .attr("class", "singleLabel")
+                            .text(function(n) {
+                            if(n==d)
+                              return n.name;
+                          })
+                          .attr("font-size", "10px")
+                          .attr("font-family", "sans-serif")
+                          .attr("dy", ".35em")
+                          .attr("text-anchor", "middle")
+                          .attr("font-weight", "bold");
+    }
+
     //}*/
   }
 
@@ -583,6 +595,8 @@ function startItUp(graph) {
 
       node.style("opacity", 1.0);
     }
+    console.log("bbaaboo")
+    d3.selectAll(".singleLabel").remove()
   }
 
   var fixNode = function(d) {
@@ -885,6 +899,10 @@ function startItUp(graph) {
   d3.selectAll(".labelChoice").on('click', function() {
     svg.selectAll(".label").remove();
     var type = d3.select(this).attr("id");
+    if(type != "noLabels")
+      labeled = true;
+    else
+      labeled = false;
     addLabels(node, type)
   });
 
