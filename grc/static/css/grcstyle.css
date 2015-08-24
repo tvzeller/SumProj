@@ -9,12 +9,6 @@ html, body {
   margin-top:0;
 }
 
-/*#titleArea {
-  position:relative;
-  /*height: 70px;*/
-/*  overflow:hidden;
-  background-color: #003965;
-}*/
 
 #logo {
   height: 35%;
@@ -68,8 +62,9 @@ ul {
 
 li { 
   float: left;
-  width: 120px;
+  /*width: 120px;*/
   padding-left: 5px;
+  padding-right: 40px;
   padding-top:5px;
   /*display: inline; */
   list-style: none;
@@ -92,6 +87,7 @@ li:hover > ul {
 li:hover > ul li {
   padding-top: 20px;
   padding-bottom: 5px;
+  padding-right:0px;
   width: 300px;
 }
 
@@ -103,34 +99,16 @@ li:hover > ul li:hover {
 ul ul ul {
   left: 100%;
   top: 0;
-  padding-right:20px;
+  padding-right:0px;
   overflow-y:auto;
   max-height: 500px;
-}
-
-/*.menudrop {
-  /* or use display inline */
-  /*float:left;
-  clear:all;
-}*/
-
-/*
-
-/*#buttons {
-  clear:all;
-}
-
-#filter {
-  clear:all;*/
-}
+}}
 
 /* Is this doing anything? */
 #svgArea {
   position: relative;
   /*left:100px;*/
 }
-
-
 
 
 #countDiv {
@@ -145,11 +123,7 @@ ul ul ul {
   font-size: 70%
 }
 
-/* #schoolChooser {
-  position:relative;
-  right: 100px;
-  border:2px solid blue;
-}*/
+
 
 #searchBox {
   position:absolute;
@@ -230,6 +204,10 @@ ul ul ul {
 
 .clickable {
   cursor: pointer;
+}
+
+#kwSearch {
+  width:200px;
 }
 
 

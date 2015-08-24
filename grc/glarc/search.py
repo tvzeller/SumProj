@@ -149,13 +149,14 @@ class Search(object):
 		matching_authors = set.intersection(*author_sets)
 		final_result = [author_paper for author_paper in author_papers if author_paper[0] in matching_authors]
 		
-		print final_result
+		#print final_result
 		return final_result
 			 
 		
 
 		#return set.intersection(*self.get_title_sets(q))
 
+	# TODO change author_papers to a dict - author:papers
 	def or_search(self, q):
 		print "or searching"
 		titles = []

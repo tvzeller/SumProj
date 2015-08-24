@@ -17,7 +17,12 @@ def index(request):
 
 	collab_graphs = os.listdir(collab_path)
 	collab_graphs = [cg.split(".")[0] for cg in collab_graphs if "University" not in cg]
-	context_dict = {"collab_graphs": collab_graphs}
+
+	sim_path = os.path.join(settings.GRAPHS_PATH, "similarity")
+	sim_graphs = os.listdir(sim_path)
+	sim_graphs = [sg.split(".")[0] for sg in sim_graphs]
+
+	context_dict = {"collab_graphs": collab_graphs, "sim_graphs":sim_graphs}
 	# Add other graphs to dict when available
 
 	return render(request, 'glarc/index.html', context_dict)

@@ -26,7 +26,10 @@ var linkColour = "#bbb";
 var inSchoolColour = Math.floor(Math.random() * 10)
 var nonSchoolColour = Math.abs(inSchoolColour - 5)
 
-var introText = "Welcome to Glasgow Research Connections.<br><br>Explanation explanation etc etc<br><br>Enjoy";
+var introText = "Welcome to Glasgow Research Connections.<br><br>The graph on the left is the collaboration network for the School \
+                of Computing Science. The nodes represent authors, who are linked if they have co-authored a paper together.<br><br> \
+                You can see the collaboration graphs for other schools within the University of Glasgow, and for single authors, by exploring \
+                the options on the top menu.";
 
 var close = "<span class=\"clickable\" id=\"close\">close</span><br>";
 
@@ -331,7 +334,7 @@ function startItUp(graph) {
           else
             return Math.max(Math.min((width / 2 / nodes.length), 20), 4);
         }
-        else if(currentViz = vizTypes.TERMSEARCH) {
+        else if(currentViz == vizTypes.TERMSEARCH) {
           if(d.isTerm)
             return 30;
           else
@@ -350,7 +353,7 @@ function startItUp(graph) {
     /*if(labeled)
       addLabels(nodeG);*/
 
-    if(currentViz == vizTypes.TERMSEARCH)
+    if(currentViz == vizTypes.TERMSEARCH || currentViz == vizTypes.SHORTEST)
       addLabels(nodeG, "nameLabels");
 
     nodeG.append("title")
@@ -369,8 +372,8 @@ function startItUp(graph) {
       node.on("mouseover", highlight);
       node.on("mouseout", lowlight);
       //node.on("dblclick", highlight);
-      //node.on("dblclick", fixNode)
-      node.on("dblclick", showCollabInfo);
+      node.on("dblclick", fixNode)
+      node.on("click", showCollabInfo);
 
     // nodeCountText.text(node[0].length + " nodes");
   }
@@ -401,6 +404,7 @@ function startItUp(graph) {
   function updateInfoText(links, nodes) {
     nodeCountText.text(nodes.length + " nodes");
     edgeCountText.text(links.length + " links");
+    // does this need to be called from here?
     updateKey();
   }
 
@@ -428,6 +432,8 @@ function startItUp(graph) {
       }
       a = [[multiColour(0), name],];
 
+      //TODO get numHops from somewhere else - cuttoffinput may be different/empty by this point
+      //Or set to variable outside here
       numHops = $("#cutoffInput").val()
       for(var i=1; i<=numHops; i++) {
         if(i==1)
@@ -492,7 +498,7 @@ function startItUp(graph) {
         if (l.source == d || l.target == d)
           return "red";
         else
-          return "black";
+          return linkColour;
       })
       .style("opacity", function(l) {
         if (l.source == d || l.target == d)
@@ -527,6 +533,36 @@ function startItUp(graph) {
     else
       nodeSelected = true;
   }
+
+  /*d3.select("#svgArea").on("click", function() {
+    var coords = d3.mouse(this);
+    var xClick = coords[0];
+    var yClick = coords[1];
+    var circles = d3.selectAll(".nodeCircle");
+    console.log(circles)
+    console.log(node)
+    /*for(var i=0; i<circles[0].length; i++) {
+      console.log(d3.select(circles[0][i]).attr("r"));
+      //console.log(d3.select(circles[0][i]).attr("x"));
+    }
+    for(var i=0; i<node[0].length; i++) {
+      var xNode = node[0][i].__data__.x
+      var yNode = node[0][i].__data__.y
+      //console.log(xNode);
+      var radius = d3.select(node[0][i].firstElementChild).attr("r");
+      //TODO credit this stackoverflow
+      onCircle = Math.sqrt((xClick - xNode)*(xClick - xNode) + (yClick - yNode) * (yClick - yNode)) < radius
+      if(onCircle)
+        console.log("BLA");
+    }
+    /*node.each(function(n) {
+      console.log(n.f)
+    })
+    /*circles.each(function(c) {
+      console.log(c);
+    })
+
+  });*/
 
   var showCollabInfo = function(d) {
     var info = getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>Collaborators:</br></br>"
@@ -635,6 +671,10 @@ function startItUp(graph) {
   }
 
   function update(links, nodes) {
+    setTimeout(function() {
+      freeze();
+    }, 10000);
+
     //TODO change back to filtered
     console.log("in update")
     console.log(links)
@@ -811,7 +851,7 @@ function startItUp(graph) {
 
   function displayMetricText(metric, name, description) {
     var infoText = description +
-              "<br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
+              "<br><br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
               (note that this metric is calculated for the full graph, including non-school members)<br><br>"
     theNodes = force.nodes()  
     theNodes.sort(function(a, b) {
@@ -864,7 +904,7 @@ function startItUp(graph) {
         commNums.push(commNum);
         //console.log("community number:")
         //console.log(commNum);
-        keyArray.push([moreColour(commNum), "a community"]);
+        keyArray.push([moreColour(commNum), "community " + commNum]);
       }
     }
     console.log("COMMUNITIES:");
@@ -874,7 +914,8 @@ function startItUp(graph) {
   });
 
   function displayCommunityText(arr) {
-    var infoText = "below are the communities<br><br>"
+    var infoText = "The authors in the network can be divided into communities based on the patterns of collaboration. Below are the \
+              communities for this network.<br><br>"
     for(var i=0; i<arr.length; i++) {
       infoText += "<strong><span id=\"" + i + "\" class=\"comTitle\">Community " + i + "</strong><br><br>";
       var thisCommunity = arr[i];
@@ -909,6 +950,7 @@ function startItUp(graph) {
       colourBySchool();
   });
 
+// TODO make key in here so don't have to change colours in both places if colours change
   function colourByDefault() {
     console.log("COLOUR BY DEFAULT");
     console.log(currentViz)
@@ -923,7 +965,7 @@ function startItUp(graph) {
         }
       }
 
-      if(currentViz == vizTypes.SHORTEST) {
+      else if(currentViz == vizTypes.SHORTEST) {
         if(d.isSource)
           return "blue";
         else if(d.isTarget)
@@ -932,25 +974,27 @@ function startItUp(graph) {
           return "green";
       }
 
-      if(currentViz == vizTypes.SINGLE) {
+      else if(currentViz == vizTypes.SINGLE) {
         if(d.centre)
           return multiColour(0);
         else
           return multiColour(d.hops);
       }
 
-      if(currentViz == vizTypes.INTER)
+      else if(currentViz == vizTypes.INTER)
         return moreColour(d.name)
 
-      if(currentViz == vizTypes.TERMSEARCH) {
+      else if(currentViz == vizTypes.TERMSEARCH) {
         if(d.isTerm)
           return "white";
         else {
           var randint = Math.floor(Math.random() * 10);
           return multiColour(randint);
-        }
-          
+        } 
       }
+
+      else
+        return multiColour(d);
     });
 
     updateKey()
@@ -1049,8 +1093,8 @@ function getData(name, type) {
 
 
 var getShortest = function() {
-  var sourceInfo = $("#sourceInput").val();
-  var targetInfo = $("#targetInput").val();
+  var sourceInfo = $("#sourceInput").val().toLowerCase();
+  var targetInfo = $("#targetInput").val().toLowerCase();
   console.log(sourceInfo);
   console.log(targetInfo)
   if(!sourceInfo || !targetInfo)
@@ -1214,6 +1258,8 @@ d3.selectAll(".collabListItem").on("click", function() {
 
   if(name == "Inter School")
     currentViz = vizTypes.INTER;
+  else if(type == "similarity")
+    currentViz = vizTypes.SIMILARITY
   else
     currentViz = vizTypes.AUTHOR_COLLAB;
 
@@ -1231,6 +1277,10 @@ d3.selectAll(".collabListItem").on("click", function() {
   while(inSchoolColour == nonSchoolColour)
     nonSchoolColour = Math.floor(Math.random() * 10)
 });
+
+/*d3.selectAll(".simListItem").on("click", function() {
+
+})*/
 
 
 d3.select("#about").on("click", function() {
