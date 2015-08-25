@@ -683,15 +683,23 @@ function startItUp(graph) {
 
     if(currentViz == vizTypes.SIMILARITY)
       d3.selectAll(".numCollabs").on("click", showKeywords)
-    else
-      d3.selectAll(".numCollabs").on("click", showTitles);
+    else {
+      d3.selectAll(".numCollabs").on("click", function() {
+        showTitles(connections, this);
+      });
+    }
   }
 
-  function showTitles() {
-    var elemId = this.id;
+  //N.b. connections is an array of links incident to the node whose collaborations are showing
+  function showTitles(connections, sel) {
+    var elemId = sel.id;
+    console.log("elemid")
+    console.log(elemId);
     // Need to get the link which corresponds to this number of papers...
     // there must be a nicer way of doing this?
-    link.each(function(l) {
+    //connections.each(function(l) {
+    for(var i=0; i<connections.length; i++) {
+      var l = connections[i];
       console.log(l.source.id + "-" + l.target.id)
       if(l.source.id + "-" + l.target.id === elemId) {
         var title_urls = l.collab_title_urls;
@@ -714,7 +722,7 @@ function startItUp(graph) {
                                     .on("mouseout", lowlightJustNode);
    
       }
-    });
+    }//);
   }
 
   // TODO refactor to use just one method for show titles and show keywords
