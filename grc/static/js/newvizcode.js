@@ -10,6 +10,7 @@ var vizTypes = {
   SINGLE: 4,
   INTER: 5,
   TERMSEARCH: 6,
+  COMMUNITIES: 7,
   // etc.
 }
 
@@ -211,14 +212,14 @@ function startItUp(graph) {
     console.log(link);
     console.log(link.enter())
 
-      if(links[0].num_collabs != undefined) {
-        var maxCollabs = links[0].num_collabs
-        var minCollabs = links[0].num_collabs
-        for(var i=1, len=links.length; i<len; i++) {
-          if(links[i].num_collabs < minCollabs)
-            minCollabs = links[i].num_collabs;
-          else if(links[i].num_collabs > maxCollabs)
-            maxCollabs = links[i].num_collabs;
+    if(links.length > 0 && links[0].num_collabs != undefined) {
+      var maxCollabs = links[0].num_collabs
+      var minCollabs = links[0].num_collabs
+      for(var i=1, len=links.length; i<len; i++) {
+        if(links[i].num_collabs < minCollabs)
+          minCollabs = links[i].num_collabs;
+        else if(links[i].num_collabs > maxCollabs)
+          maxCollabs = links[i].num_collabs;
       }
 
       if(currentViz == vizTypes.SIMILARITY) {
@@ -631,7 +632,20 @@ function startItUp(graph) {
   });
 
   var showCollabInfo = function(d) {
-    var info = getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>Collaborators:</br></br>"
+    var info = getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>"
+    if(currentViz == vizTypes.SIMILARITY) {
+      console.log("SIMSIMSIM");
+      info += "Keywords:<br><br>";
+      keyword_scores = d.keywords;
+      just_keywords = ""
+      for(var i=0; i<keyword_scores.length; i++)
+        just_keywords += keyword_scores[i][0] + " "
+
+      info += just_keywords + "<br><br>";
+    }
+
+    info += /*getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>*/"Collaborators:</br></br>";
+
     var connections = []
     link.each(function(l) {
       if(l.source == d || l.target == d) {
@@ -790,6 +804,7 @@ function startItUp(graph) {
   }
 
   function update(links, nodes) {
+    clearTimeout(freezeTimeOut)
     freezeTimeOut = setTimeout(function() {
       freeze();
     }, 10000);
@@ -879,14 +894,12 @@ function startItUp(graph) {
 
   d3.select("#filter").on("click", function() {                
     if(just_school) {
-      
       just_school = false;
       update(allLinks, allNodes)
     }
     else {
       just_school = true;
       update(filteredLinks, filteredNodes)
-      
     }
   });
 
@@ -928,7 +941,7 @@ function startItUp(graph) {
     displayInfoBox(bffText)
   });
 
-  d3.select('#searchBox').on("keyup", function() {
+  d3.select('#nodeSearch').on("keyup", function() {
     searchText = this.value.toLowerCase();
     d3.selectAll(".nodeCircle").style("stroke", function(d) {
       if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
@@ -992,14 +1005,21 @@ function startItUp(graph) {
   
 
   d3.select("#community").on("click", function() {
-    var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
+    getCommunities();
+
+  });
+    /*var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
       //console.log("COMM NUMBERS")
       //console.log(d.school_com)
       if(just_school)
         return moreColour(d.school_com);
       else
         return moreColour(d.com)
-    })
+    })*/
+    
+  function getCommunities() {
+    //alert("gettinghere")
+    colourByCommunities();
     var keyArray = []
     var commNums = []
     var communityArray = []
@@ -1034,13 +1054,25 @@ function startItUp(graph) {
     console.log(communityArray);
     makeKey(keyArray);
     displayCommunityText(communityArray)
-  });
+  }
+
+
+  function colourByCommunities() {
+    var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
+    //console.log("COMM NUMBERS")
+    //console.log(d.school_com)
+    if(just_school)
+      return moreColour(d.school_com);
+    else
+      return moreColour(d.com)
+    })
+  }
 
   function displayCommunityText(arr) {
     var infoText = "The authors in the network can be divided into communities based on the patterns of collaboration. Below are the \
               communities for this network.<br><br>"
     for(var i=0; i<arr.length; i++) {
-      infoText += "<strong><span id=\"" + i + "\" class=\"comTitle\">Community " + i + "</strong><br><br>";
+      infoText += "<strong><span id=\"" + i + "\" class=\"comTitle\">Community " + i + "</strong><br>";
       var thisCommunity = arr[i];
       for(var j=0; j < thisCommunity.length; j++) {
         var author = thisCommunity[j];
@@ -1054,13 +1086,67 @@ function startItUp(graph) {
       infoText += "<br>";
     }
     displayInfoBox(infoText);
-    /*d3.selectAll(".authorName").on("mouseover", highlightThisNode)
-                                .on("mouseout", lowlight);*/
+    d3.selectAll(".authorName").on("click", function() {
+                                    //var sel = d3.select(this);
+                                    //var theId = sel.attr("id");
+                                    var theId = d3.select(this).attr("id");
+                                    displayInfoForThisNode(theId);
+                                    highlightPathsForThisNode(theId);
+                                      })
+                                    .on("mouseover", highlightThisNode)
+                                    .on("mouseout", lowlightJustNode);
 
     d3.selectAll(".comTitle").on("click", function() {
       var comNum = d3.select(this).attr("id");
-      doComViz(comNum);
+      singleCommunityText(comNum)
+      colourByCommunities()
+      //doComViz(comNum);
     });
+  }
+
+  function singleCommunityText(comNumber) {
+    var infoText = "<strong><span id=\"" + comNumber + "\" class=\"comTitle\">Community " + comNumber + "</strong><br>";
+    infoText += "<span id=\"backToFull\">[back to full graph]</span><br><br>"
+    theNodes = force.nodes()
+    for(var i=0; i<theNodes.length; i++) {
+      var author = theNodes[i]
+      if(just_school) {
+        if(author.school_com == comNumber)
+          infoText += getAuthorNameHtml(author) + author.name + "<span><br>"
+      }
+      else {
+        if(author.com == comNumber)
+          infoText += getAuthorNameHtml(author) + author.name + "<span><br>"
+      }
+    }
+    displayInfoBox(infoText);
+    d3.select("#backToFull").on("click", function() {
+      var school = nameText.text()
+      if(just_school) {
+        update(filteredLinks, filteredNodes);
+      }
+      else {
+        update(allLinks, allNodes);
+      }
+      //colourByCommunities()
+      getCommunities()
+    });
+    //var theNodes = force.nodes()
+    var theLinks = force.links()
+    var comFilteredLinks = graph.links.filter(function(l) {
+      if(just_school)
+        return l.source.school_com == comNumber && l.target.school_com == comNumber;
+      else
+        return l.source.com == comNumber && l.target.com == comNumber;
+    });
+    // This gets just the nodes that are in this community
+    var comFilteredNodes = graph.nodes.filter(function(n) {
+      if(just_school)
+        return n.school_com == comNumber;
+      else
+        return n.com == comNumber;
+    });
+    update(comFilteredLinks, comFilteredNodes)
   }
 
 
@@ -1210,7 +1296,6 @@ function getData(name, type) {
   $.get('get_json/', {name: name, type: type}, function(data) {
     graph_data = JSON.parse(data);
     //TODO experimenting with stopping timeout
-    clearTimeout(freezeTimeOut)
     startItUp(graph_data);
   });
 }
@@ -1233,7 +1318,7 @@ var getShortest = function() {
 }
 
 var getLongest = function() {
-  var source = $("#longestInput").val();
+  var source = $("#longestInput").val().toLowerCase();
   if(!source)
     shortestPathBox(LONGESTPATHERROR, "please enter an author");
   else {
@@ -1321,7 +1406,7 @@ function displayCandidates(sel, candidates) {
 }
 
 var getSingle = function() {
-  var authorInfo = $("#singleInput").val()
+  var authorInfo = $("#singleInput").val().toLowerCase();
   var cutoff = $("#cutoffInput").val()
   if(cutoff > 3)
     d3.select("#singleError").html("Please enter a number up to 3");
@@ -1370,6 +1455,7 @@ function doComViz(comNumber) {
   $.get("community_viz/", {"school":currentSchool, "com_num": comNumber, "just_school":just_school}, function(data) {
     console.log(data)
     startItUp(data);
+    //singleCommunityText(comNumber)
   });
 }
 
@@ -1383,7 +1469,7 @@ d3.selectAll(".collabListItem").on("click", function() {
 
   if(name == "Inter School")
     currentViz = vizTypes.INTER;
-  else if(type == "similarity")
+  else if(type == "similarity2")
     currentViz = vizTypes.SIMILARITY
   else
     currentViz = vizTypes.AUTHOR_COLLAB;
@@ -1440,6 +1526,7 @@ d3.select("#kwSearch").on("keyup", function() {
       d3.select("#infoArea").style("visibility", "hidden");
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
+
       startItUp(data)
     });
   }

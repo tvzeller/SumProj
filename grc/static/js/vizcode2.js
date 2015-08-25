@@ -231,6 +231,7 @@ function startItUp(graph) {
                 .base([10]);
     }  
 
+
     link.enter()
           .append("line")
           .attr("class", "link")

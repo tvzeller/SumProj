@@ -65,7 +65,7 @@ h1 {
 .menuList {
   width:800px;
   margin: auto;
-  margin-top:5px;
+  margin-top:15px;
   /*border:1px solid green;*/
 }
 
@@ -91,7 +91,7 @@ li {
   padding-left: 50px;
   padding-right: 50px;
   padding-top:0px;
-  margin-top: 8px;
+  margin-top: 0px;
   /*display: inline; */
   list-style: none;
   position: relative;
@@ -162,14 +162,9 @@ ul ul ul {
   font-size: 70%
 }
 
-
-
-#searchBox {
-  position:absolute;
-  right:5%;
-  top:17%;
-  height: 5%;
-  width: 20%;
+.searchBox {
+  height: 3%;
+  width: 15%;
   padding-left:5px;
   /*background-color: #f5f5f5;*/
   background-color: #f0f0f0;
@@ -179,12 +174,20 @@ ul ul ul {
   border-radius: 3%;
   outline: none;
   font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+}
+
+#nodeSearch {
+  position:absolute;
+  right:5%;
+  top:15%;
 }
 
 
 #kwSearch {
-  width:200px;
-  font-family: 'Open Sans', sans-serif;
+  position: absolute;
+  right:5%;
+  top:20%;
 }
 
 
@@ -192,7 +195,7 @@ ul ul ul {
 #infoArea {
   position: absolute;
   right:5%;
-  top:26%;
+  top:25%;
   width: 320px;
   color:#383838;
   /*background-color: #34495e;*/
