@@ -336,7 +336,7 @@ function startItUp(graph) {
 
       // Define max size of node radius
       // Dependent on amount of nodes, but with lower and upper bounds
-      maxSize = Math.max(Math.min(40, 1500/nodes.length), 8);
+      maxSize = Math.max(Math.min(40, 1200/nodes.length), 8);
       // Minimum node size is in proportion to maximum node size
       minSize = maxSize/2
       // Node size is a function of the amount of papers node has, within the bounds set above
@@ -448,12 +448,12 @@ function startItUp(graph) {
   }
 
   function updateKey() {
-    if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == false) {
+    if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY && just_school == false) {
       a = [[multiColour(inSchoolColour), "school member"], [multiColour(nonSchoolColour), "non school member"]];
       makeKey(a);
     }
 
-    if(currentViz == vizTypes.AUTHOR_COLLAB && just_school == true) {
+    if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY && just_school == true) {
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
     }
@@ -720,9 +720,15 @@ function startItUp(graph) {
           titleString += keywords[i] + "<br><br>"
         
         displayInfoBox(titleString);
-        d3.selectAll(".authorName").on("click", displayInfoForThisNode)
+        d3.selectAll(".authorName").on("click", function() {
+                                    //var sel = d3.select(this);
+                                    //var theId = sel.attr("id");
+                                    var theId = d3.select(this).attr("id");
+                                    displayInfoForThisNode(theId);
+                                    highlightPathsForThisNode(theId);
+                                      })
                                     .on("mouseover", highlightThisNode)
-                                    .on("mouseout", lowlight);
+                                    .on("mouseout", lowlightJustNode);
    
       }
     });
@@ -1073,7 +1079,7 @@ function startItUp(graph) {
     console.log(currentViz)
     d3.selectAll(".nodeCircle").style("fill", function(d, i) {
       //return colors(i);
-      if(currentViz == vizTypes.AUTHOR_COLLAB) {
+      if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY) {
         if(d.in_school)
           return multiColour(inSchoolColour);
         else {
