@@ -235,7 +235,18 @@ function startItUp(graph) {
     link.enter()
           .append("line")
           .attr("class", "link")
-          .style("stroke", linkColour)
+          .style("stroke", function(d) {
+            /*if(currentViz == vizTypes.SIMILARITY) {
+              console.log("WAWAHASHDFSADFSADFSDAFSAFDASSADFSADFADZFDSAF")
+              if(!d.areCoauthors)
+                return "green";
+              else
+                return linkColour;
+            }
+            else
+              return linkColour;*/
+            return getLinkColour(d);
+          })
           .style("stroke-width", function(d) {
             if(d.num_collabs != undefined) {
               if(currentViz == vizTypes.SIMILARITY)
@@ -253,6 +264,18 @@ function startItUp(graph) {
 
     //edgeCountText.text(link[0].length + " links");
    //link = svg.selectAll(".link")
+  }
+
+  function getLinkColour(theLink) {
+    if(currentViz == vizTypes.SIMILARITY) {
+      if(!theLink.areCoauthors) {
+        return "#2ca02c";
+      }
+      else
+        return linkColour;
+    }
+    else
+      return linkColour;
   }
 
   // In static mode, disable highlighting when dragging a node
@@ -552,9 +575,10 @@ function startItUp(graph) {
     d3.selectAll(".singleLabel").remove()
     link.style("stroke", function(l) {
       if (l.source == d || l.target == d)
-        return "red";
+        return "#FF3030";
       else
-        return linkColour;
+        //return linkColour;
+        return getLinkColour(l);
     })
     .style("opacity", function(l) {
       if (l.source == d || l.target == d)
@@ -591,7 +615,9 @@ function startItUp(graph) {
 
   var lowlight = function(d) {
     if(!nodeSelected) {
-      link.style("stroke", linkColour)
+      link.style("stroke", function(l) {
+        return getLinkColour(l);
+      })
       .style("opacity", 1.0);
 
       node.style("opacity", 1.0);

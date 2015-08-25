@@ -102,10 +102,6 @@ li:hover {
   /*color:white;*/
 }
 
-.droparrow:hover {
-  color: #ffcc00;
-}
-
 
 ul ul { 
   position: absolute; 
@@ -129,7 +125,7 @@ li:hover > ul li {
 }
 
 li:hover > ul li:hover {
-  background: #ffcc00;
+  background: #9edae5;
 }
 
 
@@ -215,7 +211,8 @@ ul ul ul {
 
 #close {
   float:right;
-  color: #e74c3c;
+  /*color: #e74c3c;*/
+  color:#FF3030;
 }
 
 #back {
