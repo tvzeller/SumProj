@@ -71,17 +71,18 @@ class GraphMaker(object):
 		if not isinstance(authors[0], basestring):
 			authors = [author[1] for author in authors]
 
-		for i in range(0, len(authors)):
-			for j in range(i+1, len(authors)):
+		num_authors = len(authors)
+		for i in range(0, num_authors):
+			for j in range(i+1, num_authors):
 				author1 = authors[i]
 				author2 = authors[j]
 				# Check if edge already exists, update edge attributes
 				if self.graph.has_edge(author1, author2):
-					self.graph[author1][author2]["num_collabs"] += 1
+					self.graph[author1][author2]["weight"] += 1.0 / num_authors
 					self.graph[author1][author2]["collab_title_urls"].append([title, url])
 				# If edge is new, add it to the graph, give it initial attributes
 				else:
-					self.graph.add_edge(author1, author2, {'num_collabs': 1, "collab_title_urls": [[title, url],]})
+					self.graph.add_edge(author1, author2, {'weight': 1.0/num_authors, "collab_title_urls": [[title, url],]})
 
 
 	def check_schl_status(self, author_id):
