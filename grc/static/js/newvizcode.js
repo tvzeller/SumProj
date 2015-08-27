@@ -468,16 +468,17 @@ function startItUp(graph) {
     nodeCountText.text(nodes.length + " nodes");
     edgeCountText.text(links.length + " links");
     // does this need to be called from here?
-    updateKey();
+    //updateKey();
   }
 
   function updateKey() {
-    if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY && just_school == false) {
+    if((currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY) && just_school == false) {
+      console.log("UPDATINGKEY")
       a = [[multiColour(inSchoolColour), "school member"], [multiColour(nonSchoolColour), "non school member"]];
       makeKey(a);
     }
 
-    if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY && just_school == true) {
+    if((currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY) && just_school == true) {
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
     }
@@ -521,6 +522,8 @@ function startItUp(graph) {
 
   function makeKey(arr) {
     //First remove existing key
+    console.log("MAKING KEY")
+    console.log(arr)
     d3.selectAll(".keyCircle").remove();
     d3.selectAll(".keyText").remove();
     if(arr.length > 15) {
@@ -561,6 +564,18 @@ function startItUp(graph) {
       if(d == circ)
         return "3px";
     })
+  }
+
+  function highlightNodeGroup(arr) {
+    console.log("HILITE")
+    console.log(arr)
+    d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
+      for(var i=0; i<arr.length; i++) {
+        theNode = arr[i];
+        if(circ==theNode)
+          return "3px";
+      }
+    });
   }
 
   lowlightJustNode = function() {
@@ -701,6 +716,8 @@ function startItUp(graph) {
                                     //var sel = d3.select(this);
                                     //var theId = sel.attr("id");
                                     var theId = d3.select(this).attr("id");
+                                    console.log("IDIDIDIDID");
+                                    console.log(theId);
                                     displayInfoForThisNode(theId);
                                     highlightPathsForThisNode(theId);
                                       })
@@ -732,8 +749,8 @@ function startItUp(graph) {
       if(l.source.id + "-" + l.target.id === elemId) {
         var title_urls = l.collab_title_urls;
 
-        var titleString = "<strong>Papers connecting " + getAuthorNameHtml(l.source) + l.source.name + 
-        "</span> and " + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
+        var titleString = "Papers connecting <strong>" + getAuthorNameHtml(l.source) + l.source.name + 
+        "</span></strong> and <strong>" + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
         
         for(var i = 0; i < title_urls.length; i++)
           titleString += title_urls[i][0] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
@@ -791,11 +808,9 @@ function startItUp(graph) {
   }
 
   var displayInfoForThisNode = function(anId) {
-      console.log("ASFASFASDFSADF");
       //var storedId = d3.select(sel).attr("id");
       //console.log("THEID IS")
       var storedId = anId;
-      console.log(storedId);
       var theNode = getNodeFromId(storedId);
       showCollabInfo(theNode);
   }
@@ -1133,18 +1148,43 @@ function startItUp(graph) {
                                     //var sel = d3.select(this);
                                     //var theId = sel.attr("id");
                                     var theId = d3.select(this).attr("id");
+                                    console.log("IDIDIDIIDALL");
+                                    console.log(theId);
                                     displayInfoForThisNode(theId);
                                     highlightPathsForThisNode(theId);
                                       })
                                     .on("mouseover", highlightThisNode)
                                     .on("mouseout", lowlightJustNode);
 
+
     d3.selectAll(".comTitle").on("click", function() {
       var comNum = d3.select(this).attr("id");
       singleCommunityText(comNum)
       colourByCommunities()
+      // TODO comviz is now done by filtering
       //doComViz(comNum);
     });
+    d3.selectAll(".comTitle").on("mouseover", function() {
+      var comNum = d3.select(this).attr("id");
+      console.log("BLUEBLA")
+      var theNodes = force.nodes();
+      var comNodes = []
+      
+      for(var i=0; i<theNodes.length; i++) {
+        var author = theNodes[i];
+        if(just_school) {
+          if(author.school_com == comNum)
+            comNodes.push(author);
+        }
+        else {
+          if(author.com == comNum)
+            comNodes.push(author);
+        }
+      }
+      highlightNodeGroup(comNodes)
+    });
+
+    d3.selectAll(".comTitle").on("mouseout", lowlightJustNode)
   }
 
   function singleCommunityText(comNumber) {
@@ -1155,14 +1195,27 @@ function startItUp(graph) {
       var author = theNodes[i]
       if(just_school) {
         if(author.school_com == comNumber)
-          infoText += getAuthorNameHtml(author) + author.name + "<span><br>"
+          infoText += getAuthorNameHtml(author) + author.name + "</span><br>"
       }
       else {
         if(author.com == comNumber)
-          infoText += getAuthorNameHtml(author) + author.name + "<span><br>"
+          infoText += getAuthorNameHtml(author) + author.name + "</span><br>"
       }
     }
     displayInfoBox(infoText);
+    
+    d3.selectAll(".authorName").on("click", function() {
+                                    var theId = d3.select(this).attr("id");
+                                    console.log("IDIDIDIIDALL");
+                                    console.log(theId);
+                                    displayInfoForThisNode(theId);
+                                    highlightPathsForThisNode(theId);
+                                      })
+                                    .on("mouseover", highlightThisNode)
+                                    .on("mouseout", lowlightJustNode);
+                        
+                                  
+
     
     d3.select("#backToFull").on("click", function() {
       var school = nameText.text()
