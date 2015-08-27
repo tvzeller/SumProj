@@ -21,9 +21,10 @@ class GraphMaker(object):
 	def populate_graph(self, data_dict, sn=None):
 		self.schl_names = sn
 
-		for title, info in data_dict.items():
+		for paper_id, info in data_dict.items():
 			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
 			# Or use subclasses with different implementations of add_vertices here
+			title = info["title"]
 			print "title is " + title.encode("utf-8")
 			authors = info["authors"]
 			if not authors:

@@ -204,17 +204,27 @@ def get_paper_school_info(paper_url):
 
 
 
-def get_a_elems_for_papers(author_page_url):
+def get_a_elems_for_papers(tree):
 	"""
 	Takes the url for an Enlighten author page and extracts the <a> elements which link
 	to the papers on that page
 	Returns list of those <a> elements
 	"""
-	tree = get_tree(author_page_url)
+	#tree = get_tree(author_page_url)
 	ns = 'http://exslt.org/regular-expressions'
 	path = '//a[re:match(@href, "http://eprints.gla.ac.uk/[0-9]+/")]'
 	a_elems = tree.xpath(path, namespaces={'re':ns})
 	return a_elems
+
+
+def get_dates_for_papers(tree):
+	ns = 'http://exslt.org/regular-expressions'
+	path = '//a[re:match(@href, "http://eprints.gla.ac.uk/[0-9]+/")]/preceding-sibling::text()'
+	text_containing_dates = tree.xpath(path, namespaces={'re':ns})
+	text_as_string = " ".join(text_containing_dates)
+	# returns a list of the dates of the publications, in the order they appear on page
+	dates = re.findall("[0-9]+", text_as_string)
+	return dates
 
 
 
@@ -242,9 +252,9 @@ def get_author_titles(author_url):
 	a list of just the titles that have been tagged with a subject, so
 	([all_titles][tagged_titles])
 	"""
-
+	author_page_tree = get_tree(author_url)
 	# Get the <a> elements for the papers on the author's page
-	a_elems = get_a_elems_for_papers(author_url)
+	a_elems = get_a_elems_for_papers(author_page_tree)
 
 	all_titles = []
 	links = []
@@ -455,10 +465,15 @@ def get_coauthors_dict(name_url_list, schl_name):
 def get_papers_info(author_url, existing_papers):
 	author_dict = {}
 
+	author_page_tree = get_tree(author_url)
 	# Get the <a> elements for the papers on the author's page
-	a_elems = get_a_elems_for_papers(author_url)
+	a_elems = get_a_elems_for_papers(author_page_tree)
+	# get the dates corresponding to each paper
+	paper_dates = get_dates_for_papers(author_page_tree)
+	# zip into a list of (a_elem, date) pairs
+	a_elem_dates = zip(a_elems, paper_dates)
 	# Each a is a paper
-	for a in a_elems:
+	for a, date in a_elem_dates:
 		# Title of paper is the text content of the a element
 		paper_title = a.text_content()
 		# Check if paper has already been checked
@@ -475,12 +490,16 @@ def get_papers_info(author_url, existing_papers):
 		abstract = get_paper_abstract(paper_tree)
 		# Get paper keywords
 		keywords = get_paper_keywords(paper_tree)
-		# Add paper to dictionary with title as key and co-authors as value
-		author_dict[paper_title] = {
+		# Get paper id number from its url
+		paper_id = re.search("[0-9]+", paper_url)
+		# Add paper to dictionary with id as key and metadata as values
+		author_dict[paper_id] = {
+						"title": paper_title
 						"authors": authors,
 						"abstract": abstract,
 						"url": paper_url,
 						"keywords": keywords
+						'year': date
 		} 
 
 	return author_dict

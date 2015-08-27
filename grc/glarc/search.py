@@ -11,43 +11,43 @@ from nltk import stem
 
 class Search(object):
 	
-	def __init__(self, index_path=None, tkw_path=None):
+	def __init__(self, index_path=None, pkw_path=None):
 		#print "in init, index_path is", index_path
 		if index_path == None:
 			self.index_path = defaultdict(set)
 		else:
 			self.index_path = index_path
 			print "path is", self.index_path
-			self.tkw_path = tkw_path
+			self.pkw_path = pkw_path
 			#she = shelve.open(path)
 			#print she["programming"]
 
 	# TODO can record size of postings to optimise intersections - faster if start intersecting with smallest set; 
 	# see Intro to IR pg.11
 	# TODO also record amount of times author has this term 
-	def make_index(self, data_dict=None):
-		if data_dict==None:
-			with open("../coauthor_data/School of Computing Science.txt") as f:
-				data_dict = json.load(f)
+	# def make_index(self, data_dict=None):
+	# 	if data_dict==None:
+	# 		with open("../coauthor_data/School of Computing Science.txt") as f:
+	# 			data_dict = json.load(f)
 		
-		for title in data_dict:
-			text = title
-			abstract = data_dict[title]["abstract"]
-			# Some papers do not have an abstract
-			if abstract:
-				if not isinstance(abstract, basestring):
-					text += "\n" + abstract[0]
-				else:
-					text += "\n" + abstract
+	# 	for title in data_dict:
+	# 		text = title
+	# 		abstract = data_dict[title]["abstract"]
+	# 		# Some papers do not have an abstract
+	# 		if abstract:
+	# 			if not isinstance(abstract, basestring):
+	# 				text += "\n" + abstract[0]
+	# 			else:
+	# 				text += "\n" + abstract
 
-			#terms = set(self.process_text(data_dict[title]["keywords"]))
-			terms = set(self.process_text(text))
-			# Authors is list of lists, we want second element in list (the unique identifier)
-			authors = [author[1] for author in data_dict[title]["authors"]]
-			# For each keyword term in this paper, add authors to postings set
-			for term in terms:
-				term = term.encode("utf-8")
-				self.index[term].update(authors)
+	# 		#terms = set(self.process_text(data_dict[title]["keywords"]))
+	# 		terms = set(self.process_text(text))
+	# 		# Authors is list of lists, we want second element in list (the unique identifier)
+	# 		authors = [author[1] for author in data_dict[title]["authors"]]
+	# 		# For each keyword term in this paper, add authors to postings set
+	# 		for term in terms:
+	# 			term = term.encode("utf-8")
+	# 			self.index[term].update(authors)
 
 
 	# TODO is text coming in as a string or a list?
@@ -98,44 +98,46 @@ class Search(object):
 		she.close()
 		return author_sets
 
-	def get_title_sets(self, q):
+	def get_paper_sets(self, q):
 		data = shelve.open(self.index_path)
 		#with open(self.index_path) as f:
 		#	data = json.load(f)
 		#print "opened json file"
 		q = [term.encode("utf-8") for term in self.process_text(q)]
-		title_sets = []
+		paper_sets = []
 		for term in q:
 			if term in data:
 				#print term
 				#print "term in she"
 				#print data[term]
-				title_sets.append(data[term])
+				paper_sets.append(data[term])
 		#result = [she[term] for term in self.process_text(q)]
 		data.close()
 		#print title_sets
 		print "GOTTTTTOOOOOHEEEERE"
-		return title_sets
+		return paper_sets
 
 
 	# Return authors where each of the query terms is found in at least one of their papers
 	# NB query terms do not have to all appear in one paper - the AND is at the author level, not the paper level
 	def and_search(self, q):
-		title_sets = self.get_title_sets(q)
+		paper_sets = self.get_paper_sets(q)
 		#print title_sets
 		author_sets = []
 		author_papers = []
-		tkw_index = shelve.open(self.tkw_path)
+		pkw_index = shelve.open(self.pkw_path)
 		print "opened tkw"
 		
-		for index, title_set in enumerate(title_sets):
+		for index, paper_set in enumerate(paper_sets):
 			author_sets.append([])
-			for title in title_set:
-				title = title.encode("utf-8")
+			for paper_id in paper_set:
+				paper_id = paper_id.encode("utf-8")
+				#title = title.encode("utf-8")
 				
-				if title in tkw_index:
-					url = tkw_index[title]["url"]
-					authors = tkw_index[title]["authors"]
+				if paper_id in pkw_index:
+					title = pkw_index[paper_id]['title']
+					url = pkw_index[paper_id]["url"]
+					authors = pkw_index[paper_id]["authors"]
 					for author in authors:
 						author = tuple(author)
 						author_sets[index].append(author)
@@ -144,7 +146,7 @@ class Search(object):
 			author_sets[index] = set(author_sets[index])
 			
 
-		tkw_index.close()
+		pkw_index.close()
 		#print author_sets
 		matching_authors = set.intersection(*author_sets)
 		final_result = [author_paper for author_paper in author_papers if author_paper[0] in matching_authors]
@@ -159,18 +161,19 @@ class Search(object):
 	# TODO change author_papers to a dict - author:papers
 	def or_search(self, q):
 		print "or searching"
-		titles = []
-		title_sets = self.get_title_sets(q)
-		if title_sets:
-			titles = set.union(*self.get_title_sets(q))
+		papers = []
+		paper_sets = self.get_paper_sets(q)
+		if paper_sets:
+			papers = set.union(*self.get_paper_sets(q))
 		print "orororororoorororo"
 		authors = []
 		author_papers = []
-		tkw_index = shelve.open(self.tkw_path)
-		for title in titles:
-			title = title.encode("utf-8")
-			url = tkw_index[title]["url"]
-			authors = tkw_index[title]["authors"]
+		pkw_index = shelve.open(self.pkw_path)
+		for paper_id in papers:
+			paper_id = paper_id.encode("utf-8")
+			title = tkw_index[paper_id]['title']
+			url = pkw_index[paper_id]["url"]
+			authors = pkw_index[paper_id]["authors"]
 			for author in authors:
 				author = tuple(author)
 				author_papers.append((author, (title, url)))
@@ -183,23 +186,24 @@ class Search(object):
 		print "phrase searching"
 		#candidates = set.intersection(*self.get_author_sets(q))
 		#print candidates
-		titles = set.intersection(*self.get_title_sets(q))
-		tkw_index = shelve.open(self.tkw_path)
+		papers = set.intersection(*self.get_paper_sets(q))
+		pkw_index = shelve.open(self.pkw_path)
 		author_papers = []
-		for title in titles:
-			title = title.encode("utf-8")
-			print "query is", q
+		for paper_id in papers:
+			paper_id = paper_id.encode("utf-8")
+			#print "query is", q
 			#print "author is", author
 			#print "keyword string is", akwindex[author]
-			if title in tkw_index:
-				if q in "|".join(tkw_index[title]["keywords"]):
-					authors = tkw_index[title]["authors"]
-					url = tkw_index[title]["url"]
+			if paper_id in tkw_index:
+				if q in "|".join(pkw_index[paper_id]["keywords"]):
+					title = pkw_index[paper_id]['title']
+					authors = pkw_index[paper_id]["authors"]
+					url = pkw_index[paper_id]["url"]
 					for author in authors:
 						author = tuple(author)
 						author_papers.append((author, (title, url)))
 
-		print author_papers
+		#print author_papers
 		return author_papers
 
 

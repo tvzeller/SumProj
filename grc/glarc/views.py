@@ -18,7 +18,7 @@ def index(request):
 	collab_graphs = os.listdir(collab_path)
 	collab_graphs = [cg.split(".")[0] for cg in collab_graphs if "University" not in cg]
 
-	sim_path = os.path.join(settings.GRAPHS_PATH, "similarity")
+	sim_path = os.path.join(settings.GRAPHS_PATH, "similarity2")
 	sim_graphs = os.listdir(sim_path)
 	sim_graphs = [sg.split(".")[0] for sg in sim_graphs]
 
@@ -363,7 +363,7 @@ def kw_search(request):
 	print query
 	# TODO make index path
 	path = os.path.join(settings.INDICES_PATH + "\invindex9.db")
-	print path
+	#print path
 	#akw_path = os.path.join(settings.INDICES_PATH + "\\authorkwindex2.db")
 	tkw_path = os.path.join(settings.INDICES_PATH + "\\titlekwindex2.db")
 

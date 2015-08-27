@@ -4,23 +4,49 @@
 # clear up responsibilities between modules/classes
 
 from collections import defaultdict
+import json
+import shelve
+from nltk import stem
 
 class Search(object):
 	
-	def __init__(self):
-		self.index = defaultdict(set)
+	def __init__(self, index_path=None):
+		print "BLALSDF"
+		if index_path == None:
+			self.index = defaultdict(set)
+		else:
+			self.index = shelve.open(index_path)
 
 	# TODO can record size of postings to optimise intersections - faster if start intersecting with smallest set; 
 	# see Intro to IR pg.11
 	# TODO also record amount of times author has this term 
-	def make_index(self, data_dict):
+	def make_index(self, data_dict=None):
+		if data_dict==None:
+			with open("../coauthor_data/School of Computing Science.txt") as f:
+				data_dict = json.load(f)
+		
 		for title in data_dict:
-			terms = set(self.process_text(data_dict[title]["keywords"]))
+			#text = title
+			#abstract = data_dict[title]["abstract"]
+			# Some papers do not have an abstract
+			#if abstract:
+			#	if not isinstance(abstract, basestring):
+			#		text += "\n" + abstract[0]
+			#	else:
+			#		text += "\n" + abstract
+
+			terms = set(self.process_text(" ".join(data_dict[title]["keywords"])))
+			#terms = set(self.process_text(text))
 			# Authors is list of lists, we want second element in list (the unique identifier)
 			authors = [author[1] for author in data_dict[title]["authors"]]
+			#authors = [(author[0], author[1]) for author in data_dict[title]["authors"]]
 			# For each keyword term in this paper, add authors to postings set
+			if "java" in terms:
+				print title
 			for term in terms:
-				self.index[term].update(authors)
+				term = term.encode("utf-8")
+				#self.index[term].update(authors)
+				self.index[term].add(title)
 
 
 	# TODO is text coming in as a string or a list?
@@ -29,11 +55,38 @@ class Search(object):
 	# NB not making tokens into a set because this same method will be used on query
 	# and want to keep query as full phrase with repeated words if the case
 	def process_text(self, text):
+		prtr = stem.porter.PorterStemmer()
 		# Tokenise
 		tokens = text.lower().split()
+		tokens = [prtr.stem(token) for token in tokens]
+
 		# TODO do stemming, lemmatization etc.. NLTK?
 
 		return tokens
+
+
+	def make_author_kw_index(self, data_dict=None):
+		akw_index = {}
+		for title in data_dict:
+			kw_string = "|".join(data_dict[title]["keywords"])
+			for author in data_dict[title]["authors"]:
+				authorid = author[1].encode("utf-8")
+				if authorid in akw_index:
+					akw_index[authorid] += kw_string + "|"
+				else:
+					akw_index[authorid] = kw_string + "|"
+
+		return akw_index
+
+	def make_title_kw_index(self, data_dict=None):
+		#titles = [title.encode("utf-8") for title in data_dict.keys()]
+		tkw = {}
+		for paper_id, info in data_dict.items():
+			paper_id = paper_id.encode("utf-8")
+			del info["abstract"]
+			tkw[paper_id] = info
+
+		return tkw
 
 	def get_index(self):
 		return self.index

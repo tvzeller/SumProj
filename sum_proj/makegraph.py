@@ -63,10 +63,10 @@ def get_and_graph():
 		#author_names = [author_name for author_name, author_url in author_name_urls]
 
 		# Put names in Title First Name Last Name order
-		for title, data in coauthor_dict.items():
+		for paper_id, data in coauthor_dict.items():
 			authors = data["authors"]
 			newauthors = [(anu[0].split(", ")[1] + " " + anu[0].split(", ")[0], anu[1]) for anu in authors]
-			coauthor_dict[title]["authors"] = newauthors
+			coauthor_dict[paper_id]["authors"] = newauthors
 
 		# Do the same for author_name_urls
 		# TODO is this necessary? Because we're checking against urls - could even just give gm the urls
@@ -200,6 +200,7 @@ def make_schools_graph():
 
 	seen_pairs = set()
 
+	# TODO use unigraph.edges() and avoid having to check if pair has already been seen...
 	for author in unigraph.nodes():
 		school1 = unigraph.node[author]["school"]
 		# TODO can't get num_papers from unigraph because not accurate.. 
@@ -217,6 +218,9 @@ def make_schools_graph():
 				continue
 			
 			if schools_graph.has_edge(school1, school2):
+				# TODO I think this incrementing should only happen if paper has not yet been seen
+				# what we want is the number of papers that involve people from the different schools, so just add 1 for each title
+				# TODO this is really a TODO
 				schools_graph[school1][school2]["num_collabs"] += edgeattribs["num_collabs"]
 				# Check if papers are already in title_urls to avoid repetition
 				for title_url in edgeattribs["collab_title_urls"]:
@@ -253,10 +257,10 @@ def make_indices():
 
 		dd = textutils2.add_kw_to_data(dd)
 
-		for title, data in dd.items():
+		for paper_id, data in dd.items():
 			authors = data["authors"]
 			newauthors = [(anu[0].split(", ")[1] + " " + anu[0].split(", ")[0], anu[1]) for anu in authors]
-			dd[title]["authors"] = newauthors
+			dd[paper_id]["authors"] = newauthors
 		
 		srch = search.Search()
 		srch.make_index(dd)
@@ -276,11 +280,11 @@ def make_indices():
 		she.close()
 
 		#akw_indx = srch.make_author_kw_index(dd)
-		tkw_indx = srch.make_title_kw_index(dd)
-		she = shelve.open("../grc/indices/titlekwindex2.db")
+		pkw_indx = srch.make_paper_kw_index(dd)
+		she = shelve.open("../grc/indices/paperkwindex2.db")
 		#she.update(akw_indx)
-		for title in tkw_indx:
-			she[title] = tkw_indx[title]
+		for paper_id in pkw_indx:
+			she[paper_id] = pkw_indx[paper_id]
 			# if title in she:
 			# 	she[author] += akw_indx[author]
 			# else:

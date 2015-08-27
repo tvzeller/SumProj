@@ -20,7 +20,8 @@ def add_kw_to_data(ext, data_dict=None):
 	extractor.filter = extract.DefaultFilter(singleStrengthMinOccur=4, noLimitStrength=3)
 	#extractor.filter = extract.permissiveFilter
 
-	for title, info in data_dict.items():
+	for paper_id, info in data_dict.items():
+		title = info['title']
 		# If paper does not already have associated keywords
 		if not info["keywords"]:
 			text = title + " " + title
@@ -37,11 +38,12 @@ def add_kw_to_data(ext, data_dict=None):
 			#keyphrases = [kp[0].lower() for kp in keyphrases]
 			keyphrases = ext.get_keywords(text, 5)
 
-			data_dict[title]["keywords"] = keyphrases
+			data_dict[paper_id]["keywords"] = keyphrases
 
 		# make existing keywords lower case
 		else:
-			data_dict[title]["keywords"] = [kp.lower() for kp in info["keywords"]]
+			# put existing keywords in a tuple like the ones coming from tfidf
+			data_dict[paper_id]["keywords"] = [(kp.lower(), 1) for kp in info["keywords"]]
 
 	return data_dict
 
@@ -79,8 +81,9 @@ def make_stuff():
 
 
 def add_the_text(dd, ext):
-	for title, info in dd.items():
-		# If paper does not already have associated keywords
+	for paper_id, info in dd.items():
+		title = info['title']
+		
 		text = title
 		abstract = info["abstract"]
 		if abstract:
@@ -107,7 +110,9 @@ def make_author_kw():
 		for info in dd.values():
 			authors = info["authors"]
 			keywords = info["keywords"]
-			kw_string = " ".join(keywords)
+			# get just keywords, without scores:
+			just_kw = [kw[0] for kw in keywords]
+			kw_string = " ".join(just_kw)
 			tf2.add_text(kw_string)
 
 	for data_file in data_files:
@@ -131,7 +136,9 @@ def make_author_kw():
 
 		
 		for author, info in authorkw.items():
-			kw_string = " ".join(info["keywords"])
+			just_kw = [kw[0] for kw in info["keywords"]]
+			kw_string = " ".join(just_kw)
+
 			new_kw = tf2.get_keywords(kw_string, 20)
 			authorkw[author]["keywords"] = new_kw
 
@@ -171,26 +178,32 @@ def make_sim_graph(akw, name):
 	for i in range (0, len(authors)):
 		author1 = authors[i]
 		author1name = values[i]["name"]
+		keywords = values[i]["keywords"]
+
 		sim_graph.add_node(author1, {
-									"name": author1name, 
+									"name": col_graph.node[author1]["name"], 
 									"in_school":col_graph.node[author1]["in_school"],
-									"paper_count":col_graph.node[author1]["paper_count"]
+									"paper_count":col_graph.node[author1]["paper_count"],
+									"keywords":keywords
 									})
 
-		keywords = values[i]["keywords"]
-		stemmed1 = stem_words(keywords[:])
+		
+		stemmed1 = stem_words([kw[0] for kw in keywords])
 
 		for j in range(i+1, len(authors)):
 			author2 = authors[j]
 			author2name = values[j]["name"]
+			keywords2 = values[j]["keywords"]
+
 			sim_graph.add_node(author2, {
-										"name":author2name,
+										"name": col_graph.node[author2]["name"],
 										"in_school":col_graph.node[author1]["in_school"],
-										"paper_count":col_graph.node[author1]["paper_count"]
+										"paper_count":col_graph.node[author1]["paper_count"],
+										"keywords": keywords2
 										})
 
-			keywords2 = values[j]["keywords"]
-			stemmed2 = stem_words(keywords2[:])
+			
+			stemmed2 = stem_words([kw[0] for kw in keywords2])
 
 			sim = check_sim(stemmed1, stemmed2)
 			ratio = sim[0]
@@ -203,10 +216,12 @@ def make_sim_graph(akw, name):
 
 
 			for index in indices:
-				matched_words.append(longest[index])
+				matched_words.append(longest[index][0])
 
 			if ratio > 0.2:
 				sim_graph.add_edge(author1, author2, {"num_collabs":ratio, "sim_kw": matched_words})
+				if col_graph.has_edge(author1, author2):
+					sim_graph[author1][author2]["areCoauthors"] = True
 
 	return sim_graph
 
