@@ -708,24 +708,26 @@ function startItUp(graph) {
                                     .on("mouseout", lowlightJustNode);
 
     if(currentViz == vizTypes.SIMILARITY)
-      d3.selectAll(".numCollabs").on("click", showKeywords)
-    else {
-      d3.selectAll(".numCollabs").on("click", function() {
-        showTitles(connections, this);
-      });
-    }
+      d3.selectAll(".numCollabs").on("click", showKeywords);
+    else
+      d3.selectAll(".numCollabs").on("click", showTitles);
   }
 
-  //N.b. connections is an array of links incident to the node whose collaborations are showing
-  function showTitles(connections, sel) {
-    var elemId = sel.id;
+  //N.b. connections is an array of links incident to the node whose collaborations are showing TODO not using this anymore
+  function showTitles() {
+    var elemId = this.id;
     console.log("elemid")
     console.log(elemId);
+    console.log("LINK")
+    console.log(link)
+    //console.log("jetsons")
+    //theLinks = force.links()
     // Need to get the link which corresponds to this number of papers...
     // there must be a nicer way of doing this?
-    //connections.each(function(l) {
-    for(var i=0; i<connections.length; i++) {
-      var l = connections[i];
+    link.each(function(l) {
+    //for(var i=0; i<theLinks.length; i++) {
+      //break;
+      //var l = theLinks[i];
       console.log(l.source.id + "-" + l.target.id)
       if(l.source.id + "-" + l.target.id === elemId) {
         var title_urls = l.collab_title_urls;
@@ -748,7 +750,7 @@ function startItUp(graph) {
                                     .on("mouseout", lowlightJustNode);
    
       }
-    }//);
+    });
   }
 
   // TODO refactor to use just one method for show titles and show keywords
@@ -1032,8 +1034,15 @@ function startItUp(graph) {
       infoText += getAuthorNameHtml(n) + n.name + "</span>: " + Math.round(n[metric] * 1000) / 1000 + "<br><br>"
     }
     displayInfoBox(infoText)
-    d3.selectAll(".authorName").on("mouseover", highlightThisNode)
-                                .on("mouseout", lowlight);
+    d3.selectAll(".authorName").on("click", function() {
+                                    //var sel = d3.select(this);
+                                    //var theId = sel.attr("id");
+                                    var theId = d3.select(this).attr("id");
+                                    displayInfoForThisNode(theId);
+                                    highlightPathsForThisNode(theId);
+                                      })
+                                    .on("mouseover", highlightThisNode)
+                                    .on("mouseout", lowlightJustNode);
   }
 
   
@@ -1106,7 +1115,7 @@ function startItUp(graph) {
     var infoText = "The authors in the network can be divided into communities based on the patterns of collaboration. Below are the \
               communities for this network.<br><br>"
     for(var i=0; i<arr.length; i++) {
-      infoText += "<strong><span id=\"" + i + "\" class=\"comTitle\">Community " + i + "</strong><br>";
+      infoText += "<strong><span id=\"" + i + "\" class=\"comTitle clickable\">Community " + i + "</strong><br>";
       var thisCommunity = arr[i];
       for(var j=0; j < thisCommunity.length; j++) {
         var author = thisCommunity[j];
@@ -1139,8 +1148,8 @@ function startItUp(graph) {
   }
 
   function singleCommunityText(comNumber) {
-    var infoText = "<strong><span id=\"" + comNumber + "\" class=\"comTitle\">Community " + comNumber + "</strong><br>";
-    infoText += "<span id=\"backToFull\">[back to full graph]</span><br><br>"
+    var infoText = "<strong>Community " + comNumber + "</strong><br>";
+    infoText += "<span class=\"clickable\" id=\"backToFull\">[back to full graph]</span><br><br>"
     theNodes = force.nodes()
     for(var i=0; i<theNodes.length; i++) {
       var author = theNodes[i]
@@ -1154,6 +1163,7 @@ function startItUp(graph) {
       }
     }
     displayInfoBox(infoText);
+    
     d3.select("#backToFull").on("click", function() {
       var school = nameText.text()
       if(just_school) {
@@ -1165,6 +1175,7 @@ function startItUp(graph) {
       //colourByCommunities()
       getCommunities()
     });
+
     //var theNodes = force.nodes()
     var theLinks = force.links()
     var comFilteredLinks = graph.links.filter(function(l) {
@@ -1542,7 +1553,8 @@ function displayInfoBox(text) {
     d3.select("#infoArea").style("visibility", "hidden");
   });
 
-  $("#infoArea").draggable();   
+  $("#infoArea").draggable();
+  $("#infoArea").scrollTop(0);    
 }
 
 

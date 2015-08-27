@@ -254,5 +254,17 @@ ul ul ul {
   cursor: pointer;
 }
 
+.comTitle {
+  color:#2ecc71;
+}
+
+#backToFull {
+  text-decoration: underline;
+  color:#2ecc71;
+  font-size: 12px;
+}
+
+
+
 
 
