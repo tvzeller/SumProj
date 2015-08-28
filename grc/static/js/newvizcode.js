@@ -16,9 +16,11 @@ var vizTypes = {
 
 var freezeTimeOut;
 
-//var dragged;
+// Used to avoid dragging being treated like a click
 var downX;
 var downY;
+
+var searchedNodes = []
 
 var SHORTESTPATHERROR = 1;
 var LONGESTPATHERROR = 2;
@@ -439,27 +441,27 @@ function startItUp(graph) {
       downY = coords[1];
      });
 
-      node.on("mouseup", function(d) {
-        //console.log("DRAAGGGED");
-        //console.log(dragged);
-        var coords = d3.mouse(this);
-        var upX = coords[0];
-        var upY = coords[1];
-        if(upX == downX && upY == downY) {
-          showCollabInfo(d)
-          highlight(d);
-        }
-      });
+    node.on("mouseup", function(d) {
+      //console.log("DRAAGGGED");
+      //console.log(dragged);
+      var coords = d3.mouse(this);
+      var upX = coords[0];
+      var upY = coords[1];
+      if(upX == downX && upY == downY) {
+        showCollabInfo(d)
+        highlight(d);
+      }
+    });
 
-      //node.on("mouseover", highlight);
-      d3.selectAll(".nodeCircle").on("mouseover", highlightJustNode);
-      d3.selectAll(".nodeCircle").on("mouseout", lowlightJustNode);
-      //node.on("mouseover", highlightJustNode);
-     // node.on("mouseout", lowlight);
-      //node.on("dblclick", highlight);
+    //node.on("mouseover", highlight);
+    d3.selectAll(".nodeCircle").on("mouseover", highlightJustNode);
+    d3.selectAll(".nodeCircle").on("mouseout", lowlightJustNode);
+    //node.on("mouseover", highlightJustNode);
+   // node.on("mouseout", lowlight);
+    //node.on("dblclick", highlight);
 
 
-    // nodeCountText.text(node[0].length + " nodes");
+  // nodeCountText.text(node[0].length + " nodes");
   }
 
 
@@ -583,14 +585,12 @@ function startItUp(graph) {
     //console.log(d3.select(this))
     //console.log(d);
     d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
-      if(d == circ)
+      if(d == circ || searchedNodes.indexOf(circ) != -1)
         return "3px";
     })
   }
 
   function highlightNodeGroup(arr) {
-    console.log("HILITE")
-    console.log(arr)
     d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
       for(var i=0; i<arr.length; i++) {
         theNode = arr[i];
@@ -600,8 +600,11 @@ function startItUp(graph) {
     });
   }
 
-  lowlightJustNode = function() {
-    d3.selectAll(".nodeCircle").style("stroke-width", "1px");
+  lowlightJustNode = function(d) {
+    d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
+      if(searchedNodes.indexOf(circ) != -1)
+        return "3px";
+    });
   }
 
 
@@ -611,8 +614,12 @@ function startItUp(graph) {
     //alert("clicked");
     d3.selectAll(".singleLabel").remove()
     link.style("stroke", function(l) {
-      if (l.source == d || l.target == d)
-        return "#FF3030";
+      if (l.source == d || l.target == d) {
+        if(currentViz == vizTypes.SIMILARITY && !l.areCoauthors)
+          return "#2ca02c";
+        else
+          return "#FF3030";
+      }
       else
         //return linkColour;
         return getLinkColour(l);
@@ -621,7 +628,7 @@ function startItUp(graph) {
       if (l.source == d || l.target == d)
         return 1.0
       else
-        return 0.2
+        return 0.15
     });
 
     node.style("opacity", function(o) {
@@ -630,7 +637,7 @@ function startItUp(graph) {
       else if(d==o)
         return 1.0
       else
-        return 0.2
+        return 0.15
     });
 
     if(!labeled) {
@@ -865,6 +872,7 @@ function startItUp(graph) {
   // Attach drag event listener to nodes so they can be moved around in static mode
   function freeze() {
     force.stop();
+    frozen = true;
     node.call(staticDrag);
   }
 
@@ -874,13 +882,18 @@ function startItUp(graph) {
     node.on(".drag", null)
     node.call(force.drag);
     force.resume();
+    frozen = false;
   }
 
   function update(links, nodes) {
+    // Every time the graph is updated, clear any currently running time out
     clearTimeout(freezeTimeOut)
+    // This timeout function stops the simulation after a certain amount of time
+    var timeToFreeze = Math.min(5000 + (nodes.length * links.length), 15000);
     freezeTimeOut = setTimeout(function() {
       freeze();
-    }, 10000);
+      console.log("STOPPED")
+    }, timeToFreeze);
 
     //TODO change back to filtered
     console.log("in update")
@@ -979,11 +992,11 @@ function startItUp(graph) {
   d3.select("#freeze").on("click", function() {
     if(frozen) {
       defrost();
-      frozen = false;
+      //frozen = false;
     }
     else {
       freeze()
-      frozen = true;
+      //frozen = true;
     }
   });
 
@@ -1015,17 +1028,21 @@ function startItUp(graph) {
   });
 
   d3.select('#nodeSearch').on("keyup", function() {
+    // Clear array of searched nodes
+    searchedNodes  = []
     searchText = this.value.toLowerCase();
     d3.selectAll(".nodeCircle").style("stroke", function(d) {
-      if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
-        return "orange"; 
+      if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0) {
+        searchedNodes.push(d)
+        return "orange";
+      } 
       else
         return "black";
       })
       .style("stroke-width", function(d) {
         if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
           return "3px";
-      });           
+      });         
   });
 
 
@@ -1657,4 +1674,4 @@ d3.select("#kwSearch").on("keyup", function() {
 displayInfoBox(introText);
 getData("School of Computing Science", "collab");
 nameText.text("School of Computing Science");
-typeText.text("collaboration graph");
+typeText.text("collaboration network");
