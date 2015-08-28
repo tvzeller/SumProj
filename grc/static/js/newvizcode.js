@@ -1255,25 +1255,60 @@ function startItUp(graph) {
     }
   }
 
+  // TODO use array filtering to do this instead
+  function getNodesInCom(comNum) {
+    nodesInCom = []
+    theNodes = force.nodes()
+    for(var i=0; i<theNodes.length; i++) {
+      var author = theNodes[i]
+      if(just_school) {
+        if(author.school_com == comNum)
+          nodesInCom.push(author)
+      }
+      else {
+        if(author.com == comNum)
+          nodesInCom.push(author)
+      }
+    }
+    return nodesInCom;   
+  }
+
   function singleCommunityText(comNumber) {
+    var comNodes = getNodesInCom(comNumber)
+    //console.log("COMNODES");
+    //console.log(comNodes);
+
+    //var keywords = getComKeywords(comNodes)
+
     return function() {
       var infoText = "<strong>Community " + comNumber + "</strong><br>";
-      infoText += "<span class=\"clickable\" id=\"backToFull\">[back to full graph]</span><br><br>"
-      theNodes = force.nodes()
+      infoText += "<span class=\"clickable\" id=\"backToFull\">[back to full graph]</span><br>"
+      infoText += "<span class=\"clickable\" id= \"singleComTextOption\">[see community keywords]</span><br><br>"
+      infoText += "<span id=\"singleComTextArea\">"
+      
+      var comNames = ""
+      /*theNodes = force.nodes()
       for(var i=0; i<theNodes.length; i++) {
         var author = theNodes[i]
         if(just_school) {
           if(author.school_com == comNumber)
-            infoText += getAuthorNameHtml(author) + author.name + "</span><br>"
+            comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
         }
         else {
           if(author.com == comNumber)
-            infoText += getAuthorNameHtml(author) + author.name + "</span><br>"
+            comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
         }
+      }*/
+      for(var i=0; i<comNodes.length; i++) {
+        author = comNodes[i];
+        comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
+        console.log(comNames)
       }
+      infoText += comNames;
+      infoText += "</span>"
       displayInfoBox(infoText);
       
-      d3.selectAll(".authorName").on("click", function() {
+      /*d3.selectAll(".authorName").on("click", function() {
                                       var theId = d3.select(this).attr("id");
                                       console.log("IDIDIDIIDALL");
                                       console.log(theId);
@@ -1281,11 +1316,12 @@ function startItUp(graph) {
                                       highlightPathsForThisNode(theId);
                                         })
                                       .on("mouseover", highlightThisNode)
-                                      .on("mouseout", lowlightJustNode);
-                          
-                                    
+                                      .on("mouseout", lowlightJustNode);*/
 
-      
+
+      addNameListHandlers()
+    
+                                          
       d3.select("#backToFull").on("click", function() {
         var school = nameText.text()
         if(just_school) {
@@ -1296,6 +1332,18 @@ function startItUp(graph) {
         }
         //colourByCommunities()
         getCommunities()
+      });
+
+      d3.select("#singleComTextOption").on("click", function() {
+        var textArea = d3.select("#singleComTextArea")
+        var currentText = textArea.html()
+        if(currentText == comNames)
+          textArea.html(comKeywords)
+        else {
+          textArea.html(comNames)
+          addNameListHandlers()
+        }
+
       });
 
       //var theNodes = force.nodes()
@@ -1315,6 +1363,46 @@ function startItUp(graph) {
       });
       update(comFilteredLinks, comFilteredNodes)*/
     }
+  }
+
+  // TODO this doesn't work because nodes in collab graphs don't have keywords
+  // Do this outside - add keywords as attribute of communities in networkx graph (e.g. 20 kw each)
+  function getComKeywords(comNodes) {
+    allKeywords = {}
+    for(var i=0; i<comNodes.length; i++) {
+      // Get keyword array
+      authorKw = comNodes[i].keywords;
+      for(var j=0; j<authorKw.length; j++) {
+        var kw = authorKw[j];
+        if(allKeywords.hasOwnProperty(kw))
+          allKeywords.kw += 1;
+        else
+          allKeywords.kw = 1;
+      }
+    }
+
+    keywordText = ""
+    for(var prop in allKeywords) {
+      if(allKeywords.hasOwnProperty(prop))
+        keywordText += prop + " ";
+    }
+    console.log("KEyWORDS");
+    console.log(keywordText);
+
+  }
+
+
+
+  function addNameListHandlers() {
+    d3.selectAll(".authorName").on("click", function() {
+                                var theId = d3.select(this).attr("id");
+                                console.log("IDIDIDIIDALL");
+                                console.log(theId);
+                                displayInfoForThisNode(theId);
+                                highlightPathsForThisNode(theId);
+                                  })
+                                .on("mouseover", highlightThisNode)
+                                .on("mouseout", lowlightJustNode);                    
   }
 
   function showSingleCommunityGraph(comNumber) {
@@ -1338,7 +1426,8 @@ function startItUp(graph) {
 
 
   d3.selectAll(".colourChoice").on("click", function() {
-    metricView = false;
+    if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE)
+      metricView = false;
     var choice = d3.select(this).attr("id");
     console.log("the choice was" + choice)
     if(choice == "defaultColours")
@@ -1429,56 +1518,83 @@ function startItUp(graph) {
 
 
   d3.select("#shortest").on("click", function() {
-    shortestPathBox();
+    lastInfoBox = shortestPathBox();
+    lastInfoBox();
   });
 
   // TODO using a global variable here as a quick fix, please revise
   // e.g. put this outside startitup
   shortestPathBox = function(errorType, errorMessage) {
-    var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the name or, for more accurate \
-        results, the unique Enlighten numbers of the source and target authors. You can find out an author's identifier by checking their \
-        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" \
-        placeholder=\"source\"/><br><br><span id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
-        <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
-        <span id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
+    return function() {
+      var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the name or, for more accurate \
+          results, the unique Enlighten numbers of the source and target authors. You can find out an author's identifier by checking their \
+          url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" \
+          placeholder=\"source\"/><br><br><span id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
+          <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
+          <span id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
 
-    /*if(errorType == SHORTESTPATHERROR)
-      info += "<br>" + errorMessage + "<br>";*/
-      info += "<span id=\"shortestError\"></span>"
+      /*if(errorType == SHORTESTPATHERROR)
+        info += "<br>" + errorMessage + "<br>";*/
+        info += "<span id=\"shortestError\"></span>"
 
-    info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br> \
-            <br><input type=\"text\" id=\"longestInput\" \
-            placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span> \
-            <button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
+      info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br> \
+              <br><input type=\"text\" id=\"longestInput\" \
+              placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span> \
+              <button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
 
-    /*if(errorType == LONGESTPATHERROR)
-      info += errorMessage*/
-    info += "<span id=\"longestError\"></span>"
+      /*if(errorType == LONGESTPATHERROR)
+        info += errorMessage*/
+      info += "<span id=\"longestError\"></span>"
 
-    displayInfoBox(info);
-    d3.select("#shortestButton").on("click", getShortest);
-    d3.select("#longestButton").on("click", getLongest);
+      displayInfoBox(info);
+      d3.select("#shortestButton").on("click", getShortest);
+      d3.select("#sourceInput").on("keyup", function() {
+        if(d3.event.keyCode == 13)
+          getShortest();
+      });
+      d3.select("#targetInput").on("keyup", function() {
+        if(d3.event.keyCode == 13)
+          getShortest();
+      })
+      d3.select("#longestButton").on("click", getLongest);
+      
+      d3.select("#longestInput").on("keyup", function() {
+        if(d3.event.keyCode == 13)
+          getLongest();   
+      })
+    }
   }
 
   d3.select("#single").on("click", function() {
-    singleAuthorBox();
+    lastInfoBox  = singleAuthorBox();
+    lastInfoBox();
   })
 
   singleAuthorBox = function(errorMessage) {
-    var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please enter the name or, for more \
-        accurate results, the unique Enlighten number \
-        of the author whose graph you want to see. You can find out an author's identifier by checking their \
-        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
-        placeholder=\"source\"/><br><br> \
-        <span id=\"singleCandidates\" data-input=\"singleInput\"></span> \
-        Choose how far you want the graph to reach (up to 3 hops)<br><br><input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
-        <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
+    return function() {
+      var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please enter the name or, for more \
+          accurate results, the unique Enlighten number \
+          of the author whose graph you want to see. You can find out an author's identifier by checking their \
+          url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
+          placeholder=\"source\"/><br><br> \
+          <span id=\"singleCandidates\" data-input=\"singleInput\"></span> \
+          Choose how far you want the graph to reach (up to 3 hops)<br><br><input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
+          <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
 
-    //if(errorMessage)
-    info += "<span id=\"singleError\"></span>"
+      //if(errorMessage)
+      info += "<span id=\"singleError\"></span>"
 
-    displayInfoBox(info);
-    d3.select("#singleButton").on("click", getSingle);
+      displayInfoBox(info);
+      d3.select("#singleButton").on("click", getSingle);
+      d3.select("#singleInput").on("keyup", function() {
+        if(d3.event.keyCode == 13)
+          getSingle();   
+      });
+      d3.select("#cutoffInput").on("keyup", function() {
+        if(d3.event.keyCode == 13)
+          getSingle();   
+      });
+    }
   }
 
 
@@ -1499,13 +1615,14 @@ function getData(name, type) {
 
 
 var getShortest = function() {
-  metricView = false;
+  //metricView = false;
   var sourceInfo = $("#sourceInput").val().toLowerCase();
   var targetInfo = $("#targetInput").val().toLowerCase();
   console.log(sourceInfo);
-  console.log(targetInfo)
+  console.log(targetInfo);
   if(!sourceInfo || !targetInfo)
-    shortestPathBox(SHORTESTPATHERROR, "please enter both authors");
+    //shortestPathBox(SHORTESTPATHERROR, "please enter both authors");
+    d3.select("#shortestError").html("<br>please enter both authors<br>");
   else {
     $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
       //graph_data = JSON.parse(data);
@@ -1517,6 +1634,7 @@ var getShortest = function() {
 var getLongest = function() {
   metricView = false;
   var source = $("#longestInput").val().toLowerCase();
+  console.log(source)
   if(!source)
     shortestPathBox(LONGESTPATHERROR, "please enter an author");
   else {
@@ -1564,7 +1682,9 @@ function doShortestViz(data, errorType) {
     console.log(sourceName)
     nameText.text(sourceName + " to")
     typeText.text(targetName)
-    shortestPathBox();
+    lastInfoBox = shortestPathBox();
+    lastInfoBox();
+    metricView = true;
 
     var metricsList = d3.select("#metricsList");
     metricsList.html("<li>No metrics available for shortest path graph</li>")
@@ -1604,11 +1724,11 @@ function displayCandidates(sel, candidates) {
 }
 
 var getSingle = function() {
-  metricView = false;
+  //metricView = false;
   var authorInfo = $("#singleInput").val().toLowerCase();
   var cutoff = $("#cutoffInput").val()
-  if(cutoff > 3)
-    d3.select("#singleError").html("Please enter a number up to 3");
+  if(!cutoff || cutoff < 0 || cutoff > 3)
+    d3.select("#singleError").html("Please enter a number betwen 0 and 3");
   else {
       $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
         console.log("SINGLEERROR");
@@ -1633,10 +1753,15 @@ var getSingle = function() {
           }
           nameText.text(name);
           typeText.text("cutoff of " + cutoff);
+          startItUp(data)
+
+          lastInfoBox = singleAuthorBox();
+          lastInfoBox();
+          metricView = true;
           //d3.selectAll(".metricsMenu").style("visibility", "hidden");
           var metricsList = d3.select("#metricsList");
           metricsList.html("<li>No metrics available for single author graph</li>")
-          startItUp(data)
+          
         }
       // TODO do we need this else to catch other situations?
       else {
