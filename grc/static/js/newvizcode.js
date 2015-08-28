@@ -16,6 +16,10 @@ var vizTypes = {
 
 var freezeTimeOut;
 
+//var dragged;
+var downX;
+var downY;
+
 var SHORTESTPATHERROR = 1;
 var LONGESTPATHERROR = 2;
 
@@ -281,6 +285,7 @@ function startItUp(graph) {
   // In static mode, disable highlighting when dragging a node
   function dragstart(d, i) {
     node.on("mouseover", null);
+    //dragged = true;
   }
 
   function dragmove(d, i) {
@@ -291,11 +296,13 @@ function startItUp(graph) {
     d.x = d3.event.x;
     d.y = d3.event.y;
     tick();
+
   }
 
     // reenable highlighting when finished dragging node
   function dragend(d, i) {
     //node.on("mouseover", highlight)
+    //dragged = true;
   }
 
   // Used to bind new node data to visual elements and display
@@ -422,11 +429,26 @@ function startItUp(graph) {
       // attach event listeners here so they get attached to new nodes as well
 
       //node.on("click", fixNode)
-      node.on("click", showCollabInfo);
+     // node.on("click", showCollabInfo);
 
-      node.on("click", function(d) {
-        showCollabInfo(d)
-        highlight(d);
+     // Record mousedown coordinates to compare with mouseup coordinates
+     // So that dragging a node does not do the same as just clicking it in place
+     node.on("mousedown", function() {
+      var coords = d3.mouse(this);
+      downX = coords[0];
+      downY = coords[1];
+     });
+
+      node.on("mouseup", function(d) {
+        //console.log("DRAAGGGED");
+        //console.log(dragged);
+        var coords = d3.mouse(this);
+        var upX = coords[0];
+        var upY = coords[1];
+        if(upX == downX && upY == downY) {
+          showCollabInfo(d)
+          highlight(d);
+        }
       });
 
       //node.on("mouseover", highlight);
