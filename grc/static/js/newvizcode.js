@@ -14,6 +14,8 @@ var vizTypes = {
   // etc.
 }
 
+var metricView;
+
 var freezeTimeOut;
 
 var lastInfoBox;
@@ -705,7 +707,9 @@ function startItUp(graph) {
     }
     if(!onCircle) {
       lowlight();
-      lastInfoBox();
+      if(metricView == true) {
+        lastInfoBox();
+      }
     }
   });
 
@@ -1067,7 +1071,9 @@ function startItUp(graph) {
     colourByMetric(metric);
     var keyArray = [["white", "least " + name], ["red", "most " + name]];
     makeKey(keyArray);
-    displayMetricText(metric, name, descrptn)
+    lastInfoBox = displayMetricText(metric, name, descrptn)
+    lastInfoBox();
+    metricView = true;
   });
 
  
@@ -1090,27 +1096,29 @@ function startItUp(graph) {
   }
 
   function displayMetricText(metric, name, description) {
-    var infoText = description +
-              "<br><br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
-              (note that this metric is calculated for the full graph, including non-school members)<br><br>"
-    theNodes = force.nodes()  
-    theNodes.sort(function(a, b) {
-      return b[metric]-a[metric];
-    });
-    for(var i=0, len=theNodes.length; i<len; i++) {
-      n = theNodes[i]
-      infoText += getAuthorNameHtml(n) + n.name + "</span>: " + Math.round(n[metric] * 1000) / 1000 + "<br><br>"
+    return function() {
+      var infoText = description +
+                "<br><br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
+                (note that this metric is calculated for the full graph, including non-school members)<br><br>"
+      theNodes = force.nodes()  
+      theNodes.sort(function(a, b) {
+        return b[metric]-a[metric];
+      });
+      for(var i=0, len=theNodes.length; i<len; i++) {
+        n = theNodes[i]
+        infoText += getAuthorNameHtml(n) + n.name + "</span>: " + Math.round(n[metric] * 1000) / 1000 + "<br><br>"
+      }
+      displayInfoBox(infoText)
+      d3.selectAll(".authorName").on("click", function() {
+                                      //var sel = d3.select(this);
+                                      //var theId = sel.attr("id");
+                                      var theId = d3.select(this).attr("id");
+                                      displayInfoForThisNode(theId);
+                                      highlightPathsForThisNode(theId);
+                                        })
+                                      .on("mouseover", highlightThisNode)
+                                      .on("mouseout", lowlightJustNode);
     }
-    displayInfoBox(infoText)
-    d3.selectAll(".authorName").on("click", function() {
-                                    //var sel = d3.select(this);
-                                    //var theId = sel.attr("id");
-                                    var theId = d3.select(this).attr("id");
-                                    displayInfoForThisNode(theId);
-                                    highlightPathsForThisNode(theId);
-                                      })
-                                    .on("mouseover", highlightThisNode)
-                                    .on("mouseout", lowlightJustNode);
   }
 
   
@@ -1166,6 +1174,7 @@ function startItUp(graph) {
     makeKey(keyArray);
     lastInfoBox = displayCommunityText(communityArray);
     lastInfoBox();
+    metricView = true;
   }
 
 
@@ -1217,6 +1226,7 @@ function startItUp(graph) {
         showSingleCommunityGraph(comNum);
         lastInfoBox = singleCommunityText(comNum);
         lastInfoBox();
+        metricView = true;
         colourByCommunities()
         // TODO comviz is now done by filtering
         //doComViz(comNum);
@@ -1328,6 +1338,7 @@ function startItUp(graph) {
 
 
   d3.selectAll(".colourChoice").on("click", function() {
+    metricView = false;
     var choice = d3.select(this).attr("id");
     console.log("the choice was" + choice)
     if(choice == "defaultColours")
@@ -1488,6 +1499,7 @@ function getData(name, type) {
 
 
 var getShortest = function() {
+  metricView = false;
   var sourceInfo = $("#sourceInput").val().toLowerCase();
   var targetInfo = $("#targetInput").val().toLowerCase();
   console.log(sourceInfo);
@@ -1503,6 +1515,7 @@ var getShortest = function() {
 }
 
 var getLongest = function() {
+  metricView = false;
   var source = $("#longestInput").val().toLowerCase();
   if(!source)
     shortestPathBox(LONGESTPATHERROR, "please enter an author");
@@ -1591,6 +1604,7 @@ function displayCandidates(sel, candidates) {
 }
 
 var getSingle = function() {
+  metricView = false;
   var authorInfo = $("#singleInput").val().toLowerCase();
   var cutoff = $("#cutoffInput").val()
   if(cutoff > 3)
@@ -1633,7 +1647,7 @@ var getSingle = function() {
 }
 
 
-function doComViz(comNumber) {
+/*function doComViz(comNumber) {
   //alert(comNumber);
   var currentSchool = nameText.text()
   //alert(currentSchool)
@@ -1642,11 +1656,12 @@ function doComViz(comNumber) {
     startItUp(data);
     //singleCommunityText(comNumber)
   });
-}
+}*/
 
 
 
 d3.selectAll(".collabListItem").on("click", function() {
+  metricView = false;
   var type = d3.select(this).attr("data-type");
   var name = d3.select(this).attr("data-name");
   var nmtext = d3.select(this).attr("data-nametext");
