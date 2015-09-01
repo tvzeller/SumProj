@@ -247,6 +247,7 @@ ul ul ul {
 }
 
 .numText {
+  font-size: 15px;
   fill: #c0c0c0;
 }
 
@@ -283,6 +284,19 @@ ul ul ul {
   margin: auto;
   text-align: center;
   margin-top:20px;
+}
+
+#yearDiv {
+  position:absolute;
+  bottom: 45%;
+  left:5%;
+  font-size: 15px;
+  color:#c0c0c0;;
+}
+
+#yearChooser {
+  color:#c0c0c0;
+  background-color: #f0f0f0;
 }
 
 

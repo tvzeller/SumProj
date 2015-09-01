@@ -20,6 +20,8 @@ var freezeTimeOut;
 
 var lastInfoBox;
 
+var allTimeLinks;
+
 // Used to avoid dragging being treated like a click
 var downX;
 var downY;
@@ -70,13 +72,13 @@ var typeText = svg.append("text")
 
 var nodeCountText = svg.append("text")
                   .attr("x", 0)
-                  .attr("y", "22%")
+                  .attr("y", "18%")
                   .attr("class", "numText");
                  /* .text("node count goes here")*/
 
 var edgeCountText = svg.append("text")
                    .attr("x", 0)
-                  .attr("y", "27%")
+                  .attr("y", "21%")
                   .attr("class", "numText");
                 /*  .text("edge count goes here")*/
 
@@ -159,6 +161,7 @@ function startItUp(graph) {
   var allNodes = graph.nodes;
   var currentLinks = allLinks;
   var currentNodes = allNodes;
+  allTimeLinks = allLinks;
   console.log(allLinks);
 
     
@@ -177,6 +180,7 @@ function startItUp(graph) {
     });
     currentLinks = filteredLinks;
     currentNodes = filteredNodes;
+    allTimeLinks = filteredLinks;
   }
 
   // link will hold all the visual elements representing links
@@ -209,7 +213,8 @@ function startItUp(graph) {
 
   // Used to bind new link data to visual elements and display
   function updateLinks(links) {
-    
+    var existingLinks = linkGroup.selectAll(".link");
+    existingLinks.remove();
     link = linkGroup.selectAll(".link")
           // Pass function as argument to data() to ensure that line elements are joined to the right link data
           // d.source.id - d.target.id uniquely identifies a link
@@ -232,7 +237,7 @@ function startItUp(graph) {
 
       if(currentViz == vizTypes.SIMILARITY) {
         minCollabs = minCollabs * 100;
-        maxCollabs = maxCollabs * 100
+        maxCollabs = maxCollabs * 100;
       }
 
       linkScale.domain([minCollabs, maxCollabs])
@@ -259,8 +264,13 @@ function startItUp(graph) {
             if(d.weight != undefined) {
               if(currentViz == vizTypes.SIMILARITY)
                 return linkScale(d.weight*100);
-              else
+              else {
+                console.log(d.source.name)
+                console.log(d.target.name)
+                console.log(d.weight);
                 return linkScale(d.weight);
+
+              }
             }
 
             else
@@ -881,6 +891,7 @@ function startItUp(graph) {
   // Make graph static by stopping the force simulation
   // Attach drag event listener to nodes so they can be moved around in static mode
   function freeze() {
+    console.log("FROZEN")
     force.stop();
     frozen = true;
     node.call(staticDrag);
@@ -993,10 +1004,12 @@ function startItUp(graph) {
     if(just_school) {
       just_school = false;
       update(allLinks, allNodes)
+      allTimeLinks = allLinks;
     }
     else {
       just_school = true;
       update(filteredLinks, filteredNodes)
+      allTimeLinks = filteredLinks;
     }
     d3.select("#infoArea").style("visibility", "hidden");
     d3.select("#metricsList").html(metricsHtml);
@@ -1014,6 +1027,117 @@ function startItUp(graph) {
       //frozen = true;
     }
   });
+
+//TODO put somewhere else
+  //if(currentViz == vizTypes.AUTHOR_COLLAB) {
+  function updateYearChooser() {
+    theLinks = allTimeLinks;
+    console.log("YEARRRS")
+    var maxYear = Math.max.apply(Math, theLinks.map(function(l){
+      for(var i=0; i<l.collab_title_url_years.length; i++)
+        return l.collab_title_url_years[i][2]
+    }));
+
+    var minYear = Math.min.apply(Math, theLinks.map(function(l){
+      for(var i=0; i<l.collab_title_url_years.length; i++)
+        return l.collab_title_url_years[i][2]
+    }));
+
+    console.log("MAXYEAR");
+    console.log(maxYear)
+    console.log(minYear)
+    yearChooser = d3.select("#yearChooser");
+    var options = "<option value=\"all\">all time</option>";
+    for(var i=maxYear; i>=minYear; i--) {
+      options += "<option value=\"" + i + "\">up to " + i + "</option>"
+    }
+    yearChooser.html(options)
+
+  //}
+  }
+  updateYearChooser();
+
+
+  d3.select("#yearChooser").on('change', function() {
+    chosenYear = this.options[this.selectedIndex].value;
+    var theNodes = force.nodes()
+    if(chosenYear === "all") {
+      /*if(just_school) 
+        update(filteredLinks, filteredNodes);
+      else
+        update(allLinks, allNodes);*/
+      updateJustLinks(allTimeLinks)
+    }
+    else {
+
+      /*if(just_school) {
+        var theLinks = copyArray(filteredLinks);
+        console.log("LIIINKS")
+        console.log(theLinks)
+      }
+      else
+        var theLinks = copyArray(allLinks);*/
+      var theLinks = copyArray(allTimeLinks);
+
+      chosenYear = parseInt(chosenYear)
+      var yearFilteredLinks = theLinks.filter(function(l) {
+        var count = 0
+        var collabs = []
+        for(var i=0; i<l.collab_title_url_years.length; i++) {
+          if(l.collab_title_url_years[i][2] <= chosenYear) {
+            collabs.push(l.collab_title_url_years[i]);
+            count += 1;
+
+          }
+        }
+        if(count > 0) {
+          console.log("original weight")
+          console.log(l.weight)
+          l.weight = count;
+          console.log("new weight")
+          console.log(l.weight);
+          l.num_collabs = count;
+          l.collab_title_url_years = collabs;
+          return true;
+        }
+        else
+          return false
+
+      })
+     /* for(var i=0; i<yearFilteredLinks.length; i++) {
+        aLink = yearFilteredLinks[i];
+        var collabs = aLink.collab_title_url_years
+        collabs = collabs.filter(function(c) {
+          return c[2] == chosenYear;
+        })
+        aLink.collab_title_url_years = collabs
+      }*/
+
+      theNodes = force.nodes();
+      updateJustLinks(yearFilteredLinks)
+
+    } 
+      /*var comFilteredLinks = graph.links.filter(function(l) {
+      return nodeArray.indexOf(l.source) > -1 && nodeArray.indexOf(l.target) > -1;*/
+  });
+
+  function updateJustLinks(newLinks) {
+    updateLinks(newLinks);
+    force.links(newLinks);
+    force.resume();
+  }
+
+  function copyArray(arr) {
+    arrCopy = []
+    for(var i=0; i<arr.length; i++) {
+      var original = arr[i];
+      var objCopy = JSON.parse(JSON.stringify(original));
+      objCopy.source = original.source;
+      objCopy.target = original.target;
+      arrCopy.push(objCopy);
+    }
+    return arrCopy;
+  }
 
 
   d3.selectAll(".labelChoice").on('click', function() {
@@ -1130,9 +1254,11 @@ function startItUp(graph) {
   }
 
   function addComHandler() {
-    d3.select("#community").on("click", function() {
-      getCommunities();
-    });
+    if(currentViz != vizTypes.INTER) {
+      d3.select("#community").on("click", function() {
+        getCommunities();
+      });
+    }
   }
 
   addComHandler();
@@ -1257,6 +1383,8 @@ function startItUp(graph) {
         colourByCommunities();
         var metricsList = d3.select("#metricsList");
         metricsList.html("<li>No metrics available in this view</li>")
+        updateYearChooser();
+        //d3.select("#yearDiv").style("visibility", "hidden");
         // TODO comviz is now done by filtering
         //doComViz(comNum);
       });
@@ -1375,15 +1503,18 @@ function startItUp(graph) {
         var school = nameText.text()
         if(just_school) {
           update(filteredLinks, filteredNodes);
+          allTimeLinks = filteredLinks;
         }
         else {
           update(allLinks, allNodes);
+          allTimeLinks = allLinks;
         }
         //colourByCommunities()
         getCommunities()
         d3.select("#metricsList").html(metricsHtml);
         addMetricHandlers();
         addComHandler();
+        updateYearChooser();
       });
 
       d3.select("#singleComTextOption").on("click", function() {
@@ -1482,6 +1613,7 @@ function startItUp(graph) {
         return n.com == comNumber;
     });*/
     update(comFilteredLinks, nodeArray)
+    allTimeLinks = comFilteredLinks;
     d3.selectAll(".keyCircle").remove();
     d3.selectAll(".keyText").remove();
   }
