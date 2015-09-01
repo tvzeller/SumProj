@@ -39,6 +39,8 @@
   // Array to keep track of which nodes have been searched for in the graph - to keep them highlighted
   var searchedNodes = []
 
+  var numHops;
+
   var SHORTESTPATHERROR = 1;
   var LONGESTPATHERROR = 2;
 
@@ -132,7 +134,7 @@
     var currentNodes = allNodes;
     // When filtering links by year, need a way to go back to all the links (for all time) - this holds those links
     // Set to allLinks at first
-    var allTimeLinks = allLinks;
+    //var allTimeLinks = allLinks;
 
     /* Collaboration graphs can show either just members of the current school or also people outside 
     the school who they have collaborated with. just_school variable keeps track of which is currently the case.
@@ -152,7 +154,7 @@
       // Set current links and nodes to the filtered down versions
       currentLinks = filteredLinks;
       currentNodes = filteredNodes;
-      allTimeLinks = filteredLinks;
+      //allTimeLinks = filteredLinks;
     }
 
     // link will hold all the visual elements representing links
@@ -184,6 +186,11 @@
     for(var i=0; i < allLinks.length; i++) {
       neighboursMap[allLinks[i].source.id + "," + allLinks[i].target.id] = 1;
       neighboursMap[allLinks[i].target.id + "," + allLinks[i].source.id] = 1;
+    }
+
+    // Uses neigbours map to check whether two nodes are adjacent in graph
+    function neighbours(n1, n2) {
+      return neighboursMap[n1.id + "," + n2.id];
     }
 
 
@@ -459,7 +466,7 @@
 
         // Rest of nodes are coloured according to distance from central node, so make
         // key accordingly
-        numHops = $("#cutoffInput").val()
+        //numHops = $("#cutoffInput").val()
         for(var i=1; i<=numHops; i++) {
           if(i==1)
             var hopString = " hop away";
@@ -754,8 +761,7 @@
     }
 
     var displayInfoForThisNode = function(anId) {
-        var storedId = anId;
-        var theNode = getNodeFromId(storedId);
+        var theNode = getNodeFromId(anId);
         showCollabInfo(theNode);
     }
 
@@ -766,21 +772,17 @@
     }
 
     var highlightPathsForThisNode = function(anId) {
-      //var storedId = d3.select(this).attr("id");
       var theNode = getNodeFromId(anId);
       highlight(theNode)
     }
 
+    //Used to find a node object from it's ID
     function getNodeFromId(nodeId) {
       var theNodes = force.nodes();
       for(var i=0; i<theNodes.length; i++) {
         if(theNodes[i].id == nodeId)
           return theNodes[i];
       }
-    }
-
-    function neighbours(n1, n2) {
-      return neighboursMap[n1.id + "," + n2.id]
     }
 
     // Make graph static by stopping the force simulation
@@ -801,8 +803,9 @@
       frozen = false;
     }
 
-    function update(links, nodes) {
-      // Every time the graph is updated, clear any currently running time out
+    // Used to make graph static (stop the D3 simulation) after certain amount of time
+    function setFreezeTimeout(links, nodes) {
+      // First clear any currently running timeout
       clearTimeout(freezeTimeOut)
       // This timeout function stops the simulation after a certain amount of time
       var timeToFreeze = Math.min(5000 + (nodes.length * links.length), 15000);
@@ -810,22 +813,27 @@
         freeze();
         console.log("STOPPED")
       }, timeToFreeze);
+    }
 
-      //TODO change back to filtered
-      console.log("in update")
-      console.log(links)
+    // Function called when new data is obtained from server or when current data is filtered and graph needs to be redrawn
+    function update(links, nodes) {
+      // Start timer to stop simulation after certain amount of time
+      setFreezeTimeout(links, nodes);
 
+      //TODO CHECK THIS
+      allTimeLinks = links;
+
+      // Update the links and nodes visual elements with new data
       updateLinks(links);
       updateNodes(nodes);
+      // Change the node count and link count text
       updateInfoText(links, nodes);
-      //TODO set charge depending on size of node?
 
       // Formula to set appropriate gravity and charge as a function of the number of nodes
       // and the area
       // based on http://stackoverflow.com/a/9929599
       var k = Math.sqrt(nodes.length / (width * height));
       force.gravity(70 * k)
-            //.charge((-10/k)
               //TODO still be be revised
               .charge(function(d) {
                 if(currentViz == vizTypes.SINGLE) {
@@ -841,14 +849,12 @@
                     return -10/k;
                 }
               })
-            //.charge(-350)
-            //.linkDistance([120])
             .linkDistance(function(d) {
               if(currentViz == vizTypes.SHORTEST)
                 return 60;
               else if(currentViz == vizTypes.SINGLE) {
                 if(d.centre)
-                  return 5/5;
+                  return 5/k;
                 else
                   return 0.5/k
               }
@@ -858,6 +864,7 @@
                 return 0.8/k;
             });
 
+      // If visualisation is single author graph, fix author in center of visualisation area
       if(currentViz == vizTypes.SINGLE) {
         for(var i=0; i<nodes.length; i++) {
           if(nodes[i].centre) {
@@ -868,22 +875,21 @@
         }
       }
 
-      //startForce(nodes, links);
+      // Pass the node and link data to the D3 force layout and start it
       force.nodes(nodes)
             .links(links)
             .start();  
-      // force simulation is running in background, position of things is changing with each tick
-      // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
-
+      
+      // Call tick function with each tick of the simulation
       force.on("tick", tick);
-     
-     /* updateLinks(links);
-      updateNodes(nodes);
-      updateInfoText(links, nodes);*/
     }
-
+    // Call the update function
     update(currentLinks, currentNodes)
 
+    // Standard function used in D3 visualisations to adjust position of visual elements based on position of
+    // corresponding data elements in the force simulation
+    // Force simulation is running in background, position of things is changing with each tick
+    // In order to see this visually, we need to get the current x and y positions on each tick and update the lines 
     function tick() {
      link.attr("x1", function(d) { return d.source.x; })
           .attr("y1", function(d) { return d.source.y; })
@@ -894,17 +900,15 @@
     }  
 
 
-    d3.select("#filter").on("click", function() {
+    d3.select("#justSchoolFilter").on("click", function() {
       metricView = false;                
       if(just_school) {
         just_school = false;
-        update(allLinks, allNodes)
-        allTimeLinks = allLinks;
+        update(allLinks, allNodes);
       }
       else {
         just_school = true;
         update(filteredLinks, filteredNodes)
-        allTimeLinks = filteredLinks;
       }
       d3.select("#infoArea").style("visibility", "hidden");
       d3.select("#metricsList").html(metricsHtml);
@@ -923,8 +927,7 @@
       }
     });
 
-  //TODO put somewhere else
-    //if(currentViz == vizTypes.AUTHOR_COLLAB) {
+ 
     function updateYearChooser() {
       theLinks = allTimeLinks;
       console.log("YEARRRS")
@@ -963,25 +966,15 @@
     d3.select("#yearChooser").on('change', function() {
       chosenYear = this.options[this.selectedIndex].value;
       var theNodes = force.nodes()
+
       if(chosenYear === "all") {
-        /*if(just_school) 
-          update(filteredLinks, filteredNodes);
-        else
-          update(allLinks, allNodes);*/
         updateJustLinks(allTimeLinks)
       }
+
       else {
-
-        /*if(just_school) {
-          var theLinks = copyArray(filteredLinks);
-          console.log("LIIINKS")
-          console.log(theLinks)
-        }
-        else
-          var theLinks = copyArray(allLinks);*/
         var theLinks = copyArray(allTimeLinks);
-
         chosenYear = parseInt(chosenYear)
+        
         var yearFilteredLinks = theLinks.filter(function(l) {
           var count = 0
           var collabs = []
@@ -992,6 +985,7 @@
 
             }
           }
+          
           if(count > 0) {
             console.log("original num_collabs")
             console.log(l.num_collabs)
@@ -1024,9 +1018,11 @@
     });
 
     function updateJustLinks(newLinks) {
+      theNodes = force.nodes();
+      setFreezeTimeout(newLinks, theNodes);
       updateLinks(newLinks);
       force.links(newLinks);
-      updateInfoText(newLinks, force.nodes())
+      updateInfoText(newLinks, theNodes);
       force.resume();
     }
 
@@ -1143,16 +1139,8 @@
         }
       return function() {
 
-        displayInfoBox(infoText)
-        d3.selectAll(".authorName").on("click", function() {
-                                        //var sel = d3.select(this);
-                                        //var theId = sel.attr("id");
-                                        var theId = d3.select(this).attr("id");
-                                        displayInfoForThisNode(theId);
-                                        highlightPathsForThisNode(theId);
-                                          })
-                                        .on("mouseover", highlightThisNode)
-                                        .on("mouseout", lowlightJustNode);
+        displayInfoBox(infoText);
+        addNameListHandlers();
       }
     }
 
@@ -1263,18 +1251,7 @@
       return function() {
 
         displayInfoBox(infoText);
-        d3.selectAll(".authorName").on("click", function() {
-                                        //var sel = d3.select(this);
-                                        //var theId = sel.attr("id");
-                                        var theId = d3.select(this).attr("id");
-                                        console.log("IDIDIDIIDALL");
-                                        console.log(theId);
-                                        displayInfoForThisNode(theId);
-                                        highlightPathsForThisNode(theId);
-                                          })
-                                        .on("mouseover", highlightThisNode)
-                                        .on("mouseout", lowlightJustNode);
-
+        addNameListHandlers();
 
         d3.selectAll(".comTitle").on("click", function() {
           var comNum = d3.select(this).attr("id");
@@ -1387,17 +1364,6 @@
 
 
         displayInfoBox(infoText);
-        
-        /*d3.selectAll(".authorName").on("click", function() {
-                                        var theId = d3.select(this).attr("id");
-                                        console.log("IDIDIDIIDALL");
-                                        console.log(theId);
-                                        displayInfoForThisNode(theId);
-                                        highlightPathsForThisNode(theId);
-                                          })
-                                        .on("mouseover", highlightThisNode)
-                                        .on("mouseout", lowlightJustNode);*/
-
 
         addNameListHandlers()
       
@@ -1406,11 +1372,9 @@
           var school = nameText.text()
           if(just_school) {
             update(filteredLinks, filteredNodes);
-            allTimeLinks = filteredLinks;
           }
           else {
             update(allLinks, allNodes);
-            allTimeLinks = allLinks;
           }
           //colourByCommunities()
           getCommunities()
@@ -1484,10 +1448,9 @@
 
 
     function addNameListHandlers() {
+      // The author names get an id corresponding to the id of the node, so the node can be found from the name text element
       d3.selectAll(".authorName").on("click", function() {
                                   var theId = d3.select(this).attr("id");
-                                  console.log("IDIDIDIIDALL");
-                                  console.log(theId);
                                   displayInfoForThisNode(theId);
                                   highlightPathsForThisNode(theId);
                                     })
@@ -1516,7 +1479,6 @@
           return n.com == comNumber;
       });*/
       update(comFilteredLinks, nodeArray)
-      allTimeLinks = comFilteredLinks;
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
     }
@@ -1855,6 +1817,7 @@
             }
             nameText.text(name);
             typeText.text("cutoff of " + cutoff);
+            numHops = cutoff;
             startItUp(data)
 
             lastInfoBox = singleAuthorBox();
