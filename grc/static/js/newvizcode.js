@@ -220,14 +220,14 @@ function startItUp(graph) {
 
     console.log("in update links");
 
-    if(links.length > 0 && links[0].num_collabs != undefined) {
-      var maxCollabs = links[0].num_collabs
-      var minCollabs = links[0].num_collabs
+    if(links.length > 0 && links[0].weight != undefined) {
+      var maxCollabs = links[0].weight
+      var minCollabs = links[0].weight
       for(var i=1, len=links.length; i<len; i++) {
-        if(links[i].num_collabs < minCollabs)
-          minCollabs = links[i].num_collabs;
-        else if(links[i].num_collabs > maxCollabs)
-          maxCollabs = links[i].num_collabs;
+        if(links[i].weight < minCollabs)
+          minCollabs = links[i].weight;
+        else if(links[i].weight > maxCollabs)
+          maxCollabs = links[i].weight;
       }
 
       if(currentViz == vizTypes.SIMILARITY) {
@@ -256,11 +256,11 @@ function startItUp(graph) {
             return getLinkColour(d);
           })
           .style("stroke-width", function(d) {
-            if(d.num_collabs != undefined) {
+            if(d.weight != undefined) {
               if(currentViz == vizTypes.SIMILARITY)
-                return linkScale(d.num_collabs*100);
+                return linkScale(d.weight*100);
               else
-                return linkScale(d.num_collabs);
+                return linkScale(d.weight);
             }
 
             else

@@ -126,7 +126,7 @@ class Search(object):
 		author_sets = []
 		author_papers = []
 		pkw_index = shelve.open(self.pkw_path)
-		print "opened tkw"
+		print "opened pkw"
 		
 		for index, paper_set in enumerate(paper_sets):
 			author_sets.append([])
@@ -138,10 +138,11 @@ class Search(object):
 					title = pkw_index[paper_id]['title']
 					url = pkw_index[paper_id]["url"]
 					authors = pkw_index[paper_id]["authors"]
+					year = pkw_index[paper_id]["year"]
 					for author in authors:
 						author = tuple(author)
 						author_sets[index].append(author)
-						author_papers.append((author, (title, url)))
+						author_papers.append((author, (title, url, year)))
 			
 			author_sets[index] = set(author_sets[index])
 			
@@ -171,12 +172,13 @@ class Search(object):
 		pkw_index = shelve.open(self.pkw_path)
 		for paper_id in papers:
 			paper_id = paper_id.encode("utf-8")
-			title = tkw_index[paper_id]['title']
+			title = pkw_index[paper_id]['title']
 			url = pkw_index[paper_id]["url"]
 			authors = pkw_index[paper_id]["authors"]
+			year = pkw_index[paper_id]["year"]
 			for author in authors:
 				author = tuple(author)
-				author_papers.append((author, (title, url)))
+				author_papers.append((author, (title, url, year)))
 
 		#print author_papers
 		return author_papers
@@ -194,7 +196,7 @@ class Search(object):
 			#print "query is", q
 			#print "author is", author
 			#print "keyword string is", akwindex[author]
-			if paper_id in tkw_index:
+			if paper_id in pkw_index:
 				if q in "|".join(pkw_index[paper_id]["keywords"]):
 					title = pkw_index[paper_id]['title']
 					authors = pkw_index[paper_id]["authors"]

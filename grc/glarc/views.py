@@ -31,7 +31,7 @@ def index(request):
 
 
 def about(request):
-	return HttpResponse("about")
+	return render(request, 'glarc/about.html')
 
 # TODO what if json file not found? Display error message
 def get_json(request):
@@ -362,10 +362,10 @@ def kw_search(request):
 
 	print query
 	# TODO make index path
-	path = os.path.join(settings.INDICES_PATH + "\invindex9.db")
+	path = os.path.join(settings.INDICES_PATH + "\invindex10.db")
 	#print path
 	#akw_path = os.path.join(settings.INDICES_PATH + "\\authorkwindex2.db")
-	tkw_path = os.path.join(settings.INDICES_PATH + "\\titlekwindex2.db")
+	tkw_path = os.path.join(settings.INDICES_PATH + "\paperkwindex3.db")
 
 	srch = search.Search(path, tkw_path)
 
@@ -373,13 +373,14 @@ def kw_search(request):
 		query = query[1:-1]
 		author_titles = srch.phrase_search(query)
 
-	elif 'AND' in query:
-		q = query.replace('AND', '')
-		author_titles = srch.and_search(q)
+	# TODO make AND search the default, with OR as an option
+	elif 'OR' in query:
+		q = query.replace('OR', '')
+		author_titles = srch.or_search(q)
 		#print author_titles
 
 	else:
-		author_titles = srch.or_search(query)
+		author_titles = srch.and_search(query)
 		print "GOT HERE"
 		#print author_titles
 
@@ -404,9 +405,10 @@ def kw_search(request):
 
 		if term_graph.has_edge(query, authorid):
 			term_graph[query][authorid]["num_collabs"] += 1
-			term_graph[query][authorid]["collab_title_urls"].append(title_url)
+			term_graph[query][authorid]["weight"] += 1
+			term_graph[query][authorid]["collab_title_url_years"].append(title_url)
 		else:
-			term_graph.add_edge(query, authorid, {"num_collabs":1, "collab_title_urls": [title_url,]})
+			term_graph.add_edge(query, authorid, {"num_collabs":1, "weight":1, "collab_title_url_years": [title_url,]})
 	
 	if len(term_graph.nodes()) > 30:
 		print "TOO MANY NODES"
