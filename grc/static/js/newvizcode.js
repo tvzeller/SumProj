@@ -1124,6 +1124,7 @@ function startItUp(graph) {
   function updateJustLinks(newLinks) {
     updateLinks(newLinks);
     force.links(newLinks);
+    updateInfoText(newLinks, force.nodes())
     force.resume();
   }
 
@@ -1924,7 +1925,9 @@ var getSingle = function() {
   //metricView = false;
   var authorInfo = $("#singleInput").val().toLowerCase();
   var cutoff = $("#cutoffInput").val()
-  if(!cutoff || cutoff < 0 || cutoff > 3)
+  if(!authorInfo)
+    d3.select("#singleError").html("Please enter an author");
+  else if(!cutoff || cutoff < 0 || cutoff > 3)
     d3.select("#singleError").html("Please enter a number betwen 0 and 3");
   else {
       $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {

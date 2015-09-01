@@ -5,11 +5,11 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>GRC</title>
+        <title>GRCNEW</title>
        	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">-->
        	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="{% static "css/jquery-ui.min.css" %}" />
-        <link rel="stylesheet" href="{% static "css/grcstyle.css" %}" />
+        <link rel="stylesheet" href="{% static "css/grcstyle2.css" %}" />
     </head>
 
     <body>
@@ -28,8 +28,8 @@
 									Collaboration
 									<ul>
 										{% for cg in collab_graphs %}
-											<li>
-												<span class="collabListItem clickable" data-type="collab" data-typetext="collaboration network" data-name="{{ cg }}" data-nametext="{{cg}}">
+											<li span class="collabListItem clickable" data-type="collab" data-typetext="collaboration network" data-name="{{ cg }}" data-nametext="{{cg}}">
+												<span>
 													{{cg}}
 												</span>
 											</li>
@@ -41,11 +41,11 @@
 								<li class="clickable" id="single">Collaboration - Single Author</li>	
 
 								<li>
-									Similarity
+									Keyword Similarity
 									<ul>
 										{% for sg in sim_graphs %}
-											<li>
-												<span class="collabListItem clickable" data-type="similarity" data-typetext="keyword similarity network" data-name="{{ sg }}" data-nametext="{{sg}}">
+											<li class="collabListItem clickable" data-type="similarity2" data-typetext="keyword similarity network" data-name="{{ sg }}" data-nametext="{{sg}}">
+												<span >
 													{{sg}}
 												</span>
 											</li>
@@ -92,7 +92,7 @@
 								<li class="metricsMenu" id="bff">Most frequent collaborators</li>		
 							</ul>
 						</li>
-						<!--<li id="about" class="clickable">About/Help</li>-->
+						<!--<li id="about" class="clickable">About</li>-->
 					</div>
 				</ul>
 
@@ -107,9 +107,12 @@
 	  		
 	  		<div id="svgDiv"></div>
 
-	  		<input type="text" id="searchBox" placeholder="search for a node within this graph"/>
+	  		<input type="text" class="searchBox" id="nodeSearch" placeholder="search for a node within this graph"/>
+	  		<span id="searchTip" title="default is a boolean AND search&#10;enter OR between terms for a Boolean OR search&#10;use quote marks around terms to search for exact phrases">?</span><input type="text" class="searchBox" id="kwSearch" placeholder="search for a keyword or phrase"/></div>
 
 	        <div id="infoArea"></div>
+
+	        <div id="yearDiv">Filter links by year<br><select id="yearChooser"></select></div>
 
 	        <div id="spinnerDiv"><img id="spinner" src="{% static "images/spinner.gif" %}" alt="loading"/></div>
    		
@@ -119,7 +122,7 @@
       	<script type="text/javascript" src="{% static "js/d3/d3.v3.js" %}"></script>
       	<script type="text/javascript" src="{% static "js/jquery-1.11.3.min.js" %}"></script>
       	<script type="text/javascript" src="{% static "js/jquery-ui.min.js" %}"></script>
-    	<script type="text/javascript" src="{% static "js/vizcode2.js" %}"></script>
+    	<script type="text/javascript" src="{% static "js/rfvizcode.js" %}"></script>
 
     </body>
 
