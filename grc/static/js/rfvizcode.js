@@ -397,25 +397,30 @@
 
     //Function to add name labels to nodes
     var addLabels = function(sel, label) {
-      sel.append("text")
-        .attr("font-size", "10px")
+      var labelText = sel.append("text")
+                    .text(function(d) { 
+                      // TODO magic numbers...
+                      if(label=="nameLabels") {
+                        if(d.name)
+                          return d.name
+                        else
+                          return d.id
+                      }
+                      else if(label=="idLabels") {
+                        return d.id;
+                      }
+                    })
+                     .attr("class", "label");
+
+      addLabelAttribs(labelText)
+    }
+
+    function addLabelAttribs(labelText) {
+      labelText.attr("font-size", "10px")
         .attr("font-family", "sans-serif")
-        .text(function(d) { 
-          // TODO magic numbers...
-          if(label=="nameLabels") {
-            if(d.name)
-              return d.name
-            else
-              return d.id
-          }
-          else if(label=="idLabels") {
-            return d.id;
-          }
-        })
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .attr("font-weight", "bold")
-        .attr("class", "label");
     }
 
     // Updates the text displaying number of nodes and links in a graph
@@ -469,6 +474,9 @@
         for(var i=0; i<currentNodes.length; i++)
           a.push([moreColour(currentNodes[i].name), currentNodes[i].name]);
       }
+
+      else
+        var a = [];
       // Finally call makeKey, passing it the array
       makeKey(a)
     }
@@ -511,16 +519,17 @@
       }
     }
 
+    // Function to highlight node when hovering by increasing the width of its stroke
     highlightJustNode = function(d) {
-      //d3.select(this).style("stroke-width", "3px");
-      //console.log(d3.select(this))
-      //console.log(d);
       d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
+        // Stroke is wider (3px) if circ is the hovered node or if node has been searched for (so is in searchedNodes array)
         if(d == circ || searchedNodes.indexOf(circ) != -1)
           return "3px";
-      })
+      });
     }
 
+    // Function to highlight a group of nodes (used to highlight a community when hovering over community name)
+    // Takes array of nodes to be highlighted
     function highlightNodeGroup(arr) {
       d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
         for(var i=0; i<arr.length; i++) {
@@ -531,6 +540,7 @@
       });
     }
 
+    // Keeps the stroke of any searched node wider, all other nodes revert to thinner stroke
     lowlightJustNode = function(d) {
       d3.selectAll(".nodeCircle").style("stroke-width", function(circ) {
         if(searchedNodes.indexOf(circ) != -1)
@@ -538,12 +548,11 @@
       });
     }
 
-
+    // Function to highlight a node, its neighbours and links between them
     highlight = function(d) {
-     // alert(d.paper_count)
-      //if(true) {
-      //alert("clicked");
+      // Remove any labels attached when previously highlighting another node
       d3.selectAll(".singleLabel").remove()
+      // Change the colour or links incident to node
       link.style("stroke", function(l) {
         if (l.source == d || l.target == d) {
           if(currentViz == vizTypes.SIMILARITY && !l.areCoauthors)
@@ -552,9 +561,9 @@
             return "#FF3030";
         }
         else
-          //return linkColour;
           return getLinkColour(l);
       })
+      // Reduce opacity of irrelevant links
       .style("opacity", function(l) {
         if (l.source == d || l.target == d)
           return 1.0
@@ -562,6 +571,7 @@
           return 0.15
       });
 
+      // Reduce opacity of irrelevant nodes
       node.style("opacity", function(o) {
         if (neighbours(d, o))
           return 1.0
@@ -571,23 +581,20 @@
           return 0.15
       });
 
+      // If the whole graph is not labeled, add a name label to the clicked node
       if(!labeled) {
-        d3.selectAll(".node").append("text")
+        theLabel = d3.selectAll(".node").append("text")
                               .attr("class", "singleLabel")
                               .text(function(n) {
                               if(n==d)
                                 return n.name;
-                            })
-                            .attr("font-size", "10px")
-                            .attr("font-family", "sans-serif")
-                            .attr("dy", ".35em")
-                            .attr("text-anchor", "middle")
-                            .attr("font-weight", "bold");
-      }
+                            });
 
-      //}*/
+        addLabelAttribs(theLabel);                        
+      }
     }
 
+    // De-highlights nodes when a node is deselected
     var lowlight = function(d) {
       link.style("stroke", function(l) {
         return getLinkColour(l);
@@ -599,42 +606,47 @@
       d3.selectAll(".singleLabel").remove()
     }
 
-
+    // Attach a click event handler to whole of visualisation area to deselect a selected node
+    // Check if click was on a node - if not, de-highlight all the nodes
     d3.select("#svgArea").on("click", function() {
       var coords = d3.mouse(this);
+      // Get x and y coordinates of mouse click
       var xClick = coords[0];
       var yClick = coords[1];
-      var circles = d3.selectAll(".nodeCircle");
       var onCircle = false;
-      /*for(var i=0; i<circles[0].length; i++) {
-        console.log(d3.select(circles[0][i]).attr("r"));
-        //console.log(d3.select(circles[0][i]).attr("x"));
-      }*/
+
+      // Iterate over nodes, get their coordinates and check if click was on node
       for(var i=0; i<node[0].length; i++) {
         var xNode = node[0][i].__data__.x
         var yNode = node[0][i].__data__.y
-        //console.log(xNode);
+        // Get radius of circle element
         var radius = d3.select(node[0][i].firstElementChild).attr("r");
-        //TODO credit this stackoverflow
+        //Code to check if click is within circle from http://stackoverflow.com/a/16792888
         onCircle = Math.sqrt((xClick - xNode)*(xClick - xNode) + (yClick - yNode) * (yClick - yNode)) < radius
         if(onCircle)
           break;
       }
+      // Click was not on any circle
       if(!onCircle) {
         lowlight();
+        // If metricView is true, display the info area stored in variable - this is so information that was replaced
+        // when user clicked on a node can be displayed again after node is deselected
         if(metricView == true) {
           lastInfoBox();
         }
+        // Otherwise, hide info text
         else
           d3.select("#infoArea").style("visibility", "hidden");
       }
     });
-
+  
+    // Used when user clicks on a node, displays list of the node's collaborators or authors with similar keywords (if similarity graph)
     var showCollabInfo = function(d) {
       var info = getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>"
+      
       if(currentViz == vizTypes.SIMILARITY) {
-        console.log("SIMSIMSIM");
         info += "Keywords:<br><br>";
+        // TODO not using keyword scores for anything - pass just keywords?
         keyword_scores = d.keywords;
         just_keywords = ""
         for(var i=0; i<keyword_scores.length; i++)
@@ -643,9 +655,10 @@
         info += just_keywords + "<br><br>";
         info += "Researchers with keywords in common<br><br>"
       }
-      else
-        info += /*getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>*/"Collaborators:</br></br>";
+      else if(currentViz != vizTypes.TERMSEARCH)
+        info += "Collaborators:</br></br>";
 
+      // Make array of the clicked node's incident links
       var connections = []
       link.each(function(l) {
         if(l.source == d || l.target == d) {
@@ -653,13 +666,16 @@
         }
       });
           
+      // Sort the links by number of collaborations so can list them in order
       connections.sort(function(a, b) {
         return (b.num_collabs - a.num_collabs) 
       });
       
-      
+      // Make list of collaborators; if clicked node is the link's source, collaborator is target and vice versa
       for(var i=0; i<connections.length; i++) {
         var con = connections[i]
+        // Give the element representing number of collaborations an id made up of the link's source and target ids, so
+        // that the link object can be identified from the number element
         if(d == con.source)
           info += getAuthorNameHtml(con.target) + con.target.name + "</span> (<span class=\"clickable numCollabs\" id=\"" + 
             con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br></br>"
@@ -668,70 +684,53 @@
             con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br></br>"
       }
 
+      // Display the information
       displayInfoBox(info);
    
+      // Attach click handlers to the names of collaborators so can select node by clicking within list, highlight node on hover
+      addNameListHandlers();
 
-      d3.selectAll(".authorName").on("click", function() {
-                                      //var sel = d3.select(this);
-                                      //var theId = sel.attr("id");
-                                      var theId = d3.select(this).attr("id");
-                                      displayInfoForThisNode(theId);
-                                      highlightPathsForThisNode(theId);
-                                        })
-                                      .on("mouseover", highlightThisNode)
-                                      .on("mouseout", lowlightJustNode);
-
+      // Collaborators get collaboration/similarity number next to name, attach click handler to display collab titles / similar keywords
       if(currentViz == vizTypes.SIMILARITY)
         d3.selectAll(".numCollabs").on("click", showKeywords);
       else
         d3.selectAll(".numCollabs").on("click", showTitles);
     }
 
-    //N.b. connections is an array of links incident to the node whose collaborations are showing TODO not using this anymore
+    // Function to display collaboration titles between two nodes
     function showTitles() {
+      // Get id of number which was clicked
       var elemId = this.id;
-      console.log("elemid")
-      //console.log(elemId);
-      //console.log("LINK")
-      //console.log(link)
-      //console.log("jetsons")
-      //theLinks = force.links()
-      // Need to get the link which corresponds to this number of papers...
-      // there must be a nicer way of doing this?
+      // Iterate over links to get the link which corresponds to the number which was clicked
+      // Once found, make list out of the collaboration titles link attribute
       link.each(function(l) {
-      //for(var i=0; i<theLinks.length; i++) {
-        //break;
-        //var l = theLinks[i];
-        //console.log(l.source.id + "-" + l.target.id)
         if(l.source.id + "-" + l.target.id === elemId) {
           var title_urls = l.collab_title_url_years;
 
           var titleString = "Papers connecting <strong>" + getAuthorNameHtml(l.source) + l.source.name + 
           "</span></strong> and <strong>" + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
           
-          for(var i = 0; i < title_urls.length; i++)
-            titleString += title_urls[i][0] + "<br>" + title_urls[i][2] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
+          for(var i = 0; i < title_urls.length; i++) {
+            var title = title_urls[i][0];
+            var url = title_urls[i][1];
+            var year = title_urls[i][2]
+
+            titleString += title + " (" + year + ")<br><a href=\"" + url + "\" target=\"_blank\">link</a><br><br>"
+
+          }
           
           displayInfoBox(titleString);
-          d3.selectAll(".authorName").on("click", function() {
-                                      //var sel = d3.select(this);
-                                      //var theId = sel.attr("id");
-                                      var theId = d3.select(this).attr("id");
-                                      displayInfoForThisNode(theId);
-                                      highlightPathsForThisNode(theId);
-                                        })
-                                      .on("mouseover", highlightThisNode)
-                                      .on("mouseout", lowlightJustNode);
-     
+          // Event handlers added to author and collaborator name, so can go back to full list of collaborators or
+          // select collaborator to view their collaborators
+          addNameListHandlers();
         }
       });
     }
 
-    // TODO refactor to use just one method for show titles and show keywords
+    // Function to display the keywords which authors have in common
     function showKeywords() {
       var elemId = this.id;
-      // Need to get the link which corresponds to this number of papers...
-      // there must be a nicer way of doing this?
+      // Iterate through links to get link corresponding to clicked number
       link.each(function(l) {
         console.log(l.source.id + "-" + l.target.id)
         if(l.source.id + "-" + l.target.id === elemId) {
@@ -744,29 +743,17 @@
             titleString += keywords[i] + "<br><br>"
           
           displayInfoBox(titleString);
-          d3.selectAll(".authorName").on("click", function() {
-                                      //var sel = d3.select(this);
-                                      //var theId = sel.attr("id");
-                                      var theId = d3.select(this).attr("id");
-                                      displayInfoForThisNode(theId);
-                                      highlightPathsForThisNode(theId);
-                                        })
-                                      .on("mouseover", highlightThisNode)
-                                      .on("mouseout", lowlightJustNode);
-     
+          addNameListHandlers();
         }
       });
     }
 
-
-    //helper function
+    //Helper function to produce the html for displaying an author name in info text area
     function getAuthorNameHtml(theNode) {
       return "<span class=\"clickable authorName\" id=\"" + theNode.id + "\">"
     }
 
     var displayInfoForThisNode = function(anId) {
-        //var storedId = d3.select(sel).attr("id");
-        //console.log("THEID IS")
         var storedId = anId;
         var theNode = getNodeFromId(storedId);
         showCollabInfo(theNode);
@@ -1536,8 +1523,10 @@
 
 
     d3.selectAll(".colourChoice").on("click", function() {
-      if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE)
+      if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE) {
         metricView = false;
+        d3.select("#infoArea").style("visibility", "hidden");
+      }
       var choice = d3.select(this).attr("id");
       console.log("the choice was" + choice)
       if(choice == "defaultColours")
