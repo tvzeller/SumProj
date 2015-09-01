@@ -219,8 +219,6 @@ function startItUp(graph) {
           });
 
     console.log("in update links");
-    console.log(link);
-    console.log(link.enter())
 
     if(links.length > 0 && links[0].num_collabs != undefined) {
       var maxCollabs = links[0].num_collabs
@@ -302,7 +300,7 @@ function startItUp(graph) {
     d.x = d3.event.x;
     d.y = d3.event.y;
     tick();
-
+    console.log("DRAGGGGIN");
   }
 
     // reenable highlighting when finished dragging node
@@ -674,7 +672,6 @@ function startItUp(graph) {
 
       node.style("opacity", 1.0);
     }
-    console.log("bbaaboo")
     d3.selectAll(".singleLabel").remove()
   }
 
@@ -710,6 +707,8 @@ function startItUp(graph) {
       if(metricView == true) {
         lastInfoBox();
       }
+      else
+        d3.select("#infoArea").style("visibility", "hidden");
     }
   });
 
@@ -724,9 +723,10 @@ function startItUp(graph) {
         just_keywords += keyword_scores[i][0] + " "
 
       info += just_keywords + "<br><br>";
+      info += "Researchers with keywords in common<br><br>"
     }
-
-    info += /*getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>*/"Collaborators:</br></br>";
+    else
+      info += /*getAuthorNameHtml(d) + "<strong>" + d.name + "</strong></span></br></br>*/"Collaborators:</br></br>";
 
     var connections = []
     link.each(function(l) {
@@ -757,8 +757,6 @@ function startItUp(graph) {
                                     //var sel = d3.select(this);
                                     //var theId = sel.attr("id");
                                     var theId = d3.select(this).attr("id");
-                                    console.log("IDIDIDIDID");
-                                    console.log(theId);
                                     displayInfoForThisNode(theId);
                                     highlightPathsForThisNode(theId);
                                       })
@@ -775,9 +773,9 @@ function startItUp(graph) {
   function showTitles() {
     var elemId = this.id;
     console.log("elemid")
-    console.log(elemId);
-    console.log("LINK")
-    console.log(link)
+    //console.log(elemId);
+    //console.log("LINK")
+    //console.log(link)
     //console.log("jetsons")
     //theLinks = force.links()
     // Need to get the link which corresponds to this number of papers...
@@ -786,15 +784,15 @@ function startItUp(graph) {
     //for(var i=0; i<theLinks.length; i++) {
       //break;
       //var l = theLinks[i];
-      console.log(l.source.id + "-" + l.target.id)
+      //console.log(l.source.id + "-" + l.target.id)
       if(l.source.id + "-" + l.target.id === elemId) {
-        var title_urls = l.collab_title_urls;
+        var title_urls = l.collab_title_url_years;
 
         var titleString = "Papers connecting <strong>" + getAuthorNameHtml(l.source) + l.source.name + 
         "</span></strong> and <strong>" + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
         
         for(var i = 0; i < title_urls.length; i++)
-          titleString += title_urls[i][0] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
+          titleString += title_urls[i][0] + "<br>" + title_urls[i][2] + "<br><a href=\"" + title_urls[i][1] + "\" target=\"_blank\">link</a><br><br>"
         
         displayInfoBox(titleString);
         d3.selectAll(".authorName").on("click", function() {
@@ -990,7 +988,8 @@ function startItUp(graph) {
   }  
 
 
-  d3.select("#filter").on("click", function() {                
+  d3.select("#filter").on("click", function() {
+    metricView = false;                
     if(just_school) {
       just_school = false;
       update(allLinks, allNodes)
@@ -999,6 +998,10 @@ function startItUp(graph) {
       just_school = true;
       update(filteredLinks, filteredNodes)
     }
+    d3.select("#infoArea").style("visibility", "hidden");
+    d3.select("#metricsList").html(metricsHtml);
+    addMetricHandlers();
+    addComHandler();
   });
 
   d3.select("#freeze").on("click", function() {
@@ -1063,18 +1066,22 @@ function startItUp(graph) {
   });
 
 
-  d3.selectAll(".metricListItem").on("click", function() {
-    var listItem = d3.select(this);
-    var metric = listItem.attr("id");
-    var name = listItem.attr("data-name");
-    var descrptn = listItem.attr("data-desc");
-    colourByMetric(metric);
-    var keyArray = [["white", "least " + name], ["red", "most " + name]];
-    makeKey(keyArray);
-    lastInfoBox = displayMetricText(metric, name, descrptn)
-    lastInfoBox();
-    metricView = true;
-  });
+  function addMetricHandlers() {
+    d3.selectAll(".metricListItem").on("click", function() {
+      var listItem = d3.select(this);
+      var metric = listItem.attr("id");
+      var name = listItem.attr("data-name");
+      var descrptn = listItem.attr("data-desc");
+      colourByMetric(metric);
+      var keyArray = [["white", "least " + name], ["red", "most " + name]];
+      makeKey(keyArray);
+      lastInfoBox = displayMetricText(metric, name, descrptn)
+      lastInfoBox();
+      metricView = true;
+    });
+  }
+
+  addMetricHandlers()
 
  
   function colourByMetric(metric) {
@@ -1096,7 +1103,6 @@ function startItUp(graph) {
   }
 
   function displayMetricText(metric, name, description) {
-    return function() {
       var infoText = description +
                 "<br><br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
                 (note that this metric is calculated for the full graph, including non-school members)<br><br>"
@@ -1108,6 +1114,8 @@ function startItUp(graph) {
         n = theNodes[i]
         infoText += getAuthorNameHtml(n) + n.name + "</span>: " + Math.round(n[metric] * 1000) / 1000 + "<br><br>"
       }
+    return function() {
+
       displayInfoBox(infoText)
       d3.selectAll(".authorName").on("click", function() {
                                       //var sel = d3.select(this);
@@ -1121,12 +1129,13 @@ function startItUp(graph) {
     }
   }
 
-  
+  function addComHandler() {
+    d3.select("#community").on("click", function() {
+      getCommunities();
+    });
+  }
 
-  d3.select("#community").on("click", function() {
-    getCommunities();
-
-  });
+  addComHandler();
     /*var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
       //console.log("COMM NUMBERS")
       //console.log(d.school_com)
@@ -1156,19 +1165,22 @@ function startItUp(graph) {
         var commNum = theNodes[i].school_com
       else
         var commNum = theNodes[i].com
+      //commNum may be false
+      if(commNum !== false) {
+        if(communityArray[commNum])
+          communityArray[commNum].push(theNodes[i]);
+        else
+          communityArray[commNum] = [theNodes[i],];
       
-      if(communityArray[commNum])
-        communityArray[commNum].push(theNodes[i]);
-      else
-        communityArray[commNum] = [theNodes[i],];
-      
-      if(commNums.indexOf(commNum) < 0) {
-        commNums.push(commNum);
-        //console.log("community number:")
-        //console.log(commNum);
-        keyArray.push([moreColour(commNum), "community " + commNum]);
+        if(commNums.indexOf(commNum) < 0) {
+          commNums.push(commNum);
+          //console.log("community number:")
+          //console.log(commNum);
+          keyArray.push([moreColour(commNum), "community " + commNum]);
+        }
       }
     }
+    keyArray.push(["white", "no community"])
     console.log("COMMUNITIES:");
     console.log(communityArray);
     makeKey(keyArray);
@@ -1183,30 +1195,43 @@ function startItUp(graph) {
     //console.log("COMM NUMBERS")
     //console.log(d.school_com)
     if(just_school)
-      return moreColour(d.school_com);
+      var comNum = d.school_com;
+
     else
-      return moreColour(d.com)
+      var comNum = d.com;
+
+    if(comNum !== false)
+      return moreColour(comNum);
+    else
+      return "white";
     })
   }
 
   function displayCommunityText(arr) {
-    return function() {
-      var infoText = "The authors in the network can be divided into communities based on the patterns of collaboration. Below are the \
-                communities for this network.<br><br>"
-      for(var i=0; i<arr.length; i++) {
-        infoText += "<strong><span id=\"" + i + "\" class=\"comTitle clickable\">Community " + i + "</strong><br>";
-        var thisCommunity = arr[i];
-        for(var j=0; j < thisCommunity.length; j++) {
-          var author = thisCommunity[j];
-          if(just_school) {
-            if(author.in_school)
-              infoText += getAuthorNameHtml(author) + author.name + "</span><br>";
-          }
-          else
-            infoText += getAuthorNameHtml(author) + author.name + "</span><br>"; 
+  
+    console.log("ARRRR");
+    console.log(arr);
+    var infoText = "The authors in the network can be divided into communities based on the patterns of collaboration. Below are the \
+              communities for this network.<br><br>"
+    for(var i=0; i<arr.length; i++) {
+      infoText += "<strong><span id=\"" + i + "\" class=\"comTitle clickable\">Community " + i + "</strong><br>";
+      var thisCommunity = arr[i];
+      console.log(thisCommunity);
+      for(var j=0; j < thisCommunity.length; j++) {
+        var author = thisCommunity[j];
+        /*if(just_school) {
+          if(author.in_school)
+            infoText += getAuthorNameHtml(author) + author.name + "</span><br>";
         }
-        infoText += "<br>";
+        else
+          infoText += getAuthorNameHtml(author) + author.name + "</span><br>"; */
+        infoText += getAuthorNameHtml(author) + author.name + "</span><br>";
       }
+      infoText += "<br>";
+    }
+
+    return function() {
+
       displayInfoBox(infoText);
       d3.selectAll(".authorName").on("click", function() {
                                       //var sel = d3.select(this);
@@ -1223,16 +1248,19 @@ function startItUp(graph) {
 
       d3.selectAll(".comTitle").on("click", function() {
         var comNum = d3.select(this).attr("id");
-        showSingleCommunityGraph(comNum);
-        lastInfoBox = singleCommunityText(comNum);
+        //showSingleCommunityGraph(comNum);
+        showSingleCommunityGraph(arr[comNum]);
+        lastInfoBox = singleCommunityText(arr[comNum], comNum);
         lastInfoBox();
         metricView = true;
-        colourByCommunities()
+        colourByCommunities();
+        var metricsList = d3.select("#metricsList");
+        metricsList.html("<li>No metrics available in this view</li>")
         // TODO comviz is now done by filtering
         //doComViz(comNum);
       });
       d3.selectAll(".comTitle").on("mouseover", function() {
-        var comNum = d3.select(this).attr("id");
+        var comNum = parseInt(d3.select(this).attr("id"));
         console.log("BLUEBLA")
         var theNodes = force.nodes();
         var comNodes = []
@@ -1240,11 +1268,11 @@ function startItUp(graph) {
         for(var i=0; i<theNodes.length; i++) {
           var author = theNodes[i];
           if(just_school) {
-            if(author.school_com == comNum)
+            if(author.school_com === comNum)
               comNodes.push(author);
           }
           else {
-            if(author.com == comNum)
+            if(author.com === comNum)
               comNodes.push(author);
           }
         }
@@ -1273,8 +1301,8 @@ function startItUp(graph) {
     return nodesInCom;   
   }
 
-  function singleCommunityText(comNumber) {
-    var comNodes = getNodesInCom(comNumber)
+  function singleCommunityText(comNodes, comNumber) {
+    //var comNodes = getNodesInCom(comNumber)
     //console.log("COMNODES");
     //console.log(comNodes);
 
@@ -1332,6 +1360,9 @@ function startItUp(graph) {
         }
         //colourByCommunities()
         getCommunities()
+        d3.select("#metricsList").html(metricsHtml);
+        addMetricHandlers();
+        addComHandler();
       });
 
       d3.select("#singleComTextOption").on("click", function() {
@@ -1405,23 +1436,29 @@ function startItUp(graph) {
                                 .on("mouseout", lowlightJustNode);                    
   }
 
-  function showSingleCommunityGraph(comNumber) {
+  function showSingleCommunityGraph(nodeArray) {
     //var theNodes = force.nodes()
     var theLinks = force.links()
-    var comFilteredLinks = graph.links.filter(function(l) {
+    /*var comFilteredLinks = graph.links.filter(function(l) {
       if(just_school)
         return l.source.school_com == comNumber && l.target.school_com == comNumber;
       else
         return l.source.com == comNumber && l.target.com == comNumber;
-    });
+    });*/
+
+    var comFilteredLinks = graph.links.filter(function(l) {
+      return nodeArray.indexOf(l.source) > -1 && nodeArray.indexOf(l.target) > -1;
+    })
     // This gets just the nodes that are in this community
-    var comFilteredNodes = graph.nodes.filter(function(n) {
+    /*var comFilteredNodes = graph.nodes.filter(function(n) {
       if(just_school)
         return n.school_com == comNumber;
       else
         return n.com == comNumber;
-    });
-    update(comFilteredLinks, comFilteredNodes)
+    });*/
+    update(comFilteredLinks, nodeArray)
+    d3.selectAll(".keyCircle").remove();
+    d3.selectAll(".keyText").remove();
   }
 
 

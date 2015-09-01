@@ -83,7 +83,7 @@ def make_stuff():
 def add_the_text(dd, ext):
 	for paper_id, info in dd.items():
 		title = info['title']
-		
+
 		text = title
 		abstract = info["abstract"]
 		if abstract:
@@ -188,7 +188,7 @@ def make_sim_graph(akw, name):
 									})
 
 		
-		stemmed1 = stem_words([kw[0] for kw in keywords])
+		stemmed1 = set(stem_words([kw[0] for kw in keywords]))
 
 		for j in range(i+1, len(authors)):
 			author2 = authors[j]
@@ -203,7 +203,7 @@ def make_sim_graph(akw, name):
 										})
 
 			
-			stemmed2 = stem_words([kw[0] for kw in keywords2])
+			stemmed2 = set(stem_words([kw[0] for kw in keywords2]))
 
 			sim = check_sim(stemmed1, stemmed2)
 			ratio = sim[0]
@@ -242,6 +242,7 @@ def check_sim(kw1, kw2):
 			if word1 == word2:
 				count += 1
 				match_indices.append(index)
+				break
 
 	ratio = (count*1.0) / len(longest)
 	return (ratio, match_indices)

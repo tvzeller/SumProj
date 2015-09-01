@@ -139,8 +139,9 @@ def sort_name_urls(name_url_list, schl_name):
 
 	for name_url in name_url_list: # for each author page
 		school_matches[name_url] = 0
+		author_page_tree = get_tree(name_url[1])
 		# get the <a> elements for each paper on the author's page
-		a_elems = get_a_elems_for_papers(name_url[1])
+		a_elems = get_a_elems_for_papers(author_page_tree)
 		for a in a_elems: # for each paper
 			# from the paper's Enlighten page, get a string indicating what school it is associated to
 			schl_info = get_paper_school_info(a.get("href"))
@@ -168,7 +169,8 @@ def check_if_in_dept(author_url, schl_name):
 	checks if author has at least one paper associated to the given school 
 	"""
 	# Get list of the <a> elements linking to all the papers on the author's page
-	a_elems = get_a_elems_for_papers(author_url)
+	author_page_tree = get_tree(author_url)
+	a_elems = get_a_elems_for_papers(author_page_tree)
 	in_dept = False
 	i = 0
 
@@ -491,14 +493,14 @@ def get_papers_info(author_url, existing_papers):
 		# Get paper keywords
 		keywords = get_paper_keywords(paper_tree)
 		# Get paper id number from its url
-		paper_id = re.search("[0-9]+", paper_url)
+		paper_id = re.search("[0-9]+", paper_url).group()
 		# Add paper to dictionary with id as key and metadata as values
 		author_dict[paper_id] = {
-						"title": paper_title
+						"title": paper_title,
 						"authors": authors,
 						"abstract": abstract,
 						"url": paper_url,
-						"keywords": keywords
+						"keywords": keywords,
 						'year': date
 		} 
 

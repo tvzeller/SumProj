@@ -48,7 +48,7 @@ def get_and_graph():
 
 
 	# For each school
-	for name, url in school_names_urls:
+	for name, url in school_names_urls[10:]:
 		print name, url
 
 		if "Humanities" in name:
@@ -75,6 +75,7 @@ def get_and_graph():
 		gm = gfd.GraphMaker()
 		gm.populate_graph(coauthor_dict, author_name_urls)
 		gm.add_metrics()
+		gm.add_just_school_community()
 		gm.write_to_file("../newestgraphs/" + name + ".json")
 
 def graphs_from_files():
@@ -115,7 +116,8 @@ def graphs_from_files():
 
 	
 def get_metrics():
-	path = "../grc/graphs/collab/"
+	#path = "../grc/graphs/collab/"
+	path = "../newestgraphs/"
 	gnames = os.listdir(path)
 	for name in gnames:
 		if "University" not in name and "Inter School" not in name:
@@ -124,14 +126,14 @@ def get_metrics():
 			g = json_graph.node_link_graph(data)
 			gm = gfd.GraphMaker(g)
 			# TODO commmenting this out for now
-			#gm.add_metrics()
+			gm.add_metrics()
 			gm.add_just_school_community()
 			gm.write_to_file(path + name)
 
 # TODO correct this
 def add_school_info():
 	nameurlpath = "../nameurls/"
-	graphpath = "../grc/graphs/collab/"
+	graphpath = "../grc/graphs/collab3/"
 	nufiles = os.listdir(nameurlpath)
 	graphfiles = os.listdir(graphpath)
 	allgraphs = []
@@ -183,7 +185,7 @@ def add_school_info():
 	#	json.dump(unidata, f)
 
 def make_schools_graph():
-	graphpath = "../grc/graphs/collab/"
+	graphpath = "../grc/graphs/collab3/"
 	with open(graphpath + "The University of Glasgow.json") as f:
 		data = json.load(f)
 
@@ -221,14 +223,16 @@ def make_schools_graph():
 				# TODO I think this incrementing should only happen if paper has not yet been seen
 				# what we want is the number of papers that involve people from the different schools, so just add 1 for each title
 				# TODO this is really a TODO
-				schools_graph[school1][school2]["num_collabs"] += edgeattribs["num_collabs"]
+
+				#schools_graph[school1][school2]["num_collabs"] += edgeattribs["num_collabs"]
 				# Check if papers are already in title_urls to avoid repetition
-				for title_url in edgeattribs["collab_title_urls"]:
-					if title_url not in schools_graph[school1][school2]["collab_title_urls"]:
-						schools_graph[school1][school2]["collab_title_urls"].append(title_url)
+				for title_url in edgeattribs["collab_title_url_years"]:
+					if title_url not in schools_graph[school1][school2]["collab_title_url_years"]:
+						schools_graph[school1][school2]["num_collabs"] += 1
+						schools_graph[school1][school2]["collab_title_url_years"].append(title_url)
 	
 			else:
-				schools_graph.add_edge(school1, school2, {"num_collabs": edgeattribs["num_collabs"], "collab_title_urls": edgeattribs["collab_title_urls"]})
+				schools_graph.add_edge(school1, school2, {"num_collabs": edgeattribs["num_collabs"], "collab_title_url_years": edgeattribs["collab_title_url_years"]})
 
 			seen_pairs.add((author, coauthor))
 

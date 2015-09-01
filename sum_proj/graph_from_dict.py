@@ -5,6 +5,7 @@ import tfidf
 import rake
 import time
 import community
+import operator
 
 class GraphMaker(object):
 
@@ -25,7 +26,7 @@ class GraphMaker(object):
 			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
 			# Or use subclasses with different implementations of add_vertices here
 			title = info["title"]
-			print "title is " + title.encode("utf-8")
+			#print "title is " + title.encode("utf-8")
 			authors = info["authors"]
 			if not authors:
 				continue
@@ -34,7 +35,8 @@ class GraphMaker(object):
 				self.add_vertex(author)
 			
 			paper_url = info['url']
-			self.add_links(title, paper_url, authors)
+			paper_year = info['year']
+			self.add_links(title, paper_url, paper_year, authors)
 
 	# TODO consider using polymorphism here... having separate classes for data from scraper vs from oai
 	def add_vertex(self, author):
@@ -65,7 +67,7 @@ class GraphMaker(object):
 			self.graph.node[vertex_id]["in_school"] = in_school
 
 
-	def add_links(self, title, url, authors):
+	def add_links(self, title, url, year, authors):
 		# Check if authors is a list of collections or just strings
 		# If collections, make new list out of element at index 1, which is the unique author url and the node id
 		if not isinstance(authors[0], basestring):
@@ -79,10 +81,11 @@ class GraphMaker(object):
 				# Check if edge already exists, update edge attributes
 				if self.graph.has_edge(author1, author2):
 					self.graph[author1][author2]["weight"] += 1.0 / num_authors
-					self.graph[author1][author2]["collab_title_urls"].append([title, url])
+					self.graph[author1][author2]["num_collabs"] += 1
+					self.graph[author1][author2]["collab_title_url_years"].append([title, url, year])
 				# If edge is new, add it to the graph, give it initial attributes
 				else:
-					self.graph.add_edge(author1, author2, {'weight': 1.0/num_authors, "collab_title_urls": [[title, url],]})
+					self.graph.add_edge(author1, author2, {'weight': 1.0 / num_authors, "num_collabs": 1, "collab_title_url_years": [[title, url, year],]})
 
 
 	def check_schl_status(self, author_id):
@@ -110,23 +113,100 @@ class GraphMaker(object):
 		between_cent = nx.betweenness_centrality(self.graph)
 		com = community.best_partition(self.graph)
 
+		sorted_coms = self.get_sorted_multimember_coms(com)
+
 		for vertex in self.graph.node.keys():
 			self.graph.node[vertex]["deg_cent"] = deg_cent[vertex]
 			self.graph.node[vertex]["close_cent"] = close_cent[vertex]
 			self.graph.node[vertex]["between_cent"] = between_cent[vertex]
-			self.graph.node[vertex]["com"] = com[vertex]
-
+			if com[vertex] in sorted_coms:
+				new_com_num = sorted_coms.index(com[vertex])
+				#self.graph.node[vertex]["com"] = com[vertex]
+				self.graph.node[vertex]["com"] = new_com_num
+			else:
+				self.graph.node[vertex]["com"] = False
 
 	def add_just_school_community(self, g=None):
 		print "adding just school community"
 		school_nodes = [node for node in self.graph.node if self.graph.node[node]["in_school"]]
 		just_school_graph = self.graph.subgraph(school_nodes)
+		print "JUST SCHOOL GRAPH:"
+		print just_school_graph
+		print just_school_graph.nodes()
 		com = community.best_partition(just_school_graph)
 
+		sorted_coms = self.get_sorted_multimember_coms(com)
+
 		for vertex in just_school_graph.node.keys():
-			self.graph.node[vertex]["school_com"] = com[vertex]
+			if com[vertex] in sorted_coms:
+				new_com_num = sorted_coms.index(com[vertex])
+				self.graph.node[vertex]["school_com"] = new_com_num
+			else:
+				self.graph.node[vertex]["school_com"] = False
+
+
+	def get_sorted_multimember_coms(self, com_dict):
+		print com_dict
+		multimembers = {}
+		# TODO instead of this use:
+		# for comnum in com_dict.values(), if count(com_num) > 1, add to set
+		for author, com_num in com_dict.items():
+			if com_num in multimembers:
+				multimembers[com_num] = True
+			else:
+				multimembers[com_num] = False
+
+		multimember_coms = []
+		for con_num, is_multimember in multimembers.items():
+			if is_multimember:
+				multimember_coms.append(con_num)
+
+		sorted_coms = sorted(multimember_coms)
+		return sorted_coms
+
+	def add_com_keywords(self, akw, g=None):
+		com_keywords = {}
+		school_com_keywords = {}
+		for author in akw:
+			keywords = akw[author]["keywords"]
+			com_num = self.graph.node[author]["com"]
+			school_com_num = self.graph.node[author]["school_com"]
+			if com_num and com_num not in com_keywords:
+				com_keywords[com_num] = keywords
+			elif com_num in com_keywords:
+				com_keywords[com_num].extend(keywords)
+
+
+			if school_com_num and school_com_num not in school_com_keywords:
+				school_com_keywords[school_com_num] = keywords
+			elif school_com_num in school_com_keywords:
+				school_com_keywords[com_num].extend(keywords)
+
+
+		assign_com_keywords(com_keywords, 'com_keywords')
+		assign_com_keywords(school_com_keywords, 'school_com_keywords')
 
 	
+	def assign_com_keywords(comkwdict, attr_name):
+		for com, keywords in comkwdict:
+			top_com_words = get_most_frequent(keywords, 20)
+			self.graph.graph[attr_name].append([com, top_com_words])
+
+
+
+	# TODO put in textutils or something
+	def get_most_frequent(self, wordlist, maxwords):
+		wordcounts = {}
+		for word in wordlist:
+			if word not in wordcounts:
+				wordcounts[word] = wordcounts.count(word)
+
+		topwords = sorted(wordcounts.items(), key=operator.itemgetter(1), reverse=True)
+		topwords = [wordscore[0] for wordscore in topwords]
+		return topwords[:maxwords]
+
+
+
 	def get_graph(self):
 		return self.graph
 
