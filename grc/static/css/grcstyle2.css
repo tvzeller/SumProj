@@ -272,6 +272,12 @@ ul ul ul {
   font-size: 12px;
 }
 
+#singleComTextOption {
+  text-decoration: underline;
+  color:#2ecc71;
+  font-size: 12px;
+}
+
 #aboutTitle {
   width:200px;
   margin: auto;

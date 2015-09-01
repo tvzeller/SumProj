@@ -116,8 +116,8 @@ def graphs_from_files():
 
 	
 def get_metrics():
-	#path = "../grc/graphs/collab/"
-	path = "../newestgraphs/"
+	path = "../grc/graphs/collab/"
+	#path = "../newestgraphs/"
 	gnames = os.listdir(path)
 	for name in gnames:
 		if "University" not in name and "Inter School" not in name:
@@ -133,7 +133,7 @@ def get_metrics():
 # TODO correct this
 def add_school_info():
 	nameurlpath = "../nameurls/"
-	graphpath = "../grc/graphs/collab3/"
+	graphpath = "../grc/graphs/collab/"
 	nufiles = os.listdir(nameurlpath)
 	graphfiles = os.listdir(graphpath)
 	allgraphs = []
@@ -185,7 +185,7 @@ def add_school_info():
 	#	json.dump(unidata, f)
 
 def make_schools_graph():
-	graphpath = "../grc/graphs/collab3/"
+	graphpath = "../grc/graphs/collab/"
 	with open(graphpath + "The University of Glasgow.json") as f:
 		data = json.load(f)
 
@@ -247,6 +247,28 @@ def make_schools_graph():
 
 	return schools_graph
 
+def get_com_keywords():
+	graphpath = "../grc/graphs/collab/"
+	graphfiles = os.listdir(graphpath)
+	akwpath = "../author_kw/"
+	akwfiles = os.listdir(akwpath)
+	graphfiles = [gfile for gfile in graphfiles if "Inter School" not in gfile and "University" not in gfile]
+
+	for index, gfile in enumerate(graphfiles):
+		print "got a gfile"
+		with open(graphpath + gfile) as f:
+			gdata = json.load(f)
+		with open(akwpath+akwfiles[index]) as f:
+			akw = json.load(f)
+
+		g = json_graph.node_link_graph(gdata)
+		gm = gfd.GraphMaker(g)
+		gm.add_com_keywords(akw)
+		gm.write_to_file(graphpath+gfile)
+
+
+
+
 
 def make_indices():
 	data_path = ("../coauthor_data/")
@@ -259,7 +281,7 @@ def make_indices():
 		with open(data_path + data_file) as f:
 			dd = json.load(f)
 
-		dd = textutils2.add_kw_to_data(dd)
+		dd = textutils2.add_topia_kw(dd)
 
 		for paper_id, data in dd.items():
 			authors = data["authors"]
@@ -272,7 +294,7 @@ def make_indices():
 
 
 
-		she = shelve.open("../grc/indices/invindex9.db")
+		she = shelve.open("../grc/indices/invindex10.db")
 		for term in indx:
 		# 	if term == "programming":
 		 #		print indx[term]
@@ -285,7 +307,7 @@ def make_indices():
 
 		#akw_indx = srch.make_author_kw_index(dd)
 		pkw_indx = srch.make_paper_kw_index(dd)
-		she = shelve.open("../grc/indices/paperkwindex2.db")
+		she = shelve.open("../grc/indices/paperkwindex3.db")
 		#she.update(akw_indx)
 		for paper_id in pkw_indx:
 			she[paper_id] = pkw_indx[paper_id]

@@ -70,17 +70,17 @@ var typeText = svg.append("text")
 
 var nodeCountText = svg.append("text")
                   .attr("x", 0)
-                  .attr("y", "25%")
+                  .attr("y", "22%")
                   .attr("class", "numText");
                  /* .text("node count goes here")*/
 
 var edgeCountText = svg.append("text")
                    .attr("x", 0)
-                  .attr("y", "30%")
+                  .attr("y", "27%")
                   .attr("class", "numText");
                 /*  .text("edge count goes here")*/
 
-var keyStartY = height/2.3
+var keyStartY = height/2.7
 
 var keyGroup = svg.append("g")
                   .attr("class", "key");
@@ -1213,7 +1213,8 @@ function startItUp(graph) {
     console.log(arr);
     var infoText = "The authors in the network can be divided into communities based on the patterns of collaboration. Below are the \
               communities for this network.<br><br>"
-    for(var i=0; i<arr.length; i++) {
+    // N.B. community numbers start at 1, not 0
+    for(var i=1; i<arr.length; i++) {
       infoText += "<strong><span id=\"" + i + "\" class=\"comTitle clickable\">Community " + i + "</strong><br>";
       var thisCommunity = arr[i];
       console.log(thisCommunity);
@@ -1306,7 +1307,19 @@ function startItUp(graph) {
     //console.log("COMNODES");
     //console.log(comNodes);
 
-    //var keywords = getComKeywords(comNodes)
+    if(just_school)
+      var allKeywords = graph.graph[1]
+    else
+      var allKeywords = graph.graph[0]
+    console.log("RONALDO");
+    console.log(allKeywords[0]);
+    kw_lists = allKeywords[1];
+    var comKeywordList = []
+    for(var i=0; i<kw_lists.length;i++) {
+      if(kw_lists[i][0] == comNumber)
+        comKeywordList = kw_lists[i][1]
+    }
+    //console.log(thisComKw);
 
     return function() {
       var infoText = "<strong>Community " + comNumber + "</strong><br>";
@@ -1334,6 +1347,14 @@ function startItUp(graph) {
       }
       infoText += comNames;
       infoText += "</span>"
+      
+      var comKeywords = ""
+      for(var i=0; i<comKeywordList.length; i++) {
+        comKeywords += comKeywordList[i] + " | "
+      }
+
+
+
       displayInfoBox(infoText);
       
       /*d3.selectAll(".authorName").on("click", function() {
@@ -1368,11 +1389,15 @@ function startItUp(graph) {
       d3.select("#singleComTextOption").on("click", function() {
         var textArea = d3.select("#singleComTextArea")
         var currentText = textArea.html()
-        if(currentText == comNames)
+        var option = d3.select("#singleComTextOption")
+        if(currentText == comNames) {
           textArea.html(comKeywords)
+          option.html("[see community authors]");
+        }
         else {
           textArea.html(comNames)
           addNameListHandlers()
+          option.html("[see community keywords]");
         }
 
       });
@@ -1645,7 +1670,10 @@ function getData(name, type) {
   $.get('get_json/', {name: name, type: type}, function(data) {
     graph_data = JSON.parse(data);
     //TODO experimenting with stopping timeout
+    //console.log("GRAPHATTRIBS")
+    //console.log(graph_data.graph[0])
     startItUp(graph_data);
+
   });
 }
 

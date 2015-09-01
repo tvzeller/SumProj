@@ -122,7 +122,7 @@ class GraphMaker(object):
 			if com[vertex] in sorted_coms:
 				new_com_num = sorted_coms.index(com[vertex])
 				#self.graph.node[vertex]["com"] = com[vertex]
-				self.graph.node[vertex]["com"] = new_com_num
+				self.graph.node[vertex]["com"] = new_com_num + 1
 			else:
 				self.graph.node[vertex]["com"] = False
 
@@ -140,7 +140,7 @@ class GraphMaker(object):
 		for vertex in just_school_graph.node.keys():
 			if com[vertex] in sorted_coms:
 				new_com_num = sorted_coms.index(com[vertex])
-				self.graph.node[vertex]["school_com"] = new_com_num
+				self.graph.node[vertex]["school_com"] = new_com_num + 1
 			else:
 				self.graph.node[vertex]["school_com"] = False
 
@@ -169,8 +169,10 @@ class GraphMaker(object):
 		school_com_keywords = {}
 		for author in akw:
 			keywords = akw[author]["keywords"]
+			keywords = [kw[0] for kw in keywords]
 			com_num = self.graph.node[author]["com"]
-			school_com_num = self.graph.node[author]["school_com"]
+			# Use get as author may not have school_com
+			school_com_num = self.graph.node[author].get("school_com")
 			if com_num and com_num not in com_keywords:
 				com_keywords[com_num] = keywords
 			elif com_num in com_keywords:
@@ -180,17 +182,24 @@ class GraphMaker(object):
 			if school_com_num and school_com_num not in school_com_keywords:
 				school_com_keywords[school_com_num] = keywords
 			elif school_com_num in school_com_keywords:
-				school_com_keywords[com_num].extend(keywords)
+				school_com_keywords[school_com_num].extend(keywords)
 
 
-		assign_com_keywords(com_keywords, 'com_keywords')
-		assign_com_keywords(school_com_keywords, 'school_com_keywords')
+		self.assign_com_keywords(com_keywords, 'com_keywords')
+		self.assign_com_keywords(school_com_keywords, 'school_com_keywords')
 
 	
-	def assign_com_keywords(comkwdict, attr_name):
-		for com, keywords in comkwdict:
-			top_com_words = get_most_frequent(keywords, 20)
-			self.graph.graph[attr_name].append([com, top_com_words])
+	def assign_com_keywords(self, comkwdict, attr_name):
+		self.graph.graph[attr_name] = []
+		for com, keywords in comkwdict.items():
+			top_com_words = self.get_most_frequent(keywords, 20)
+			print "appending " + attr_name
+			print top_com_words
+			
+			if attr_name in self.graph.graph: 
+				self.graph.graph[attr_name].append([com, top_com_words])
+			else:
+				self.graph.graph[attr_name] = [[com, top_com_words],]
 
 
 
@@ -199,7 +208,7 @@ class GraphMaker(object):
 		wordcounts = {}
 		for word in wordlist:
 			if word not in wordcounts:
-				wordcounts[word] = wordcounts.count(word)
+				wordcounts[word] = wordlist.count(word)
 
 		topwords = sorted(wordcounts.items(), key=operator.itemgetter(1), reverse=True)
 		topwords = [wordscore[0] for wordscore in topwords]
