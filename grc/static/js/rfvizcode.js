@@ -2,8 +2,8 @@
 (function() {
 
   // To be used as the width and height of the SVG visualisation area
-  var width = 1000
-  var height = 650
+  var width = 1000;
+  var height = 600;
 
   // JS style enums - https://stijndewitt.wordpress.com/2014/01/26/enums-in-javascript/
   var vizTypes = {
@@ -58,25 +58,25 @@
 
   var nameText = svg.append("text")
                     .attr("x", 0)
-                    .attr("y", "8%")
+                    .attr("y", "5%")
                     .attr("class", "displayText")
 
   var typeText = svg.append("text")
                     .attr("x", 0)
-                    .attr("y", "12%")
+                    .attr("y", "9%")
                     .attr("class", "displayText")
 
   var nodeCountText = svg.append("text")
                     .attr("x", 0)
-                    .attr("y", "18%")
+                    .attr("y", "13%")
                     .attr("class", "numText");               
 
   var edgeCountText = svg.append("text")
                      .attr("x", 0)
-                    .attr("y", "21%")
+                    .attr("y", "16%")
                     .attr("class", "numText");
 
-  var keyStartY = height/2.7
+  var keyStartY = height/2.3
 
   var keyGroup = svg.append("g")
                     .attr("class", "key");
@@ -316,7 +316,7 @@
 
         // Define max size of node radius
         // Dependent on amount of nodes, but with lower and upper bounds
-        maxSize = Math.max(Math.min(40, 1200/nodes.length), 8);
+        maxSize = Math.max(Math.min(35, 1000/nodes.length), 8);
         // Minimum node size is in proportion to maximum node size
         minSize = maxSize/2
         // Node size is a function of the amount of papers node has, within the bounds set above
@@ -494,9 +494,9 @@
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
       // Adjust size of the key based on number of elements
-      if(arr.length > 15) {
-        var radius = 4.5;
-        var textSize = 12;
+      if(arr.length > 12) {
+        var radius = 3.5;
+        var textSize = 7.5;
       }
       else {
         var radius = 6;
@@ -833,7 +833,7 @@
       // and the area
       // based on http://stackoverflow.com/a/9929599
       var k = Math.sqrt(nodes.length / (width * height));
-      force.gravity(70 * k)
+      force.gravity(80 * k)
               //TODO still be be revised
               .charge(function(d) {
                 if(currentViz == vizTypes.SINGLE) {
@@ -933,13 +933,21 @@
       console.log("YEARRRS")
       var maxYear = Math.max.apply(Math, theLinks.map(function(l){
         for(var i=0; i<l.collab_title_url_years.length; i++)
-          return l.collab_title_url_years[i][2]
+          return l.collab_title_url_years[i][2];
       }));
 
-      var minYear = Math.min.apply(Math, theLinks.map(function(l){
+      /*var minYear = Math.min.apply(Math, theLinks.map(function(l){
         for(var i=0; i<l.collab_title_url_years.length; i++)
-          return l.collab_title_url_years[i][2]
-      }));
+          return l.collab_title_url_years[i][2];
+      }));*/
+      // TODO doing it this way because Math.min.apply not working for some reason
+      var minYear = theLinks[0].collab_title_url_years[0][2];
+      for(var i=0; i<theLinks.length; i++) {
+        for (var j=0; j<theLinks[i].collab_title_url_years.length; j++) {
+          if(theLinks[i].collab_title_url_years[j][2] < minYear)
+            minYear = theLinks[i].collab_title_url_years[j][2];
+        }
+      }
 
       console.log("MAXYEAR");
       console.log(maxYear)
@@ -985,7 +993,7 @@
 
             }
           }
-          
+
           if(count > 0) {
             console.log("original num_collabs")
             console.log(l.num_collabs)
@@ -1048,6 +1056,20 @@
         labeled = false;
       addLabels(node, type)
     });
+
+    d3.select("#labelButton").on('click', function() {
+      if(labeled) {
+        svg.selectAll(".label").remove();
+        labeled = false;
+        d3.select(this).html("turn on labels");
+      }
+      else {
+        addLabels(node, "nameLabels");
+        labeled = true;
+        d3.select(this).html("turn off labels");
+      }
+
+    })
 
 
     d3.select("#bff").on("click", function() {

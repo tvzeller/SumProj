@@ -111,8 +111,15 @@
 	  		<span id="searchTip" title="default is a boolean AND search&#10;enter OR between terms for a Boolean OR search&#10;use quote marks around terms to search for exact phrases">?</span><input type="text" class="searchBox" id="kwSearch" placeholder="search for a keyword or phrase"/></div>
 
 	        <div id="infoArea"></div>
+	        <div id="buttonArea">
+		        <div id="labelDiv"><button type="button" id="labelButton">turn on labels</button></div><br>
+		        <div id="freezeDiv"><button type="button" id="freezeButton">freeze graph</button></div><br>
+		        <div id="colourDiv"><button type="button" id="colourButton">colour by school</button></div><br>
+		        <div id="membersDiv"><button type="button" id="membersButton">show non-school authors</button></div>
+	    		<div id="yearDiv">Filter links by year<br><select id="yearChooser"></select></div>
+	    	</div>
 
-	        <div id="yearDiv">Filter links by year<br><select id="yearChooser"></select></div>
+	        
 
 	        <div id="spinnerDiv"><img id="spinner" src="{% static "images/spinner.gif" %}" alt="loading"/></div>
    		
