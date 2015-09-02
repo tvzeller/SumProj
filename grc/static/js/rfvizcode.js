@@ -14,14 +14,19 @@
     INTER: 5,
     TERMSEARCH: 6,
     COMMUNITIES: 7,
+    SINGLECOM: 8,
     // etc.
-  }  
+  }
+
+
 
   // Start with author collaboration graph as default on page load
   var currentViz = vizTypes.AUTHOR_COLLAB
   var metricView = false;
   // When metricView is true
-  var lastInfoBox;
+  var lastInfoBox = function() {
+    d3.select("#infoArea").style("visibility", "hidden")
+  }
 
   // To be used to stop simulation after a certain amount of time
   var freezeTimeOut;
@@ -30,6 +35,9 @@
   // Variables to keep track of whether the visualisation is static or not, and whether nodes are labelled
   var frozen = false;
   var labeled = false;
+  
+  var defaultColourText = "use default colours";
+  var schoolColourText = "colour by school";
 
 
   // Used to avoid dragging being treated like a click
@@ -362,6 +370,10 @@
       // Add labels by default to search and shortest path visualisations
       if(currentViz == vizTypes.TERMSEARCH || currentViz == vizTypes.SHORTEST)
         addLabels(nodeG, "nameLabels");
+      else {
+        d3.select("#labelButton").html("turn on labels");
+        labeled = false;
+      }
 
       // Add tooltips to display names on hovering
       nodeG.append("title")
@@ -419,7 +431,9 @@
                     })
                      .attr("class", "label");
 
-      addLabelAttribs(labelText)
+      addLabelAttribs(labelText);
+      labeled = true;
+      d3.select("#labelButton").html("turn off labels");
     }
 
     function addLabelAttribs(labelText) {
@@ -638,12 +652,12 @@
         lowlight();
         // If metricView is true, display the info area stored in variable - this is so information that was replaced
         // when user clicked on a node can be displayed again after node is deselected
-        if(metricView == true) {
-          lastInfoBox();
-        }
+       // if(metricView == true) {
+        lastInfoBox();
+        //}
         // Otherwise, hide info text
-        else
-          d3.select("#infoArea").style("visibility", "hidden");
+       // else
+        //  d3.select("#infoArea").style("visibility", "hidden");
       }
     });
   
@@ -792,6 +806,7 @@
       force.stop();
       frozen = true;
       node.call(staticDrag);
+      d3.select("#freezeButton").html("defrost graph");
     }
 
     // Restart simulation
@@ -807,6 +822,8 @@
     function setFreezeTimeout(links, nodes) {
       // First clear any currently running timeout
       clearTimeout(freezeTimeOut)
+      d3.select("#freezeButton").html("freeze graph");
+      frozen = false;
       // This timeout function stops the simulation after a certain amount of time
       var timeToFreeze = Math.min(5000 + (nodes.length * links.length), 15000);
       freezeTimeOut = setTimeout(function() {
@@ -916,6 +933,24 @@
       addComHandler();
     });
 
+    d3.select("#membersButton").on("click", function() {
+      metricView = false;                
+      if(just_school) {
+        just_school = false;
+        update(allLinks, allNodes);
+        d3.select(this).html("show just school members")
+      }
+      else {
+        just_school = true;
+        update(filteredLinks, filteredNodes)
+        d3.select(this).html("show non-school authors")
+      }
+      d3.select("#infoArea").style("visibility", "hidden");
+      d3.select("#metricsList").html(metricsHtml);
+      addMetricHandlers();
+      addComHandler();      
+    })
+
     d3.select("#freeze").on("click", function() {
       if(frozen) {
         defrost();
@@ -926,6 +961,16 @@
         //frozen = true;
       }
     });
+
+    d3.select("#freezeButton").on("click", function() {
+      if(frozen) {
+        defrost();
+        d3.select(this).html("freeze graph");
+      }
+      else {
+        freeze();
+      }
+    })
 
  
     function updateYearChooser() {
@@ -963,12 +1008,15 @@
     }
 
     // TODO put this somewhere else
+    // BUT DO SIMILAR SORT OF THING FOR SHOW NON MEMBERS (IE PUT IN JUST ONE PLACE)
     if(currentViz != vizTypes.SIMILARITY) {
       updateYearChooser();
       d3.select("#yearDiv").style("visibility", "visible");
     }
     else
       d3.select("#yearDiv").style("visibility", "hidden");
+
+
 
 
     d3.select("#yearChooser").on('change', function() {
@@ -1032,6 +1080,8 @@
       force.links(newLinks);
       updateInfoText(newLinks, theNodes);
       force.resume();
+     // frozen = false;
+      d3.select("#freezeButton").html("freeze graph");
     }
 
     function copyArray(arr) {
@@ -1065,8 +1115,8 @@
       }
       else {
         addLabels(node, "nameLabels");
-        labeled = true;
-        d3.select(this).html("turn off labels");
+        //labeled = true;
+        //d3.select(this).html("turn off labels");
       }
 
     })
@@ -1281,10 +1331,13 @@
           showSingleCommunityGraph(arr[comNum]);
           lastInfoBox = singleCommunityText(arr[comNum], comNum);
           lastInfoBox();
-          metricView = true;
+          //metricView = true;
+          //singleComView = true;
+          currentViz = vizTypes.SINGLECOM;
           colourByCommunities();
           var metricsList = d3.select("#metricsList");
-          metricsList.html("<li>No metrics available in this view</li>")
+          metricsList.html("<li>No metrics available in this view</li>");
+          d3.select("#membersButton").style("visibility", "hidden");
           updateYearChooser();
           //d3.select("#yearDiv").style("visibility", "hidden");
           // TODO comviz is now done by filtering
@@ -1404,6 +1457,8 @@
           addMetricHandlers();
           addComHandler();
           updateYearChooser();
+          currentViz = vizTypes.AUTHOR_COLLAB;
+          d3.select("#membersButton").style("visibility", "visible");
         });
 
         d3.select("#singleComTextOption").on("click", function() {
@@ -1519,10 +1574,31 @@
         colourBySchool();
     });
 
+    d3.select("#colourButton").on("click", function() {
+      if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE && currentViz != vizTypes.SINGLECOM) {
+        metricView = false;
+        lastInfoBox = function() {
+          d3.select("#infoArea").style("visibility", "hidden");
+        }
+        lastInfoBox();
+      }
+
+      var button = d3.select(this);
+      if(button.html() === schoolColourText) {
+        colourBySchool();
+       // button.html(defaultText);
+      }
+      else if(button.html() === defaultColourText) {
+        colourByDefault();
+        //button.html(schoolText);
+      }
+    })
+
   // TODO make key in here so don't have to change colours in both places if colours change
     function colourByDefault() {
       console.log("COLOUR BY DEFAULT");
       console.log(currentViz)
+      d3.select("#colourButton").html(schoolColourText);
       var chosenColour;
       d3.selectAll(".nodeCircle").style("fill", function(d, i) {
         //return colors(i);
@@ -1577,6 +1653,7 @@
 
     function colourBySchool() {
       console.log("COLOURS");
+      d3.select("#colourButton").html(defaultColourText);
       var keyArray = []
       var schools = []
       d3.selectAll(".nodeCircle").style("fill", function(d) {
@@ -1772,6 +1849,7 @@
 
       var metricsList = d3.select("#metricsList");
       metricsList.html("<li>No metrics available for shortest path graph</li>")
+      d3.select("#membersButton").style("visibility", "hidden");
       // TODO in this case do not have to JSON.parse data - find out why
       startItUp(data);
     }
@@ -1848,6 +1926,7 @@
             //d3.selectAll(".metricsMenu").style("visibility", "hidden");
             var metricsList = d3.select("#metricsList");
             metricsList.html("<li>No metrics available for single author graph</li>")
+            d3.select("#membersButton").style("visibility", "hidden");
             
           }
         // TODO do we need this else to catch other situations?
@@ -1893,8 +1972,13 @@
     getData(name, type);
 
     d3.select("#metricsList").html(metricsHtml);
+    d3.select("#membersButton").style("visibility", "visible");
 
-    d3.select("#infoArea").style("visibility", "hidden");  
+    //d3.select("#infoArea").style("visibility", "hidden");
+    lastInfoBox = function() {
+      d3.select("#infoArea").style("visibility", "hidden");
+    }
+    lastInfoBox();  
     inSchoolColour = Math.floor(Math.random() * 10)
     nonSchoolColour = Math.floor(Math.random() * 10)
     while(inSchoolColour == nonSchoolColour)
@@ -1937,6 +2021,7 @@
         nameText.text(query);
         typeText.text("keyword search");
         d3.select("#infoArea").style("visibility", "hidden");
+        d3.select("#membersButton").style("visibility", "hidden");
         d3.selectAll(".keyCircle").remove();
         d3.selectAll(".keyText").remove();
 

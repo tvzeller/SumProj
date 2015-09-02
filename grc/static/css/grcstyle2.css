@@ -63,7 +63,7 @@ h1 {
 }
 
 .menuList {
-  width:800px;
+  width:475px;
   margin: auto;
   margin-top:15px;
   /*border:1px solid green;*/
@@ -307,9 +307,13 @@ ul ul ul {
   
 }
 
-button {
+#buttonArea button {
   font-size: 12px;
   float:left;
+  width: 175px;
+  background-color: #bcd4e6;
+  color: #707070;
+  border:1px solid #a0a0a0;
 }
 
 /*#freezeDiv {
@@ -320,7 +324,6 @@ button {
   position: absolute;
   bottom: 55%;
   left:5%;
-
 }
 
 
