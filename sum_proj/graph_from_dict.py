@@ -6,8 +6,9 @@ import rake
 import time
 import community
 import operator
+import textutils3 as tu
 
-class GraphMaker(object):
+class CollabGraphMaker(object):
 
 	def __init__(self, g=None):
 		#self.data_dict = dd
@@ -55,14 +56,9 @@ class GraphMaker(object):
 		# TODO think graph.node can be replaced by just self.graph (also a dict)
 		if vertex_id in self.graph.node:
 			self.graph.node[vertex_id]["paper_count"] += 1
-			# TODO now treating keywords as a string rather than list (concatenate rather than extend)
-			#self.graph.node[vertex_id]["keywords"] += " " + keywords
 		else:
-			#self.graph.add_node(vertex_id, {"name": name, "paper_count": 1, "keywords": keywords})
-			# TODO keywords do not go in this graph anymore
 			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
 			in_school = self.check_schl_status(vertex_id)
-			#print name, in_school
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school
 
@@ -101,119 +97,8 @@ class GraphMaker(object):
 			return False 
 
 		# If no list of names of school members has been provided (e.g. when data comes from OAI) return false
-		# TODO or do something else??
 		else:
 			return False
-
-
-	def add_metrics(self, g=None):
-		print "getting the metrics..."
-		deg_cent = nx.degree_centrality(self.graph)
-		close_cent = nx.closeness_centrality(self.graph)
-		between_cent = nx.betweenness_centrality(self.graph)
-		com = community.best_partition(self.graph)
-
-		sorted_coms = self.get_sorted_multimember_coms(com)
-
-		for vertex in self.graph.node.keys():
-			self.graph.node[vertex]["deg_cent"] = deg_cent[vertex]
-			self.graph.node[vertex]["close_cent"] = close_cent[vertex]
-			self.graph.node[vertex]["between_cent"] = between_cent[vertex]
-			if com[vertex] in sorted_coms:
-				new_com_num = sorted_coms.index(com[vertex])
-				#self.graph.node[vertex]["com"] = com[vertex]
-				self.graph.node[vertex]["com"] = new_com_num + 1
-			else:
-				self.graph.node[vertex]["com"] = False
-
-	def add_just_school_community(self, g=None):
-		print "adding just school community"
-		school_nodes = [node for node in self.graph.node if self.graph.node[node]["in_school"]]
-		just_school_graph = self.graph.subgraph(school_nodes)
-		print "JUST SCHOOL GRAPH:"
-		print just_school_graph
-		print just_school_graph.nodes()
-		com = community.best_partition(just_school_graph)
-
-		sorted_coms = self.get_sorted_multimember_coms(com)
-
-		for vertex in just_school_graph.node.keys():
-			if com[vertex] in sorted_coms:
-				new_com_num = sorted_coms.index(com[vertex])
-				self.graph.node[vertex]["school_com"] = new_com_num + 1
-			else:
-				self.graph.node[vertex]["school_com"] = False
-
-
-	def get_sorted_multimember_coms(self, com_dict):
-		print com_dict
-		multimembers = {}
-		# TODO instead of this use:
-		# for comnum in com_dict.values(), if count(com_num) > 1, add to set
-		for author, com_num in com_dict.items():
-			if com_num in multimembers:
-				multimembers[com_num] = True
-			else:
-				multimembers[com_num] = False
-
-		multimember_coms = []
-		for con_num, is_multimember in multimembers.items():
-			if is_multimember:
-				multimember_coms.append(con_num)
-
-		sorted_coms = sorted(multimember_coms)
-		return sorted_coms
-
-	def add_com_keywords(self, akw, g=None):
-		com_keywords = {}
-		school_com_keywords = {}
-		for author in akw:
-			keywords = akw[author]["keywords"]
-			keywords = [kw[0] for kw in keywords]
-			com_num = self.graph.node[author]["com"]
-			# Use get as author may not have school_com
-			school_com_num = self.graph.node[author].get("school_com")
-			if com_num and com_num not in com_keywords:
-				com_keywords[com_num] = keywords
-			elif com_num in com_keywords:
-				com_keywords[com_num].extend(keywords)
-
-
-			if school_com_num and school_com_num not in school_com_keywords:
-				school_com_keywords[school_com_num] = keywords
-			elif school_com_num in school_com_keywords:
-				school_com_keywords[school_com_num].extend(keywords)
-
-
-		self.assign_com_keywords(com_keywords, 'com_keywords')
-		self.assign_com_keywords(school_com_keywords, 'school_com_keywords')
-
-	
-	def assign_com_keywords(self, comkwdict, attr_name):
-		self.graph.graph[attr_name] = []
-		for com, keywords in comkwdict.items():
-			top_com_words = self.get_most_frequent(keywords, 20)
-			print "appending " + attr_name
-			print top_com_words
-			
-			if attr_name in self.graph.graph: 
-				self.graph.graph[attr_name].append([com, top_com_words])
-			else:
-				self.graph.graph[attr_name] = [[com, top_com_words],]
-
-
-
-	# TODO put in textutils or something
-	def get_most_frequent(self, wordlist, maxwords):
-		wordcounts = {}
-		for word in wordlist:
-			if word not in wordcounts:
-				wordcounts[word] = wordlist.count(word)
-
-		topwords = sorted(wordcounts.items(), key=operator.itemgetter(1), reverse=True)
-		topwords = [wordscore[0] for wordscore in topwords]
-		return topwords[:maxwords]
-
 
 
 	def get_graph(self):
@@ -224,3 +109,97 @@ class GraphMaker(object):
 		graph_data = json_graph.node_link_data(self.graph)
 		with open(path, 'w') as f:
 			json.dump(graph_data, f)
+
+
+
+
+def add_metrics(g):
+	print "getting the metrics..."
+	deg_cent = nx.degree_centrality(g)
+	close_cent = nx.closeness_centrality(g)
+	between_cent = nx.betweenness_centrality(g)
+	com = community.best_partition(g)
+
+	sorted_coms = get_sorted_multimember_coms(com)
+
+	for vertex in self.graph.node.keys():
+		g.node[vertex]["deg_cent"] = deg_cent[vertex]
+		g.node[vertex]["close_cent"] = close_cent[vertex]
+		g.node[vertex]["between_cent"] = between_cent[vertex]
+		if com[vertex] in sorted_coms:
+			new_com_num = sorted_coms.index(com[vertex])
+			#self.graph.node[vertex]["com"] = com[vertex]
+			g.node[vertex]["com"] = new_com_num + 1
+		else:
+			g.node[vertex]["com"] = False
+
+	return g
+
+def add_just_school_community(g):
+	print "adding just school community"
+	school_nodes = [node for node in g.node if g.node[node].get("in_school")]
+	just_school_graph = g.subgraph(school_nodes)
+	com = community.best_partition(just_school_graph)
+
+	sorted_coms = get_sorted_multimember_coms(com)
+
+	for vertex in just_school_graph.node.keys():
+		if com[vertex] in sorted_coms:
+			new_com_num = sorted_coms.index(com[vertex])
+			g.node[vertex]["school_com"] = new_com_num + 1
+		else:
+			g.node[vertex]["school_com"] = False
+
+	return g
+
+
+def get_sorted_multimember_coms(com_dict):
+	multimember_coms = set()
+	for comnum in com_dict.values():
+		if com_dict.values().count(comnum) > 1:
+			multimember_coms.add(comnum)
+
+	sorted_coms = sorted(multimember_coms)
+
+	return sorted_coms
+
+def add_com_keywords(akw, g):
+	com_keywords = {}
+	school_com_keywords = {}
+	for author in akw:
+		keywords = akw[author]["keywords"]
+		keywords = [kw[0] for kw in keywords]
+		com_num = g.node[author]["com"]
+		# Use get as author may not have school_com
+		school_com_num = g.node[author].get("school_com")
+		if com_num and com_num not in com_keywords:
+			com_keywords[com_num] = keywords
+		elif com_num in com_keywords:
+			com_keywords[com_num].extend(keywords)
+
+
+		if school_com_num and school_com_num not in school_com_keywords:
+			school_com_keywords[school_com_num] = keywords
+		elif school_com_num in school_com_keywords:
+			school_com_keywords[school_com_num].extend(keywords)
+
+
+	g = assign_com_keywords(com_keywords, 'com_keywords')
+	g = assign_com_keywords(school_com_keywords, 'school_com_keywords')
+
+	return g
+
+
+def assign_com_keywords(g, comkwdict, attr_name):
+	g.graph[attr_name] = []
+	for com, keywords in comkwdict.items():
+		top_com_words = tu.get_most_frequent(keywords, 20)
+		print "appending " + attr_name
+		print top_com_words
+		
+		if attr_name in self.graph.graph: 
+			g.graph[attr_name].append([com, top_com_words])
+		else:
+			g.graph[attr_name] = [[com, top_com_words],]
+
+	return g
