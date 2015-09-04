@@ -1514,6 +1514,41 @@
       makeKey(keyArray);
     }
 
+    // Add click event handler to school names in dropdown so user can select school graph
+    d3.selectAll(".schoolListItem").on("click", function() {
+      // Get school name and type of graph stored as attributes of html element
+      var type = d3.select(this).attr("data-type");
+      var name = d3.select(this).attr("data-name");
+      var nmtext = d3.select(this).attr("data-nametext");
+      var tptext = d3.select(this).attr("data-typetext");
+
+      // Change currentViz based on option chosen
+      if(name == "Inter School")
+        currentViz = vizTypes.INTER;
+      else if(type == "similarity2")
+        currentViz = vizTypes.SIMILARITY
+      else
+        currentViz = vizTypes.AUTHOR_COLLAB;
+
+      //display background text
+      nameText.text(nmtext)
+      typeText.text(tptext)
+      //Get the new data
+      getData(name, type);
+
+      // Set lastInfoBox to function which hides the info text area
+      lastInfoBox = function() {
+        d3.select("#infoArea").style("visibility", "hidden");
+      }
+      lastInfoBox();
+      // Get random colours to use in graph  
+      inSchoolColour = Math.floor(Math.random() * 10)
+      nonSchoolColour = Math.floor(Math.random() * 10)
+      // Ensure non-school colour is different from inSchoolColour
+      while(inSchoolColour == nonSchoolColour)
+        nonSchoolColour = Math.floor(Math.random() * 10)
+    });
+
     // Event handler for shortest path menu option
     d3.select("#shortest").on("click", function() {
       // Show shortest path info text
@@ -1540,7 +1575,7 @@
 
       info += "<span id=\"longestError\"></span>"      
 
-      // Return a function which displays prepared text and adds event handlers to html elements
+      // Return a function which displays prepared html and adds event handlers to html elements
       return function() {
         displayInfoBox(info);
         d3.select("#shortestButton").on("click", getShortest);
@@ -1579,9 +1614,8 @@
 
         info += "<span id=\"singleError\"></span>"
 
+      // Return function to display prepared html and attach event handlers
       return function() {
-
-
         displayInfoBox(info);
         d3.select("#singleButton").on("click", getSingle);
         d3.select("#singleInput").on("keyup", function() {
@@ -1595,33 +1629,33 @@
       }
     }
 
+  } // This is the end of startItUp()
 
-  } // THIS IS THE END OF STARTITUP
 
 
-  // Using jquery to make get request to server as was having trouble passing parameters in d3 requests
-  // get_json is the url which maps to the django view which loads the json file and returns the data
+  // Used to get one of the stored JSON graphs (collaboration graphs or keyword similarity graphs)
+  // Uses AJAX
   function getData(name, type) {
-    console.log(name)
+    // Using jquery to make get request to server as tricky to pass parameters in D3 ajax get request
+    // get_json is the url which maps to the django view which loads the json file and returns the data
     $.get('get_json/', {name: name, type: type}, function(data) {
       graph_data = JSON.parse(data);
-      //TODO experimenting with stopping timeout
-      //console.log("GRAPHATTRIBS")
-      //console.log(graph_data.graph[0])
+      // call startItUp with new data
       startItUp(graph_data);
 
     });
   }
 
-
-
+  // Function to get shortest path graph based on authors input by user
   var getShortest = function() {
+    // Get input authors
     var sourceInfo = $("#sourceInput").val().toLowerCase();
     var targetInfo = $("#targetInput").val().toLowerCase();
-    console.log(sourceInfo);
-    console.log(targetInfo);
+    // If info missing display error message
     if(!sourceInfo || !targetInfo)
       d3.select("#shortestError").html("<br>please enter both authors<br>");
+    // Otherwise get the data from the server and pass to function to handle it
+    // Second parameter indicates where on the page to display error if data comes back with an error
     else {
       $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
         doShortestViz(data, SHORTESTPATHERROR);
@@ -1629,6 +1663,7 @@
     }
   }
 
+  // Same as getShortest
   var getLongest = function() {
     var source = $("#longestInput").val().toLowerCase();
     if(!source)
@@ -1640,13 +1675,16 @@
     }
   }
 
+  // Takes data obtained from the server, checks for errors/calls functions to update visualisation
   function doShortestViz(data, errorType) {
+    // Data can come back from server with an error message (e.g. author not found)
     if(data.error) {
       if(errorType == SHORTESTPATHERROR)
         d3.select("#shortestError").html("<br>" + data.error + "<br>");
       else if(errorType == LONGESTPATHERROR)
         d3.select("#longestError").html("<br>" + data.error + "<br>");
     }
+    // If data has candidates, more than one author matches name input by user, so display all the candidates so user can choose
     else if(data.candidates) {
       if(data.candidates.source_candidates) {
         var slctn = d3.select("#sourceCandidates");
@@ -1661,10 +1699,12 @@
         displayCandidates(slctn, data.candidates.longest_candidates);
       }
     }
+    // If data is OK and authors only have one match, update graph visualisation
     else if(data) {
       currentViz = vizTypes.SHORTEST;
       var sourceName = "";
       var targetName = "";
+      // Get the names of source and target to update graph name text
       for(var i=0; i<data.nodes.length; i++) {
         if(data.nodes[i].isSource) {
           sourceName = data.nodes[i].name;
@@ -1673,19 +1713,22 @@
           targetName = data.nodes[i].name;
         }
       }
-      console.log(sourceName)
       nameText.text(sourceName + " to")
       typeText.text(targetName)
+      // Set lastInfoBox to function which displays shortest path info text
       lastInfoBox = shortestPathBox();
       lastInfoBox();
       
-      // TODO in this case do not have to JSON.parse data - find out why
+      // Display new data
       startItUp(data);
     }
   }
 
+  // Called in case response from server indicates that name input by user matches more than one author
+  // Displays list of candidates so user can choose one
   function displayCandidates(sel, candidates) {
     var info = "Did you mean:<br><br>"
+    // Prepare HTML to display
     for(var i=0; i<candidates.length; i++) {
       var name = candidates[i].name;
       if(candidates[i].school)
@@ -1698,7 +1741,9 @@
       info += "<span class=\"candidate clickable\" id=\"" + id + "\" data-pos=\""  + pos + "\" data-input=\"" + input + "\">" + name + "</span> \
       <br>(" + school + ")<br><br>"
     }
+    // Display HTML in the selection passed as parameter
     sel.html(info);
+    // Add event handler so that when user clicks on a candidate name, their id is put into the relevant text input to be searched for
     d3.selectAll(".candidate").on("click", function() {
       var authorId = d3.select(this).attr("id");
       // data-pos holds the id of the selection (sourceCandidates or targetCandidates) in which this candidate element is positioned
@@ -1706,34 +1751,39 @@
       // which would always be targetCandidates if there are in fact target candidates present
       var pos = d3.select(this).attr("data-pos");
       var input = d3.select(this).attr("data-input")
+      // Put chosen candidate id into input box
       $("#" + input).val(authorId);
+      // Erase list of candidates
       d3.select("#" + pos).html("");
     });
   }
 
+  // Function to get and display data for single author graph based on author name input by user
   var getSingle = function() {
     var authorInfo = $("#singleInput").val().toLowerCase();
     var cutoff = $("#cutoffInput").val()
+    // If info missing display error message
     if(!authorInfo)
       d3.select("#singleError").html("Please enter an author");
     else if(!cutoff || cutoff < 0 || cutoff > 3)
       d3.select("#singleError").html("Please enter a number betwen 0 and 3");
+
+    // Otherwise, make request to server passing info
     else {
         $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
-          console.log("SINGLEERROR");
-          console.log(data);
+          // If response has error, display it
           if(data.error)
             d3.select("#singleError").html(data.error);
+          // If response has multiple author candidates display them
           else if(data.candidates) {
-            console.log("CANDIDATES")
-            console.log(data.candidates)
             var slctn = d3.select("#singleCandidates");
             displayCandidates(slctn, data.candidates)
-            //COMPLETE
           }
 
+          // Othewise update the visualisation with the new data
           else if(data) {
             currentViz = vizTypes.SINGLE
+            // Get name of central node to display
             var name;
             for(var i=0; i<data.nodes.length; i++) {
               if(data.nodes[i].centre) {
@@ -1742,74 +1792,20 @@
             }
             nameText.text(name);
             typeText.text("cutoff of " + cutoff);
+            // Set numHops variable so that function that makes key can use it
             numHops = cutoff;
-            startItUp(data)
-
+            // Set lastInfoBox to function which displays single author graph info text
             lastInfoBox = singleAuthorBox();
             lastInfoBox();
-            
+
+            // Update visualisation
+            startItUp(data)   
           }
-        // TODO do we need this else to catch other situations?
-        else {
-          singleAuthorBox(true);
-        }
       });
     }
   }
 
-
-  /*function doComViz(comNumber) {
-    //alert(comNumber);
-    var currentSchool = nameText.text()
-    //alert(currentSchool)
-    $.get("community_viz/", {"school":currentSchool, "com_num": comNumber, "just_school":just_school}, function(data) {
-      console.log(data)
-      startItUp(data);
-      //singleCommunityText(comNumber)
-    });
-  }*/
-
-
-
-  d3.selectAll(".collabListItem").on("click", function() {
-    var type = d3.select(this).attr("data-type");
-    var name = d3.select(this).attr("data-name");
-    var nmtext = d3.select(this).attr("data-nametext");
-    var tptext = d3.select(this).attr("data-typetext");
-
-    if(name == "Inter School")
-      currentViz = vizTypes.INTER;
-    else if(type == "similarity2")
-      currentViz = vizTypes.SIMILARITY
-    else
-      currentViz = vizTypes.AUTHOR_COLLAB;
-
-    //display background text
-    nameText.text(nmtext)
-    typeText.text(tptext)
-    //Get the new data
-    getData(name, type);
-
-    lastInfoBox = function() {
-      d3.select("#infoArea").style("visibility", "hidden");
-    }
-    lastInfoBox();  
-    inSchoolColour = Math.floor(Math.random() * 10)
-    nonSchoolColour = Math.floor(Math.random() * 10)
-    while(inSchoolColour == nonSchoolColour)
-      nonSchoolColour = Math.floor(Math.random() * 10)
-  });
-
-  /*d3.selectAll(".simListItem").on("click", function() {
-
-  })*/
-
-
-  /*d3.select("#about").on("click", function() {
-    displayInfoBox(introText);
-  });*/
-
-
+  // Function to 
   function displayInfoBox(text) {
     d3.select("#infoArea")
     .html(close + text)
@@ -1829,16 +1825,12 @@
       var query = this.value
       console.log(query)
       $.get('kw_search/', {query: query}, function(data) {
-        //alert("made request");
-        console.log("THEDAAAAAAAAAAAAATA");
-        console.log(data);
         currentViz = vizTypes.TERMSEARCH;
         nameText.text(query);
         typeText.text("keyword search");
         d3.select("#infoArea").style("visibility", "hidden");
         d3.selectAll(".keyCircle").remove();
         d3.selectAll(".keyText").remove();
-
         startItUp(data)
       });
     }
