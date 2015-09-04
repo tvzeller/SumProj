@@ -201,9 +201,10 @@ class Search(object):
 					title = pkw_index[paper_id]['title']
 					authors = pkw_index[paper_id]["authors"]
 					url = pkw_index[paper_id]["url"]
+					year = pkw_index[paper_id]["year"]
 					for author in authors:
 						author = tuple(author)
-						author_papers.append((author, (title, url)))
+						author_papers.append((author, (title, url, year)))
 
 		#print author_papers
 		return author_papers

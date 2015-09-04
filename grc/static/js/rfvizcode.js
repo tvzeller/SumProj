@@ -1559,16 +1559,17 @@
       var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the name or, for more accurate \
           results, the unique Enlighten numbers of the source and target authors. You can find out an author's identifier by checking their \
           url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" \
-          placeholder=\"source\"/><br><br><span id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
+          placeholder=\"source\"/><br><br><span class=\"candidates\" id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
           <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
-          <span id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
+          <span class=\"candidates\" id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" \
+          id=\"shortestButton\">Submit</button><br>"
 
       // Empty span to display error if necessary
       info += "<span id=\"shortestError\"></span>"
 
       info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br> \
               <br><input type=\"text\" id=\"longestInput\" \
-              placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span> \
+              placeholder=\"source\"/><br><br><span class=\"candidates\" id=\"longestCandidates\" data-input=\"longestInput\"></span> \
               <button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
 
       info += "<span id=\"longestError\"></span>"      
@@ -1576,22 +1577,41 @@
       // Return a function which displays prepared html and adds event handlers to html elements
       return function() {
         displayInfoBox(info);
-        d3.select("#shortestButton").on("click", getShortest);
-        d3.select("#sourceInput").on("keyup", function() {
-          if(d3.event.keyCode == 13)
-            getShortest();
+        d3.select("#shortestButton").on("click", function() {
+          clearCandidates();
+          getShortest();
         });
-        d3.select("#targetInput").on("keyup", function() {
-          if(d3.event.keyCode == 13)
+
+        d3.select("#sourceInput").on("keyup", function() {
+          if(d3.event.keyCode == 13) {
+            clearCandidates()
             getShortest();
-        })
-        d3.select("#longestButton").on("click", getLongest);
+          }
+        });
+
+        d3.select("#targetInput").on("keyup", function() {
+          if(d3.event.keyCode == 13) {
+            clearCandidates()
+            getShortest();
+          }  
+        });
+
+        d3.select("#longestButton").on("click", function() {
+          clearCandidates();
+          getLongest();
+        });
         
         d3.select("#longestInput").on("keyup", function() {
-          if(d3.event.keyCode == 13)
+          if(d3.event.keyCode == 13) {
+            clearCandidates();
             getLongest();   
-        })
+          }
+        });
       }
+    }
+
+    function clearCandidates() {
+      d3.selectAll(".candidates").html("");
     }
 
     // Event handler for single author graph menu option
@@ -1606,7 +1626,7 @@
         of the author whose graph you want to see. You can find out an author's identifier by checking their \
         url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
         placeholder=\"source\"/><br><br> \
-        <span id=\"singleCandidates\" data-input=\"singleInput\"></span> \
+        <span class=\"candidates\" id=\"singleCandidates\" data-input=\"singleInput\"></span> \
         Choose how far you want the graph to reach (up to 3 hops)<br><br><input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
         <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
 
@@ -1615,14 +1635,21 @@
       // Return function to display prepared html and attach event handlers
       return function() {
         displayInfoBox(info);
-        d3.select("#singleButton").on("click", getSingle);
+        d3.select("#singleButton").on("click", function() {
+          clearCandidates();
+          getSingle();
+        });
         d3.select("#singleInput").on("keyup", function() {
-          if(d3.event.keyCode == 13)
-            getSingle();   
+          if(d3.event.keyCode == 13) {
+            clearCandidates();
+            getSingle();
+          }   
         });
         d3.select("#cutoffInput").on("keyup", function() {
-          if(d3.event.keyCode == 13)
+          if(d3.event.keyCode == 13) {
+            clearCandidates();
             getSingle();   
+          }
         });
       }
     }
