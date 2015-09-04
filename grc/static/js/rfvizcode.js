@@ -22,7 +22,7 @@
 
   // Start with author collaboration graph as default on page load
   var currentViz = vizTypes.AUTHOR_COLLAB
-  var metricView = false;
+ // var metricView = false;
   // When metricView is true
   var lastInfoBox = function() {
     d3.select("#infoArea").style("visibility", "hidden")
@@ -338,7 +338,7 @@
         .attr("class", "nodeCircle")
         .attr("r", function(d) {
           // Radius of circles is determined by the type of visualisation currently active
-          if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY && d.paper_count != undefined)
+          if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY || currentViz == vizTypes.SINGLECOM && d.paper_count != undefined)
             return nodeScale(d.paper_count);
 
           else if(currentViz == vizTypes.SHORTEST)
@@ -437,7 +437,7 @@
     }
 
     function addLabelAttribs(labelText) {
-      labelText.attr("font-size", "10px")
+      labelText.attr("font-size", "8px")
         .attr("font-family", "sans-serif")
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
@@ -674,7 +674,7 @@
           just_keywords += keyword_scores[i][0] + " "
 
         info += just_keywords + "<br><br>";
-        info += "Researchers with keywords in common<br><br>"
+        info += "Researchers with keywords in common:<br><br>"
       }
       else if(currentViz != vizTypes.TERMSEARCH)
         info += "Collaborators:</br></br>";
@@ -704,6 +704,9 @@
           info += getAuthorNameHtml(con.source) + con.source.name + "</span> (<span class=\"clickable numCollabs\" id=\"" + 
             con.source.id + "-" + con.target.id + "\">" + con.num_collabs + "</span>)</br></br>"
       }
+
+      if(connections.length == 0)
+        info += "none"
 
       // Display the information
       displayInfoBox(info);
@@ -899,6 +902,32 @@
       
       // Call tick function with each tick of the simulation
       force.on("tick", tick);
+
+    /* Display or hide button to toggle non school members and year filter dropdown 
+      depending on type of visualisation*/
+    if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY)
+      d3.select("#membersButton").style("visibility", "visible");
+    else
+      d3.select("#membersButton").style("visibility", "hidden");
+
+    if(currentViz != vizTypes.SIMILARITY) {
+      updateYearChooser();
+      d3.select("#yearDiv").style("visibility", "visible");
+    }
+    else
+      d3.select("#yearDiv").style("visibility", "hidden");
+
+    if(currentViz == vizTypes.AUTHOR_COLLAB) {
+      d3.select("#metricsList").html(metricsHtml);
+      addMetricHandlers();
+      addComHandler();
+    }
+    else
+      d3.select("#metricsList").html("<li>No metrics available in this view</li>");
+
+
+
+
     }
     // Call the update function
     update(currentLinks, currentNodes)
@@ -916,42 +945,25 @@
       node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     }  
 
-
-    d3.select("#justSchoolFilter").on("click", function() {
-      metricView = false;                
-      if(just_school) {
-        just_school = false;
-        update(allLinks, allNodes);
-      }
-      else {
-        just_school = true;
-        update(filteredLinks, filteredNodes)
-      }
-      d3.select("#infoArea").style("visibility", "hidden");
-      d3.select("#metricsList").html(metricsHtml);
-      addMetricHandlers();
-      addComHandler();
-    });
-
+    // Add handler to button to toggle between just school members and non-school members
     d3.select("#membersButton").on("click", function() {
-      metricView = false;                
+      // If current view is just school members, update graph to show everyone             
       if(just_school) {
         just_school = false;
         update(allLinks, allNodes);
         d3.select(this).html("show just school members")
       }
       else {
+        // If current view is everyone, update graph to show just school members
         just_school = true;
         update(filteredLinks, filteredNodes)
         d3.select(this).html("show non-school authors")
       }
+      // Hide the current info text area
       d3.select("#infoArea").style("visibility", "hidden");
-      d3.select("#metricsList").html(metricsHtml);
-      addMetricHandlers();
-      addComHandler();      
     })
 
-    d3.select("#freeze").on("click", function() {
+   /* d3.select("#freeze").on("click", function() {
       if(frozen) {
         defrost();
         //frozen = false;
@@ -960,8 +972,9 @@
         freeze()
         //frozen = true;
       }
-    });
+    });*/
 
+    // Handler for button to stop / start D3 force simulation
     d3.select("#freezeButton").on("click", function() {
       if(frozen) {
         defrost();
@@ -972,20 +985,16 @@
       }
     })
 
- 
+    // Function to update the year filter dropdown based on current graph
     function updateYearChooser() {
       theLinks = allTimeLinks;
-      console.log("YEARRRS")
+      // Get the latest year out of all collaborations
       var maxYear = Math.max.apply(Math, theLinks.map(function(l){
         for(var i=0; i<l.collab_title_url_years.length; i++)
           return l.collab_title_url_years[i][2];
       }));
 
-      /*var minYear = Math.min.apply(Math, theLinks.map(function(l){
-        for(var i=0; i<l.collab_title_url_years.length; i++)
-          return l.collab_title_url_years[i][2];
-      }));*/
-      // TODO doing it this way because Math.min.apply not working for some reason
+      // Get the earliest year out of all collaborations
       var minYear = theLinks[0].collab_title_url_years[0][2];
       for(var i=0; i<theLinks.length; i++) {
         for (var j=0; j<theLinks[i].collab_title_url_years.length; j++) {
@@ -994,30 +1003,14 @@
         }
       }
 
-      console.log("MAXYEAR");
-      console.log(maxYear)
-      console.log(minYear)
+      // Set the year filter options - all the years from earliest to latest
       yearChooser = d3.select("#yearChooser");
       var options = "<option value=\"all\">all time</option>";
       for(var i=maxYear; i>=minYear; i--) {
         options += "<option value=\"" + i + "\">up to " + i + "</option>"
       }
       yearChooser.html(options)
-
-    //}
     }
-
-    // TODO put this somewhere else
-    // BUT DO SIMILAR SORT OF THING FOR SHOW NON MEMBERS (IE PUT IN JUST ONE PLACE)
-    if(currentViz != vizTypes.SIMILARITY) {
-      updateYearChooser();
-      d3.select("#yearDiv").style("visibility", "visible");
-    }
-    else
-      d3.select("#yearDiv").style("visibility", "hidden");
-
-
-
 
     d3.select("#yearChooser").on('change', function() {
       chosenYear = this.options[this.selectedIndex].value;
@@ -1176,7 +1169,7 @@
       });
     }
 
-    addMetricHandlers()
+    
 
    
     function colourByMetric(metric) {
@@ -1224,15 +1217,6 @@
       }
     }
 
-    addComHandler();
-      /*var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
-        //console.log("COMM NUMBERS")
-        //console.log(d.school_com)
-        if(just_school)
-          return moreColour(d.school_com);
-        else
-          return moreColour(d.com)
-      })*/
       
     function getCommunities() {
       //alert("gettinghere")
@@ -1328,16 +1312,17 @@
         d3.selectAll(".comTitle").on("click", function() {
           var comNum = d3.select(this).attr("id");
           //showSingleCommunityGraph(comNum);
+          currentViz = vizTypes.SINGLECOM;
           showSingleCommunityGraph(arr[comNum]);
           lastInfoBox = singleCommunityText(arr[comNum], comNum);
           lastInfoBox();
           //metricView = true;
           //singleComView = true;
-          currentViz = vizTypes.SINGLECOM;
+  
           colourByCommunities();
-          var metricsList = d3.select("#metricsList");
-          metricsList.html("<li>No metrics available in this view</li>");
-          d3.select("#membersButton").style("visibility", "hidden");
+         // var metricsList = d3.select("#metricsList");
+        //  metricsList.html("<li>No metrics available in this view</li>");
+         // d3.select("#membersButton").style("visibility", "hidden");
           updateYearChooser();
           //d3.select("#yearDiv").style("visibility", "hidden");
           // TODO comviz is now done by filtering
@@ -1445,6 +1430,7 @@
                                             
         d3.select("#backToFull").on("click", function() {
           var school = nameText.text()
+          currentViz = vizTypes.AUTHOR_COLLAB;
           if(just_school) {
             update(filteredLinks, filteredNodes);
           }
@@ -1453,12 +1439,9 @@
           }
           //colourByCommunities()
           getCommunities()
-          d3.select("#metricsList").html(metricsHtml);
-          addMetricHandlers();
-          addComHandler();
           updateYearChooser();
-          currentViz = vizTypes.AUTHOR_COLLAB;
-          d3.select("#membersButton").style("visibility", "visible");
+          
+          //d3.select("#membersButton").style("visibility", "visible");
         });
 
         d3.select("#singleComTextOption").on("click", function() {
@@ -1563,7 +1546,7 @@
 
     d3.selectAll(".colourChoice").on("click", function() {
       if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE) {
-        metricView = false;
+        //metricView = false;
         d3.select("#infoArea").style("visibility", "hidden");
       }
       var choice = d3.select(this).attr("id");
@@ -1576,7 +1559,7 @@
 
     d3.select("#colourButton").on("click", function() {
       if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE && currentViz != vizTypes.SINGLECOM) {
-        metricView = false;
+       // metricView = false;
         lastInfoBox = function() {
           d3.select("#infoArea").style("visibility", "hidden");
         }
@@ -1656,6 +1639,7 @@
       d3.select("#colourButton").html(defaultColourText);
       var keyArray = []
       var schools = []
+      var nonSchoolPresent = false;
       d3.selectAll(".nodeCircle").style("fill", function(d) {
         if(d.school) {
           console.log(d.school);
@@ -1668,11 +1652,13 @@
         }
         else {
           chosenColour = "white";
+          nonSchoolPresent = true;
         }
         d.fillColour = chosenColour;
         return chosenColour;
       });
-      keyArray.push(["white", "School not known"]);
+      if(nonSchoolPresent)
+        keyArray.push(["white", "School not known"]);
       makeKey(keyArray);
     }
 
@@ -1845,11 +1831,11 @@
       typeText.text(targetName)
       lastInfoBox = shortestPathBox();
       lastInfoBox();
-      metricView = true;
+     // metricView = true;
 
-      var metricsList = d3.select("#metricsList");
-      metricsList.html("<li>No metrics available for shortest path graph</li>")
-      d3.select("#membersButton").style("visibility", "hidden");
+    //  var metricsList = d3.select("#metricsList");
+     // metricsList.html("<li>No metrics available for shortest path graph</li>")
+    //  d3.select("#membersButton").style("visibility", "hidden");
       // TODO in this case do not have to JSON.parse data - find out why
       startItUp(data);
     }
@@ -1922,11 +1908,11 @@
 
             lastInfoBox = singleAuthorBox();
             lastInfoBox();
-            metricView = true;
+        //    metricView = true;
             //d3.selectAll(".metricsMenu").style("visibility", "hidden");
-            var metricsList = d3.select("#metricsList");
-            metricsList.html("<li>No metrics available for single author graph</li>")
-            d3.select("#membersButton").style("visibility", "hidden");
+      //      var metricsList = d3.select("#metricsList");
+        //    metricsList.html("<li>No metrics available for single author graph</li>")
+     //       d3.select("#membersButton").style("visibility", "hidden");
             
           }
         // TODO do we need this else to catch other situations?
@@ -1952,7 +1938,7 @@
 
 
   d3.selectAll(".collabListItem").on("click", function() {
-    metricView = false;
+  // metricView = false;
     var type = d3.select(this).attr("data-type");
     var name = d3.select(this).attr("data-name");
     var nmtext = d3.select(this).attr("data-nametext");
@@ -1971,8 +1957,11 @@
     //Get the new data
     getData(name, type);
 
-    d3.select("#metricsList").html(metricsHtml);
-    d3.select("#membersButton").style("visibility", "visible");
+  //  d3.select("#metricsList").html(metricsHtml);
+  /*  if(currentViz == vizTypes.INTER)
+      d3.select("#membersButton").style("visibility", "hidden");
+    else
+      d3.select("#membersButton").style("visibility", "visible");*/
 
     //d3.select("#infoArea").style("visibility", "hidden");
     lastInfoBox = function() {
