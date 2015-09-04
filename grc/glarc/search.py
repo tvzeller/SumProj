@@ -124,7 +124,7 @@ class Search(object):
 		paper_sets = self.get_paper_sets(q)
 		#print title_sets
 		author_sets = []
-		author_papers = []
+		author_papers = {}
 		pkw_index = shelve.open(self.pkw_path)
 		print "opened pkw"
 		
@@ -142,7 +142,10 @@ class Search(object):
 					for author in authors:
 						author = tuple(author)
 						author_sets[index].append(author)
-						author_papers.append((author, (title, url, year)))
+						if author in author_papers:
+							author_papers[author].append((title, url, year))
+						else:
+							author_papers[author] = [(title, url, year),]
 			
 			author_sets[index] = set(author_sets[index])
 			
@@ -150,14 +153,12 @@ class Search(object):
 		pkw_index.close()
 		#print author_sets
 		matching_authors = set.intersection(*author_sets)
-		final_result = [author_paper for author_paper in author_papers if author_paper[0] in matching_authors]
+		final_result = {k: v for k, v in author_papers.items() if k in matching_authors}
 		
 		#print final_result
 		return final_result
 			 
-		
 
-		#return set.intersection(*self.get_title_sets(q))
 
 	# TODO change author_papers to a dict - author:papers
 	def or_search(self, q):
@@ -168,7 +169,7 @@ class Search(object):
 			papers = set.union(*self.get_paper_sets(q))
 		print "orororororoorororo"
 		authors = []
-		author_papers = []
+		author_papers = {}
 		pkw_index = shelve.open(self.pkw_path)
 		for paper_id in papers:
 			paper_id = paper_id.encode("utf-8")
@@ -178,9 +179,13 @@ class Search(object):
 			year = pkw_index[paper_id]["year"]
 			for author in authors:
 				author = tuple(author)
-				author_papers.append((author, (title, url, year)))
+				if author in author_papers:
+					author_papers[author].append((title, url, year))
+				else:
+					author_papers[author] = [(title, url, year),]
+				#author_papers.append((author, (title, url, year)))
 
-		#print author_papers
+		#	print author_papers
 		return author_papers
 
 	# Return authors where the query phrase is present in the keywords of at least one of their papers

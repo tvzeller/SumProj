@@ -173,7 +173,6 @@ def longest_path(request):
 	
 
 def longest_from_id(source_num, unigraph):
-	
 	source_id = "http://eprints.gla.ac.uk/view/author/" + source_num + ".html"
 	print source_id
 
@@ -189,9 +188,7 @@ def longest_from_id(source_num, unigraph):
 	return HttpResponse(newdata, content_type='application/json')	
 
 
-# TODO limit this to cutoff of 3
-def author_search(request):
-# TODO deal with names as well as number
+def single_author(request):
 	if request.method == 'GET':
 		author_info = request.GET.get("author")
 		cutoff = int(request.GET.get("cutoff")) 
@@ -228,73 +225,17 @@ def single_from_id(author_num, unigraph, cutoff):
 		errorMessage = json.dumps({"error": "Sorry, the author was not found"})
 		return HttpResponse(errorMessage, content_type='application/json')
 
-	nodes = [author_id,]
-	neighbours = nx.single_source_shortest_path_length(unigraph, author_id, cutoff)
-	
-	nodes.extend(neighbours.keys())
+	author_graph = graph_utils.single_author_graph(unigraph, author_id, cutoff)
 
-	# Making a new subgraph out of the old graph so that changes in attributes are not reflected in full graph
-	author_graph = nx.Graph(unigraph.subgraph(nodes))
-
-	author_graph.node[author_id]["centre"] = 1
-	for neighbour, hops in neighbours.items():
-		author_graph.node[neighbour]["hops"] = hops
-
-	#print author_graph.nodes()
-	#print author_graph.edges()
-
-	graphdata = json_graph.node_link_data(author_graph)
-	newdata = json.dumps(graphdata)
-
-
-	return HttpResponse(newdata, content_type='application/json')
-
-
-def community_viz(request):
-	if request.method == 'GET':
-		school = request.GET.get("school")
-		com_num = int(request.GET.get("com_num"))
-		just_school = request.GET.get("just_school")
-
-	print "com num is", com_num
-	graphpath = 'collab/' + school + '.json'
-
-	with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
-		data = json.load(f)
-
-	school_graph = json_graph.node_link_graph(data)
-
-	if just_school:
-		# TODO using .get because not all nodes have school_com key in attributes - maybe add one for everyone, with false if not in school
-		com_nodes = [node for node in school_graph.node if school_graph.node[node].get("school_com") == com_num]
-	else:
-		com_nodes = [node for node in school_graph.node if school_graph.node[node]["com"] == com_num]
-	#print "the community is"
-	#print com_nodes
-
-	com_graph = school_graph.subgraph(com_nodes)
-
-	# TODO make this into a function, it is repeated in 3 or 4 places
-	graphdata = json_graph.node_link_data(com_graph)
+	graphdata = graph_utils.json_from_graph(author_graph)
 	newdata = json.dumps(graphdata)
 
 	return HttpResponse(newdata, content_type='application/json')
-
-
-
-
-
 
 
 def get_unigraph():
 	graphpath = os.path.join(settings.GRAPHS_PATH, 'collab/The University of Glasgow.json')
 	return graph_utils.graph_from_file(graphpath)
-
-	# with open(os.path.join(settings.GRAPHS_PATH, graphpath)) as f:
-	# 	data = json.load(f)
-
-	# unigraph = json_graph.node_link_graph(data)
-	# return unigraph
 
 
 def kw_search(request):
@@ -303,10 +244,7 @@ def kw_search(request):
 		query = request.GET.get('query')
 
 	print query
-	# TODO make index path
 	path = os.path.join(settings.INDICES_PATH + "\invindex10.db")
-	#print path
-	#akw_path = os.path.join(settings.INDICES_PATH + "\\authorkwindex2.db")
 	tkw_path = os.path.join(settings.INDICES_PATH + "\paperkwindex3.db")
 
 	srch = search.Search(path, tkw_path)
@@ -326,49 +264,13 @@ def kw_search(request):
 		print "GOT HERE"
 		#print author_titles
 
-	term_graph = nx.Graph()
 	unigraph = get_unigraph()
 
-	# TODO factor out networkx stuff from views - pass info to graph making module and get graph in return
-	term_graph.add_node(query, {"name":query, "isTerm":True})
-	#print "AUTHORS"
-	#print author_titles
-	# TODO refactor this - sort first by author, then get top 30
-	# avoid adding all possible authors to nodes
-	# OR change the way authors are returned from search so can easily filter them
-	for author_title in author_titles:
-		#print "adding node"
-		name, authorid = author_title[0]
-		#print authorid, name
-		title_url = author_title[1]
-		#print title_url
-		if authorid not in term_graph.node:
-			term_graph.add_node(authorid, {"name": name, "paper_count": 1, "school":unigraph.node[authorid]["school"]})
-			#print "added node", name
-		else:
-			term_graph.node[authorid]["paper_count"] += 1
-
-		if term_graph.has_edge(query, authorid):
-			term_graph[query][authorid]["num_collabs"] += 1
-			term_graph[query][authorid]["weight"] += 1
-			term_graph[query][authorid]["collab_title_url_years"].append(title_url)
-		else:
-			term_graph.add_edge(query, authorid, {"num_collabs":1, "weight":1, "collab_title_url_years": [title_url,]})
-	
-	if len(term_graph.nodes()) > 30:
-		print "TOO MANY NODES"
-		nodes_to_sort = [node for node in term_graph.nodes() if node != query]
-		sorted_nodes = sorted(nodes_to_sort, key=lambda k: term_graph.node[k]["paper_count"], reverse=True)
-		sorted_nodes = sorted_nodes[:29]
-		#print sorted_nodes
-		sorted_nodes.append(query)
-		term_graph = term_graph.subgraph(sorted_nodes)
+	term_graph = graph_utils.make_search_graph(query, author_titles, unigraph)
 
 	graphdata = json_graph.node_link_data(term_graph)
 	newdata = json.dumps(graphdata)
-	#print "NEWDATA"
-	#print newdata
-
+	
 	return HttpResponse(newdata, content_type='application/json')
 	#return HttpResponse("")
  

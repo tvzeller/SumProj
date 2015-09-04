@@ -337,6 +337,56 @@ def get_longest_path(g, source):
 	longest_path = paths[chosen_target]
 	return longest_path
 
+def single_author_graph(full_graph, author, cutoff):
+	nodes = [author,]
+	neighbours = nx.single_source_shortest_path_length(full_graph, author, cutoff)
+	
+	nodes.extend(neighbours.keys())
+	# Making a new subgraph out of the old graph so that changes in attributes are not reflected in full graph
+	author_graph = nx.Graph(full_graph.subgraph(nodes))
+
+	author_graph.node[author]["centre"] = 1
+
+	for neighbour, hops in neighbours.items():
+		author_graph.node[neighbour]["hops"] = hops
+
+	return author_graph
+
+def make_search_graph(query, results, full_graph):
+	
+	if len(results) > 30:
+		print "filtering results"
+		top_authors = sorted(results.keys(), key=lambda k: len(results[k]), reverse=True)[:29]
+		filtered_results = {}
+		for author in top_authors:
+			filtered_results[author] = results[author]
+		results = filtered_results
+
+	term_graph = nx.Graph()
+	term_graph.add_node(query, {"name":query, "isTerm":True})
+
+	for author, papers in results.items():
+		name, authorid = author
+		term_graph.add_node(authorid, {"name": name, "paper_count": 1, "school":full_graph.node[authorid]["school"]})
+
+		term_graph.add_edge(query, authorid, {
+											"num_collabs": len(papers),
+											"collab_title_url_years": papers
+											})
+
+	
+	# if len(term_graph.nodes()) > 30:
+	# 	print "TOO MANY NODES"
+	# 	nodes_to_sort = [node for node in term_graph.nodes() if node != query]
+	# 	sorted_nodes = sorted(nodes_to_sort, key=lambda k: term_graph.node[k]["paper_count"], reverse=True)
+	# 	sorted_nodes = sorted_nodes[:29]
+	# 	#print sorted_nodes
+	# 	sorted_nodes.append(query)
+	# 	term_graph = term_graph.subgraph(sorted_nodes)
+
+	return term_graph
+
+
 
 
 
