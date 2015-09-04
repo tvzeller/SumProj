@@ -129,90 +129,75 @@ class Search(object):
 		print "opened pkw"
 		
 		for index, paper_set in enumerate(paper_sets):
-			author_sets.append([])
+			author_sets.append(set())
 			for paper_id in paper_set:
-				paper_id = paper_id.encode("utf-8")
-				#title = title.encode("utf-8")
-				
+				paper_id = paper_id.encode("utf-8")			
 				if paper_id in pkw_index:
-					title = pkw_index[paper_id]['title']
-					url = pkw_index[paper_id]["url"]
-					authors = pkw_index[paper_id]["authors"]
-					year = pkw_index[paper_id]["year"]
-					for author in authors:
-						author = tuple(author)
-						author_sets[index].append(author)
-						if author in author_papers:
-							author_papers[author].append((title, url, year))
-						else:
-							author_papers[author] = [(title, url, year),]
-			
-			author_sets[index] = set(author_sets[index])
-			
-
+					self.add_authors_to_results(author_papers, pkw_index, paper_id, author_sets, index)
+					
 		pkw_index.close()
-		#print author_sets
-		matching_authors = set.intersection(*author_sets)
-		final_result = {k: v for k, v in author_papers.items() if k in matching_authors}
+
+		matching_authors = set()
+		if author_sets:
+			matching_authors = set.intersection(*author_sets)
 		
-		#print final_result
+		final_result = {k: v for k, v in author_papers.items() if k in matching_authors}
+
 		return final_result
 			 
 
-
-	# TODO change author_papers to a dict - author:papers
 	def or_search(self, q):
 		print "or searching"
-		papers = []
+		papers = set()
 		paper_sets = self.get_paper_sets(q)
 		if paper_sets:
-			papers = set.union(*self.get_paper_sets(q))
+			papers = set.union(*paper_sets)
 		print "orororororoorororo"
 		authors = []
 		author_papers = {}
 		pkw_index = shelve.open(self.pkw_path)
 		for paper_id in papers:
 			paper_id = paper_id.encode("utf-8")
-			title = pkw_index[paper_id]['title']
-			url = pkw_index[paper_id]["url"]
-			authors = pkw_index[paper_id]["authors"]
-			year = pkw_index[paper_id]["year"]
-			for author in authors:
-				author = tuple(author)
-				if author in author_papers:
-					author_papers[author].append((title, url, year))
-				else:
-					author_papers[author] = [(title, url, year),]
-				#author_papers.append((author, (title, url, year)))
+			if paper_id in pkw_index:
+				self.add_authors_to_results(author_papers, pkw_index, paper_id)
 
-		#	print author_papers
 		return author_papers
 
 	# Return authors where the query phrase is present in the keywords of at least one of their papers
 	def phrase_search(self, q):
-		print "phrase searching"
-		#candidates = set.intersection(*self.get_author_sets(q))
-		#print candidates
-		papers = set.intersection(*self.get_paper_sets(q))
+		paper_sets = self.get_paper_sets(q)
+		papers = set()
+		
+		if paper_sets:
+			papers = set.intersection(*paper_sets)
+		
+		print "getting here phrase"
 		pkw_index = shelve.open(self.pkw_path)
-		author_papers = []
+		author_papers = {}
+		
 		for paper_id in papers:
 			paper_id = paper_id.encode("utf-8")
-			#print "query is", q
-			#print "author is", author
-			#print "keyword string is", akwindex[author]
 			if paper_id in pkw_index:
 				if q in "|".join(pkw_index[paper_id]["keywords"]):
-					title = pkw_index[paper_id]['title']
-					authors = pkw_index[paper_id]["authors"]
-					url = pkw_index[paper_id]["url"]
-					year = pkw_index[paper_id]["year"]
-					for author in authors:
-						author = tuple(author)
-						author_papers.append((author, (title, url, year)))
+					self.add_authors_to_results(author_papers, pkw_index, paper_id)
 
-		#print author_papers
 		return author_papers
+
+
+	def add_authors_to_results(self, results_dict, pkw_index, paper_id, author_sets=None, index=None):
+		title = pkw_index[paper_id]['title']
+		authors = pkw_index[paper_id]["authors"]
+		url = pkw_index[paper_id]["url"]
+		year = pkw_index[paper_id]["year"]
+		for author in authors:
+			author = tuple(author)
+			if author in results_dict:
+				results_dict[author].append((title, url, year))
+			else:
+				results_dict[author] = [(title, url, year),]
+			
+			if(author_sets):
+				author_sets[index].add(author)
 
 
 

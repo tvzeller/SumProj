@@ -352,11 +352,11 @@ def single_author_graph(full_graph, author, cutoff):
 
 	return author_graph
 
-def make_search_graph(query, results, full_graph):
+def make_search_graph(query, results, full_graph, max_authors):
 	
-	if len(results) > 30:
+	if len(results) > max_authors:
 		print "filtering results"
-		top_authors = sorted(results.keys(), key=lambda k: len(results[k]), reverse=True)[:29]
+		top_authors = sorted(results.keys(), key=lambda k: len(results[k]), reverse=True)[:max_authors]
 		filtered_results = {}
 		for author in top_authors:
 			filtered_results[author] = results[author]
@@ -374,15 +374,6 @@ def make_search_graph(query, results, full_graph):
 											"collab_title_url_years": papers
 											})
 
-	
-	# if len(term_graph.nodes()) > 30:
-	# 	print "TOO MANY NODES"
-	# 	nodes_to_sort = [node for node in term_graph.nodes() if node != query]
-	# 	sorted_nodes = sorted(nodes_to_sort, key=lambda k: term_graph.node[k]["paper_count"], reverse=True)
-	# 	sorted_nodes = sorted_nodes[:29]
-	# 	#print sorted_nodes
-	# 	sorted_nodes.append(query)
-	# 	term_graph = term_graph.subgraph(sorted_nodes)
 
 	return term_graph
 

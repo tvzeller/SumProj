@@ -4,14 +4,13 @@ import os
 from django.conf import settings
 
 import json
-import networkx as nx
-from networkx.readwrite import json_graph
-import threading
-import operator
+
+#import threading
+#import operator
 import random
 import search
-import shelve
-import re
+#import shelve
+#import re
 import graph_utils
 
 def index(request):
@@ -266,9 +265,9 @@ def kw_search(request):
 
 	unigraph = get_unigraph()
 
-	term_graph = graph_utils.make_search_graph(query, author_titles, unigraph)
+	term_graph = graph_utils.make_search_graph(query, author_titles, unigraph, 30)
 
-	graphdata = json_graph.node_link_data(term_graph)
+	graphdata = graph_utils.json_from_graph(term_graph)
 	newdata = json.dumps(graphdata)
 	
 	return HttpResponse(newdata, content_type='application/json')
