@@ -13,16 +13,16 @@
     SINGLE: 4,
     INTER: 5,
     TERMSEARCH: 6,
-    COMMUNITIES: 7,
-    SINGLECOM: 8,
-    // etc.
+    SINGLECOM: 7,
   }
-
-
 
   // Start with author collaboration graph as default on page load
   var currentViz = vizTypes.AUTHOR_COLLAB
 
+  // lastInfoBox is set to a function and called when user clicks outside a node, deselecting any selected nodes.
+  // The function will either display the last info text that was displayed (e.g. info about a centrality metric or communities) or
+  // simply hide any text that was there (which would be info on the node that was selected).
+  // As a default, lastInfoBox is set to a function which hides the info text. 
   var lastInfoBox = function() {
     d3.select("#infoArea").style("visibility", "hidden")
   }
@@ -35,9 +35,9 @@
   var frozen = false;
   var labeled = false;
   
+  // Alternative texts displayed on colour button
   var defaultColourText = "use default colours";
   var schoolColourText = "colour by school";
-
 
   // Used to avoid dragging being treated like a click
   var downX;
@@ -46,8 +46,11 @@
   // Array to keep track of which nodes have been searched for in the graph - to keep them highlighted
   var searchedNodes = []
 
+  // In a single author collab graph, user can select number of hops away from author to see.
+  // This keeps track of that number so it can be used in several places
   var numHops;
 
+  // Pseudo-constants to avoid using magic numbers - indicate where to display any error message in the shortest path info text area
   var SHORTESTPATHERROR = 1;
   var LONGESTPATHERROR = 2;
 
@@ -139,9 +142,8 @@
     // Variables to hold the links and nodes currently displayed
     var currentLinks = allLinks;
     var currentNodes = allNodes;
-    // When filtering links by year, need a way to go back to all the links (for all time) - this holds those links
-    // Set to allLinks at first
-    //var allTimeLinks = allLinks;
+
+    var allTimeLinks;
 
     /* Collaboration graphs can show either just members of the current school or also people outside 
     the school who they have collaborated with. just_school variable keeps track of which is currently the case.
@@ -182,7 +184,6 @@
       d.x = d3.event.x;
       d.y = d3.event.y;
       tick();
-      console.log("DRAGGGGIN");
     }
 
 
@@ -217,13 +218,15 @@
               return d.source.id + "-" + d.target.id;
             });
 
-      if(links.length > 0 && links[0].num_collabs != undefined) {
+      // allTimeLinks is used for this so that link width is relative to the maximum collaborations in the non year-filtered graph,
+      // so that it is possible to see changes in link width through time
+      if(allTimeLinks.length > 0 && allTimeLinks[0].num_collabs != undefined) {
         // Get the maximum number of collaborations
-        maxCollabs = Math.max.apply(Math, links.map(function(l){
+        maxCollabs = Math.max.apply(Math, allTimeLinks.map(function(l){
           return l.num_collabs;
         }));
         // Get the minimum number of collaborations
-        minCollabs = Math.min.apply(Math, links.map(function(l){
+        minCollabs = Math.min.apply(Math, allTimeLinks.map(function(l){
           return l.num_collabs;
         }));
 
@@ -352,12 +355,13 @@
           }
 
           else if(currentViz == vizTypes.TERMSEARCH) {
+            // The search term will have isTerm set to true
             if(d.isTerm)
               return 30;
             else
               return 15;
           }
-
+          // In all other cases default size is 10
           else
             return 10;
         })
@@ -370,6 +374,7 @@
       if(currentViz == vizTypes.TERMSEARCH || currentViz == vizTypes.SHORTEST)
         addLabels(nodeG, "nameLabels");
       else {
+        // If labels are off, change text of labelbutton
         d3.select("#labelButton").html("turn on labels");
         labeled = false;
       }
@@ -416,7 +421,6 @@
     var addLabels = function(sel, label) {
       var labelText = sel.append("text")
                     .text(function(d) { 
-                      // TODO magic numbers...
                       if(label=="nameLabels") {
                         if(d.name)
                           return d.name
@@ -434,6 +438,7 @@
       d3.select("#labelButton").html("turn off labels");
     }
 
+    // Function to add style attributes to labels
     function addLabelAttribs(labelText) {
       labelText.attr("font-size", "8px")
         .attr("font-family", "sans-serif")
@@ -723,6 +728,12 @@
         if(l.source.id + "-" + l.target.id === elemId) {
           var title_urls = l.collab_title_url_years;
 
+          // Sort the paper titles by date, latest first
+          title_urls.sort(function(a, b) {
+            // The year of the collab is at index 2 of the title_url array for each paper
+            return b[2] - a[2];
+          });
+
           var titleString = "Papers connecting <strong>" + getAuthorNameHtml(l.source) + l.source.name + 
           "</span></strong> and <strong>" + getAuthorNameHtml(l.target) + l.target.name + "</span></strong><br><br>";
           
@@ -748,7 +759,6 @@
       var elemId = this.id;
       // Iterate through links to get link corresponding to clicked number
       link.each(function(l) {
-        console.log(l.source.id + "-" + l.target.id)
         if(l.source.id + "-" + l.target.id === elemId) {
           var keywords = l.sim_kw;
 
@@ -762,6 +772,18 @@
           addNameListHandlers();
         }
       });
+    }
+
+    // Function to add event handlers to author names displayed in info text area
+    function addNameListHandlers() {
+      // The author names have an id corresponding to the id of the node, so the node can be found from the name text element
+      d3.selectAll(".authorName").on("click", function() {
+                                  var theId = d3.select(this).attr("id");
+                                  displayInfoForThisNode(theId);
+                                  highlightPathsForThisNode(theId);
+                                    })
+                                  .on("mouseover", highlightThisNode)
+                                  .on("mouseout", lowlightJustNode);                    
     }
 
     //Helper function to produce the html for displaying an author name in info text area
@@ -797,7 +819,6 @@
     // Make graph static by stopping the force simulation
     // Attach drag event listener to nodes so they can be moved around in static mode
     function freeze() {
-      console.log("FROZEN")
       force.stop();
       frozen = true;
       node.call(staticDrag);
@@ -823,7 +844,6 @@
       var timeToFreeze = Math.min(5000 + (nodes.length * links.length), 15000);
       freezeTimeOut = setTimeout(function() {
         freeze();
-        console.log("STOPPED")
       }, timeToFreeze);
     }
 
@@ -831,8 +851,7 @@
     function update(links, nodes) {
       // Start timer to stop simulation after certain amount of time
       setFreezeTimeout(links, nodes);
-
-      //TODO CHECK THIS
+      // set allTimeLinks to the full set of links in current view
       allTimeLinks = links;
 
       // Update the links and nodes visual elements with new data
@@ -846,7 +865,6 @@
       // based on http://stackoverflow.com/a/9929599
       var k = Math.sqrt(nodes.length / (width * height));
       force.gravity(80 * k)
-              //TODO still be be revised
               .charge(function(d) {
                 if(currentViz == vizTypes.SINGLE) {
                   if(d.centre)
@@ -1227,8 +1245,6 @@
     function colourByCommunities() {
       var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
         // Get appropriate community property (just school community or full graph community)
-        console.log("NAME")
-        console.log(d.name);
         if(just_school)
           var comNum = d.school_com;
         else
@@ -1253,7 +1269,6 @@
       for(var i=1; i<arr.length; i++) {
         infoText += "<strong><span id=\"" + i + "\" class=\"comTitle clickable\">Community " + i + "</strong><br>";
         var thisCommunity = arr[i];
-        console.log(thisCommunity);
         for(var j=0; j < thisCommunity.length; j++) {
           var author = thisCommunity[j];
           infoText += getAuthorNameHtml(author) + author.name + "</span><br>";
@@ -1327,7 +1342,6 @@
       for(var i=0; i<comNodes.length; i++) {
         author = comNodes[i];
         comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
-        console.log(comNames)
       }
       infoText += comNames;
       infoText += "</span>"
@@ -1374,18 +1388,6 @@
       }
     }
 
-    // TODO put this somewhere else clearly
-    // Function to add event handlers to author names displayed in info text area
-    function addNameListHandlers() {
-      // The author names have an id corresponding to the id of the node, so the node can be found from the name text element
-      d3.selectAll(".authorName").on("click", function() {
-                                  var theId = d3.select(this).attr("id");
-                                  displayInfoForThisNode(theId);
-                                  highlightPathsForThisNode(theId);
-                                    })
-                                  .on("mouseover", highlightThisNode)
-                                  .on("mouseout", lowlightJustNode);                    
-    }
 
     // Displays the visualisation for a graph containing just the nodes in the array passed as argument
     // Used to display single community
@@ -1437,10 +1439,8 @@
         if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY) {
           if(d.in_school)
             chosenColour = multiColour(inSchoolColour);
-          else {
-            console.log(d.name)
+          else 
             chosenColour = multiColour(nonSchoolColour);
-          }
         }
 
         else if(currentViz == vizTypes.SHORTEST) {
@@ -1492,9 +1492,7 @@
       var nonSchoolPresent = false;
       d3.selectAll(".nodeCircle").style("fill", function(d) {
         if(d.school) {
-          console.log(d.school);
           if(schools.indexOf(d.school) < 0) {
-            console.log(d.school)
             schools.push(d.school);
             keyArray.push([moreColour(d.school), d.school])
           }
@@ -1805,7 +1803,7 @@
     }
   }
 
-  // Function to 
+  // Function to display the info text area. Takes the html string as a parameter and assigns it to the infoArea selection.
   function displayInfoBox(text) {
     d3.select("#infoArea")
     .html(close + text)
@@ -1815,15 +1813,16 @@
       d3.select("#infoArea").style("visibility", "hidden");
     });
 
+    // Makes the infoArea draggable and puts the scroll bar at the top by default
     $("#infoArea").draggable();
     $("#infoArea").scrollTop(0);    
   }
 
-
+  // Function to get results of keyword search
   d3.select("#kwSearch").on("keyup", function() {
     if(d3.event.keyCode == 13) {
       var query = this.value
-      console.log(query)
+  
       $.get('kw_search/', {query: query}, function(data) {
         currentViz = vizTypes.TERMSEARCH;
         nameText.text(query);
