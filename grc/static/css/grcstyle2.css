@@ -63,10 +63,10 @@ h1 {
 }
 
 .menuList {
-  width:475px;
+  width:460px;
   margin: auto;
   margin-top:15px;
-  /*border:1px solid green;*/
+ /* border:1px solid green;*/
 }
 
 #dropContainer {

@@ -22,8 +22,7 @@
 
   // Start with author collaboration graph as default on page load
   var currentViz = vizTypes.AUTHOR_COLLAB
- // var metricView = false;
-  // When metricView is true
+
   var lastInfoBox = function() {
     d3.select("#infoArea").style("visibility", "hidden")
   }
@@ -387,7 +386,6 @@
       // Clear searched nodes so that stroke width does not remain wider after graph is updated
       searchedNodes = []
         
-
       // Attach event handlers to node circles
 
       // Record mousedown coordinates to compare with mouseup coordinates
@@ -470,7 +468,7 @@
       }
 
       else if(currentViz == vizTypes.SINGLE) {
-        // Get the name central node (the author whose graph it is)
+        // Get the name of central node (the author whose graph it is)
         var name = "";
         for(var i=0; i<currentNodes.length; i++) {
           if(currentNodes[i].centre)
@@ -648,16 +646,10 @@
           break;
       }
       // Click was not on any circle
+      // De-highlight any highlighted nodes and bring up the last info text (which will be blank in some cases)
       if(!onCircle) {
         lowlight();
-        // If metricView is true, display the info area stored in variable - this is so information that was replaced
-        // when user clicked on a node can be displayed again after node is deselected
-       // if(metricView == true) {
         lastInfoBox();
-        //}
-        // Otherwise, hide info text
-       // else
-        //  d3.select("#infoArea").style("visibility", "hidden");
       }
     });
   
@@ -903,33 +895,34 @@
       // Call tick function with each tick of the simulation
       force.on("tick", tick);
 
-    /* Display or hide button to toggle non school members and year filter dropdown 
-      depending on type of visualisation*/
-    if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY)
-      d3.select("#membersButton").style("visibility", "visible");
-    else
-      d3.select("#membersButton").style("visibility", "hidden");
-
-    if(currentViz != vizTypes.SIMILARITY) {
-      updateYearChooser();
-      d3.select("#yearDiv").style("visibility", "visible");
+      updateOptions();
     }
-    else
-      d3.select("#yearDiv").style("visibility", "hidden");
 
-    if(currentViz == vizTypes.AUTHOR_COLLAB) {
-      d3.select("#metricsList").html(metricsHtml);
-      addMetricHandlers();
-      addComHandler();
+    function updateOptions() {
+      /* Display or hide button to toggle non school members and year filter dropdown 
+        depending on type of visualisation*/
+      if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY)
+        d3.select("#membersButton").style("visibility", "visible");
+      else
+        d3.select("#membersButton").style("visibility", "hidden");
+
+      if(currentViz != vizTypes.SIMILARITY) {
+        updateYearChooser();
+        d3.select("#yearDiv").style("visibility", "visible");
+      }
+      else
+        d3.select("#yearDiv").style("visibility", "hidden");
+
+      if(currentViz == vizTypes.AUTHOR_COLLAB) {
+        d3.select("#metricsList").html(metricsHtml);
+        addMetricHandlers();
+      }
+      else
+        d3.select("#metricsList").html("<li>No metrics available in this view</li>");
     }
-    else
-      d3.select("#metricsList").html("<li>No metrics available in this view</li>");
 
-
-
-
-    }
     // Call the update function
+    // TODO put this at the end?
     update(currentLinks, currentNodes)
 
     // Standard function used in D3 visualisations to adjust position of visual elements based on position of
@@ -947,7 +940,7 @@
 
     // Add handler to button to toggle between just school members and non-school members
     d3.select("#membersButton").on("click", function() {
-      // If current view is just school members, update graph to show everyone             
+      // If current view is just school members (just_school == true), update graph to show everyone             
       if(just_school) {
         just_school = false;
         update(allLinks, allNodes);
@@ -962,17 +955,6 @@
       // Hide the current info text area
       d3.select("#infoArea").style("visibility", "hidden");
     })
-
-   /* d3.select("#freeze").on("click", function() {
-      if(frozen) {
-        defrost();
-        //frozen = false;
-      }
-      else {
-        freeze()
-        //frozen = true;
-      }
-    });*/
 
     // Handler for button to stop / start D3 force simulation
     d3.select("#freezeButton").on("click", function() {
@@ -1012,76 +994,56 @@
       yearChooser.html(options)
     }
 
+    // Function to filter graph based on year chosen by user
     d3.select("#yearChooser").on('change', function() {
       chosenYear = this.options[this.selectedIndex].value;
-      var theNodes = force.nodes()
 
-      if(chosenYear === "all") {
+      // If user selected all time, update links using all links
+      if(chosenYear === "all")
         updateJustLinks(allTimeLinks)
-      }
 
+      // Otherwise filter links according to chosen year
       else {
+        // Make copy of all the links so as not to change the properties of the original objects
         var theLinks = copyArray(allTimeLinks);
         chosenYear = parseInt(chosenYear)
-        
+        // Filter the links based on chosen year, making array of filtered links
         var yearFilteredLinks = theLinks.filter(function(l) {
-          var count = 0
+          /* Each link has a list of collaborations. Keep only collaborations with date before or equal to chosen year
+            and put in new list. 
+          */
           var collabs = []
           for(var i=0; i<l.collab_title_url_years.length; i++) {
-            if(l.collab_title_url_years[i][2] <= chosenYear) {
+            if(l.collab_title_url_years[i][2] <= chosenYear)
               collabs.push(l.collab_title_url_years[i]);
-              count += 1;
-
-            }
           }
 
-          if(count > 0) {
-            console.log("original num_collabs")
-            console.log(l.num_collabs)
-            l.num_collabs = count;
-            console.log("new num_collabs")
-            console.log(l.num_collabs);
-            l.num_collabs = count;
+          if(collabs.length > 0) {
+            // Give link new num_collabs and collab_title_url_years properties
+            l.num_collabs = collabs.length;
             l.collab_title_url_years = collabs;
+            // Return true so this link is put in yearFilteredLinks
             return true;
           }
           else
+            // No collaborations within year range, so return false so this link is excluded
             return false
 
         })
-       /* for(var i=0; i<yearFilteredLinks.length; i++) {
-          aLink = yearFilteredLinks[i];
-          var collabs = aLink.collab_title_url_years
-          collabs = collabs.filter(function(c) {
-            return c[2] == chosenYear;
-          })
-          aLink.collab_title_url_years = collabs
-        }*/
-
-        theNodes = force.nodes();
+        // Update with the new filtered links
         updateJustLinks(yearFilteredLinks)
-
       } 
-        /*var comFilteredLinks = graph.links.filter(function(l) {
-        return nodeArray.indexOf(l.source) > -1 && nodeArray.indexOf(l.target) > -1;*/
     });
 
-    function updateJustLinks(newLinks) {
-      theNodes = force.nodes();
-      setFreezeTimeout(newLinks, theNodes);
-      updateLinks(newLinks);
-      force.links(newLinks);
-      updateInfoText(newLinks, theNodes);
-      force.resume();
-     // frozen = false;
-      d3.select("#freezeButton").html("freeze graph");
-    }
-
-    function copyArray(arr) {
+    // Function to make copy of array of link objects, to be used for filtering links
+    function copyArray(linkArr) {
       arrCopy = []
-      for(var i=0; i<arr.length; i++) {
-        var original = arr[i];
+      for(var i=0; i<linkArr.length; i++) {
+        var original = linkArr[i];
+        // Make deep copy of link object
         var objCopy = JSON.parse(JSON.stringify(original));
+        // Set source and target nodes of copied link to object references of original link
+        // This is so that the D3 visualisation works and the links stay in correct position in relation to nodes
         objCopy.source = original.source;
         objCopy.target = original.target;
         arrCopy.push(objCopy);
@@ -1089,71 +1051,64 @@
       return arrCopy;
     }
 
+    // Updates just the link objects in the visualisation
+    function updateJustLinks(newLinks) {
+      var theNodes = force.nodes();
+      setFreezeTimeout(newLinks, theNodes);
+      // Call updateLinks to update the visual elements
+      updateLinks(newLinks);
+      // Update the links in the force layout
+      force.links(newLinks);
+      updateInfoText(newLinks, theNodes);
+      // Restart force layout so links get positioned correctly
+      force.resume();
+      // Change freeze button text since graph is now non-static
+      d3.select("#freezeButton").html("freeze graph");
+    }
 
-    d3.selectAll(".labelChoice").on('click', function() {
-      svg.selectAll(".label").remove();
-      var type = d3.select(this).attr("id");
-      if(type != "noLabels")
-        labeled = true;
-      else
-        labeled = false;
-      addLabels(node, type)
-    });
-
+    // Add handler to labels button to add or remove name labels
     d3.select("#labelButton").on('click', function() {
+      // If labels are currently on, remove them
       if(labeled) {
         svg.selectAll(".label").remove();
         labeled = false;
         d3.select(this).html("turn on labels");
       }
+      // Otherwise add them
       else {
         addLabels(node, "nameLabels");
-        //labeled = true;
-        //d3.select(this).html("turn off labels");
       }
 
-    })
-
-
-    d3.select("#bff").on("click", function() {
-      bffs = force.links()
-      bffs.sort(function(a, b) {
-        return b.num_collabs - a.num_collabs
-      });
-
-      var bffText = "Most Frequent Collaborators: </br>"
-      // TODO 10 is a magic number
-      for(var i = 0; i < 10; i++) {
-        bffText += "</br>" + bffs[i].source.name + ", " + bffs[i].target.name + " (" + bffs[i].num_collabs + ")</br>"
-      }
-
-      displayInfoBox(bffText)
     });
 
+    // Handler for searching for nodes within graph
     d3.select('#nodeSearch').on("keyup", function() {
       // Clear array of searched nodes
       searchedNodes  = []
       searchText = this.value.toLowerCase();
+      // Change outline colour of nodes whose names match search text
       d3.selectAll(".nodeCircle").style("stroke", function(d) {
         if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0) {
           searchedNodes.push(d)
-          //console.log(d);
-          //return "orange";
+          // Ensure that new outline colour is not the same as the node's fill colour
           if(d.fillColour != "#ff7f0e")
             return "#ff7f0e";
           else
             return "#17becf"
         } 
+        // Nodes not searched for keep black outline
         else
           return "black";
         })
+        // Thicken outline of searched nodes
         .style("stroke-width", function(d) {
           if(d.name.toLowerCase().indexOf(searchText) != -1 && searchText.length > 0)
             return "3px";
         });         
     });
 
-
+    // Function to add handlers to metric menu options
+    // Called each time metrics menu options become available again
     function addMetricHandlers() {
       d3.selectAll(".metricListItem").on("click", function() {
         var listItem = d3.select(this);
@@ -1165,49 +1120,10 @@
         makeKey(keyArray);
         lastInfoBox = displayMetricText(metric, name, descrptn)
         lastInfoBox();
-        metricView = true;
       });
+      addComHandler();
     }
 
-    
-
-   
-    function colourByMetric(metric) {
-      theNodes = force.nodes()
-      max = Math.max.apply(Math,theNodes.map(function(n){
-        return n[metric]
-      }));
-      min = Math.min.apply(Math,theNodes.map(function(n){
-        return n[metric]
-      }));
-      metricColour.domain([min, max])
-                  .range(["white", "red"]);
-
-      d3.selectAll(".nodeCircle").style("fill", function(d) {
-        console.log("DEGEDSDAFDA")
-        d.fillColour = metricColour(d[metric]);
-        return metricColour(d[metric]);
-      });
-    }
-
-    function displayMetricText(metric, name, description) {
-        var infoText = description +
-                  "<br><br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
-                  (note that this metric is calculated for the full graph, including non-school members)<br><br>"
-        theNodes = force.nodes()  
-        theNodes.sort(function(a, b) {
-          return b[metric]-a[metric];
-        });
-        for(var i=0, len=theNodes.length; i<len; i++) {
-          n = theNodes[i]
-          infoText += getAuthorNameHtml(n) + n.name + "</span>: " + Math.round(n[metric] * 1000) / 1000 + "<br><br>"
-        }
-      return function() {
-
-        displayInfoBox(infoText);
-        addNameListHandlers();
-      }
-    }
 
     function addComHandler() {
       if(currentViz != vizTypes.INTER) {
@@ -1217,9 +1133,53 @@
       }
     }
 
+    // Colours the nodes according to the value of a centrality metric
+    function colourByMetric(metric) {
+      theNodes = force.nodes()
+      // Get maximum centrality metric value out of all nodes
+      max = Math.max.apply(Math,theNodes.map(function(n){
+        return n[metric]
+      }));
+      // Get minimum centrality metric value out of all nodes
+      min = Math.min.apply(Math,theNodes.map(function(n){
+        return n[metric]
+      }));
+      // Set range domain and range
+      metricColour.domain([min, max])
+                  .range(["white", "red"]);
+
+      // Change colour of nodes according to their metric value
+      d3.selectAll(".nodeCircle").style("fill", function(d) {
+        d.fillColour = metricColour(d[metric]);
+        return d.fillColour;
+      });
+    }
+
+    // Prepares info text for a centrality metric
+    function displayMetricText(metric, name, description) {
+      var infoText = description +
+                "<br><br>Below is the " + name + " of the nodes in this graph, ranging from 0 to 1<br> \
+                (note that this metric is calculated for the full graph, including non-school members)<br><br>"
+      theNodes = force.nodes()  
+      // Sort the nodes by value of metric, highest first
+      theNodes.sort(function(a, b) {
+        return b[metric]-a[metric];
+      });
+      // Create list of ranked nodes
+      for(var i=0, len=theNodes.length; i<len; i++) {
+        n = theNodes[i]
+        infoText += getAuthorNameHtml(n) + n.name + "</span>: " + Math.round(n[metric] * 1000) / 1000 + "<br><br>"
+      }
+      // Return a function to display info text area showing prepared text; this function can be set to a variable by calling code
+      // and called again to display same information if necessary
+      return function() {
+        displayInfoBox(infoText);
+        addNameListHandlers();
+      }
+    }
       
+    // Function to make an array of arrays, each one a different community of nodes  
     function getCommunities() {
-      //alert("gettinghere")
       colourByCommunities();
       var keyArray = []
       var commNums = []
@@ -1233,57 +1193,60 @@
           return a.com - b.com;
       })
 
+      // Nodes have two different community properties - the community computed from the just school members graph, and the
+      // community computed from the full graph; get appropriate one
       for(var i=0, len=theNodes.length; i<len; i++) {
         if(just_school)
           var commNum = theNodes[i].school_com
         else
           var commNum = theNodes[i].com
-        //commNum may be false
+        //commNum may be false if node not in any community (no collaborators)
         if(commNum !== false) {
+          // If the node's community is already in outer array, put node into inner array representing the community
           if(communityArray[commNum])
             communityArray[commNum].push(theNodes[i]);
+          // Otherwise add a new inner array representing the community, indexed at the community number
           else
             communityArray[commNum] = [theNodes[i],];
-        
+          
+          // Add to key array to be used to make the community colour key; only add community if not already present
           if(commNums.indexOf(commNum) < 0) {
             commNums.push(commNum);
-            //console.log("community number:")
-            //console.log(commNum);
             keyArray.push([moreColour(commNum), "community " + commNum]);
           }
         }
       }
       keyArray.push(["white", "no community"])
-      console.log("COMMUNITIES:");
-      console.log(communityArray);
       makeKey(keyArray);
+      // Set lastInfoBox to function which displays the text listing the communities
       lastInfoBox = displayCommunityText(communityArray);
       lastInfoBox();
-      metricView = true;
     }
 
-
+    // Function to colour the nodes according to their community
     function colourByCommunities() {
       var circles = d3.selectAll(".nodeCircle").style("fill", function(d) {
-      //console.log("COMM NUMBERS")
-      //console.log(d.school_com)
-      if(just_school)
-        var comNum = d.school_com;
-
-      else
-        var comNum = d.com;
-
-      if(comNum !== false)
-        return moreColour(comNum);
-      else
-        return "white";
-      })
+        // Get appropriate community property (just school community or full graph community)
+        console.log("NAME")
+        console.log(d.name);
+        if(just_school)
+          var comNum = d.school_com;
+        else
+          var comNum = d.com;
+        // If node not in any community (no collaborators), it is coloured white
+        if(comNum !== false) {
+          d.fillColour = moreColour(comNum);
+          return moreColour(comNum);
+        }
+        else {
+          d.fillColour = "white";
+          return "white";
+        }
+      });
     }
 
+    // Function to prepare the text listing the communities; takes array of arrays, each sub-array being a community
     function displayCommunityText(arr) {
-    
-      console.log("ARRRR");
-      console.log(arr);
       var infoText = "The authors in the network can be divided into communities based on the patterns of collaboration. Below are the \
                 communities for this network.<br><br>"
       // N.B. community numbers start at 1, not 0
@@ -1293,58 +1256,30 @@
         console.log(thisCommunity);
         for(var j=0; j < thisCommunity.length; j++) {
           var author = thisCommunity[j];
-          /*if(just_school) {
-            if(author.in_school)
-              infoText += getAuthorNameHtml(author) + author.name + "</span><br>";
-          }
-          else
-            infoText += getAuthorNameHtml(author) + author.name + "</span><br>"; */
           infoText += getAuthorNameHtml(author) + author.name + "</span><br>";
         }
         infoText += "<br>";
       }
 
+      // Return a function which displays the prepared text and adds necessary event handlers
       return function() {
-
         displayInfoBox(infoText);
         addNameListHandlers();
 
+        // Handler for when user clicks on a community title - displays single community graph and info
         d3.selectAll(".comTitle").on("click", function() {
           var comNum = d3.select(this).attr("id");
-          //showSingleCommunityGraph(comNum);
           currentViz = vizTypes.SINGLECOM;
           showSingleCommunityGraph(arr[comNum]);
           lastInfoBox = singleCommunityText(arr[comNum], comNum);
           lastInfoBox();
-          //metricView = true;
-          //singleComView = true;
-  
           colourByCommunities();
-         // var metricsList = d3.select("#metricsList");
-        //  metricsList.html("<li>No metrics available in this view</li>");
-         // d3.select("#membersButton").style("visibility", "hidden");
-          updateYearChooser();
-          //d3.select("#yearDiv").style("visibility", "hidden");
-          // TODO comviz is now done by filtering
-          //doComViz(comNum);
         });
+
+        // Handler for highlighting community within full graph when user hovers over community title
         d3.selectAll(".comTitle").on("mouseover", function() {
           var comNum = parseInt(d3.select(this).attr("id"));
-          console.log("BLUEBLA")
-          var theNodes = force.nodes();
-          var comNodes = []
-          
-          for(var i=0; i<theNodes.length; i++) {
-            var author = theNodes[i];
-            if(just_school) {
-              if(author.school_com === comNum)
-                comNodes.push(author);
-            }
-            else {
-              if(author.com === comNum)
-                comNodes.push(author);
-            }
-          }
+          comNodes = getNodesInCom(comNum);
           highlightNodeGroup(comNodes)
         });
 
@@ -1352,82 +1287,62 @@
       }
     }
 
-    // TODO use array filtering to do this instead
+    // Function to get an array of nodes in a specific community, given the community number
     function getNodesInCom(comNum) {
-      nodesInCom = []
-      theNodes = force.nodes()
-      for(var i=0; i<theNodes.length; i++) {
-        var author = theNodes[i]
-        if(just_school) {
-          if(author.school_com == comNum)
-            nodesInCom.push(author)
-        }
-        else {
-          if(author.com == comNum)
-            nodesInCom.push(author)
-        }
-      }
+      var theNodes = force.nodes()
+      var nodesInCom = theNodes.filter(function(n) {
+        if(just_school)
+          return n.school_com == comNum;
+        else
+          return n.com == comNum;
+      });
       return nodesInCom;   
     }
 
+    // Prepares the info text to display with single community graph visualisation
     function singleCommunityText(comNodes, comNumber) {
-      //var comNodes = getNodesInCom(comNumber)
-      //console.log("COMNODES");
-      //console.log(comNodes);
-
+      // Get the community keywords - they are a property of the graph object in the JSON data
       if(just_school)
         var allKeywords = graph.graph[1]
       else
         var allKeywords = graph.graph[0]
-      console.log("RONALDO");
-      console.log(allKeywords[0]);
+
+      // The actual arrays of keywords are in an array stored at index 1 of allKeywords
       kw_lists = allKeywords[1];
       var comKeywordList = []
+      // Each list of keywords is the second element in an array in which the first element is the community number
+      // Get the keywords for this community
       for(var i=0; i<kw_lists.length;i++) {
         if(kw_lists[i][0] == comNumber)
           comKeywordList = kw_lists[i][1]
       }
-      //console.log(thisComKw);
 
+      // Make the text to display
+      var infoText = "<strong>Community " + comNumber + "</strong><br>";
+      infoText += "<span class=\"clickable\" id=\"backToFull\">[back to full graph]</span><br>"
+      infoText += "<span class=\"clickable\" id= \"singleComTextOption\">[see community keywords]</span><br><br>"
+      infoText += "<span id=\"singleComTextArea\">"
+      
+      var comNames = ""
+      for(var i=0; i<comNodes.length; i++) {
+        author = comNodes[i];
+        comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
+        console.log(comNames)
+      }
+      infoText += comNames;
+      infoText += "</span>"
+      
+      var comKeywords = ""
+      for(var i=0; i<comKeywordList.length; i++) {
+        comKeywords += comKeywordList[i] + " | "
+      }
+
+      // Return a function which displays the prepared text
       return function() {
-        var infoText = "<strong>Community " + comNumber + "</strong><br>";
-        infoText += "<span class=\"clickable\" id=\"backToFull\">[back to full graph]</span><br>"
-        infoText += "<span class=\"clickable\" id= \"singleComTextOption\">[see community keywords]</span><br><br>"
-        infoText += "<span id=\"singleComTextArea\">"
-        
-        var comNames = ""
-        /*theNodes = force.nodes()
-        for(var i=0; i<theNodes.length; i++) {
-          var author = theNodes[i]
-          if(just_school) {
-            if(author.school_com == comNumber)
-              comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
-          }
-          else {
-            if(author.com == comNumber)
-              comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
-          }
-        }*/
-        for(var i=0; i<comNodes.length; i++) {
-          author = comNodes[i];
-          comNames += getAuthorNameHtml(author) + author.name + "</span><br>"
-          console.log(comNames)
-        }
-        infoText += comNames;
-        infoText += "</span>"
-        
-        var comKeywords = ""
-        for(var i=0; i<comKeywordList.length; i++) {
-          comKeywords += comKeywordList[i] + " | "
-        }
-
-
-
         displayInfoBox(infoText);
-
         addNameListHandlers()
       
-                                            
+        // Handler for back to full graph option, displays full graph again                                   
         d3.select("#backToFull").on("click", function() {
           var school = nameText.text()
           currentViz = vizTypes.AUTHOR_COLLAB;
@@ -1437,13 +1352,10 @@
           else {
             update(allLinks, allNodes);
           }
-          //colourByCommunities()
           getCommunities()
-          updateYearChooser();
-          
-          //d3.select("#membersButton").style("visibility", "visible");
         });
 
+        // Handler to toggle between displaying names of community members and community keywords
         d3.select("#singleComTextOption").on("click", function() {
           var textArea = d3.select("#singleComTextArea")
           var currentText = textArea.html()
@@ -1459,56 +1371,13 @@
           }
 
         });
-
-        //var theNodes = force.nodes()
-       /* var theLinks = force.links()
-        var comFilteredLinks = graph.links.filter(function(l) {
-          if(just_school)
-            return l.source.school_com == comNumber && l.target.school_com == comNumber;
-          else
-            return l.source.com == comNumber && l.target.com == comNumber;
-        });
-        // This gets just the nodes that are in this community
-        var comFilteredNodes = graph.nodes.filter(function(n) {
-          if(just_school)
-            return n.school_com == comNumber;
-          else
-            return n.com == comNumber;
-        });
-        update(comFilteredLinks, comFilteredNodes)*/
       }
     }
 
-    // TODO this doesn't work because nodes in collab graphs don't have keywords
-    // Do this outside - add keywords as attribute of communities in networkx graph (e.g. 20 kw each)
-    function getComKeywords(comNodes) {
-      allKeywords = {}
-      for(var i=0; i<comNodes.length; i++) {
-        // Get keyword array
-        authorKw = comNodes[i].keywords;
-        for(var j=0; j<authorKw.length; j++) {
-          var kw = authorKw[j];
-          if(allKeywords.hasOwnProperty(kw))
-            allKeywords.kw += 1;
-          else
-            allKeywords.kw = 1;
-        }
-      }
-
-      keywordText = ""
-      for(var prop in allKeywords) {
-        if(allKeywords.hasOwnProperty(prop))
-          keywordText += prop + " ";
-      }
-      console.log("KEyWORDS");
-      console.log(keywordText);
-
-    }
-
-
-
+    // TODO put this somewhere else clearly
+    // Function to add event handlers to author names displayed in info text area
     function addNameListHandlers() {
-      // The author names get an id corresponding to the id of the node, so the node can be found from the name text element
+      // The author names have an id corresponding to the id of the node, so the node can be found from the name text element
       d3.selectAll(".authorName").on("click", function() {
                                   var theId = d3.select(this).attr("id");
                                   displayInfoForThisNode(theId);
@@ -1518,48 +1387,25 @@
                                   .on("mouseout", lowlightJustNode);                    
     }
 
+    // Displays the visualisation for a graph containing just the nodes in the array passed as argument
+    // Used to display single community
     function showSingleCommunityGraph(nodeArray) {
-      //var theNodes = force.nodes()
+      // Filter full set of links to just links between nodes in the node array
       var theLinks = force.links()
-      /*var comFilteredLinks = graph.links.filter(function(l) {
-        if(just_school)
-          return l.source.school_com == comNumber && l.target.school_com == comNumber;
-        else
-          return l.source.com == comNumber && l.target.com == comNumber;
-      });*/
-
       var comFilteredLinks = graph.links.filter(function(l) {
         return nodeArray.indexOf(l.source) > -1 && nodeArray.indexOf(l.target) > -1;
       })
-      // This gets just the nodes that are in this community
-      /*var comFilteredNodes = graph.nodes.filter(function(n) {
-        if(just_school)
-          return n.school_com == comNumber;
-        else
-          return n.com == comNumber;
-      });*/
+      // Update the visualisation
       update(comFilteredLinks, nodeArray)
       d3.selectAll(".keyCircle").remove();
       d3.selectAll(".keyText").remove();
     }
 
-
-    d3.selectAll(".colourChoice").on("click", function() {
-      if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE) {
-        //metricView = false;
-        d3.select("#infoArea").style("visibility", "hidden");
-      }
-      var choice = d3.select(this).attr("id");
-      console.log("the choice was" + choice)
-      if(choice == "defaultColours")
-        colourByDefault();
-      else if(choice == "schoolColours")
-        colourBySchool();
-    });
-
+    // Event handler for changing node colours using the colour button
     d3.select("#colourButton").on("click", function() {
+      // When colours are changed, hide the info text area, since info probably not relevant anymore (e.g. info on centrality metrics)
       if(currentViz != vizTypes.SHORTEST && currentViz != vizTypes.SINGLE && currentViz != vizTypes.SINGLECOM) {
-       // metricView = false;
+        // Set lastInfoBox function to hide info text area - no info text to display when user deselects a node
         lastInfoBox = function() {
           d3.select("#infoArea").style("visibility", "hidden");
         }
@@ -1569,22 +1415,25 @@
       var button = d3.select(this);
       if(button.html() === schoolColourText) {
         colourBySchool();
-       // button.html(defaultText);
       }
       else if(button.html() === defaultColourText) {
         colourByDefault();
-        //button.html(schoolText);
       }
     })
 
-  // TODO make key in here so don't have to change colours in both places if colours change
+    // Function to colour nodes using default colours based on the type of visualiation
     function colourByDefault() {
-      console.log("COLOUR BY DEFAULT");
-      console.log(currentViz)
+      // Change text of colour button 
       d3.select("#colourButton").html(schoolColourText);
+      // If in single community mode, colour by communities and return
+      if(currentViz == vizTypes.SINGLECOM) {
+        colourByCommunities();
+        return;
+      }
+
       var chosenColour;
       d3.selectAll(".nodeCircle").style("fill", function(d, i) {
-        //return colors(i);
+
         if(currentViz == vizTypes.AUTHOR_COLLAB || currentViz == vizTypes.SIMILARITY) {
           if(d.in_school)
             chosenColour = multiColour(inSchoolColour);
@@ -1634,11 +1483,12 @@
       updateKey()
     }
 
+    // Function to colour nodes according to what school they are in
     function colourBySchool() {
-      console.log("COLOURS");
       d3.select("#colourButton").html(defaultColourText);
       var keyArray = []
       var schools = []
+      // Keep track of whether any node in the graph is not in a school - so that "school not known" is added to key
       var nonSchoolPresent = false;
       d3.selectAll(".nodeCircle").style("fill", function(d) {
         if(d.school) {
@@ -1652,6 +1502,7 @@
         }
         else {
           chosenColour = "white";
+          // Node not in school so change this to true
           nonSchoolPresent = true;
         }
         d.fillColour = chosenColour;
@@ -1659,39 +1510,38 @@
       });
       if(nonSchoolPresent)
         keyArray.push(["white", "School not known"]);
+
       makeKey(keyArray);
     }
 
-
+    // Event handler for shortest path menu option
     d3.select("#shortest").on("click", function() {
-      lastInfoBox = shortestPathBox();
-      lastInfoBox();
+      // Show shortest path info text
+      var showPathText = shortestPathBox();
+      showPathText();
     });
 
-    // TODO using a global variable here as a quick fix, please revise
-    // e.g. put this outside startitup
-    shortestPathBox = function(errorType, errorMessage) {
+    shortestPathBox = function() {
+      // HTML for shortest path text, including text input boxes to enter author names/ids
+      var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the name or, for more accurate \
+          results, the unique Enlighten numbers of the source and target authors. You can find out an author's identifier by checking their \
+          url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" \
+          placeholder=\"source\"/><br><br><span id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
+          <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
+          <span id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
+
+      // Empty span to display error if necessary
+      info += "<span id=\"shortestError\"></span>"
+
+      info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br> \
+              <br><input type=\"text\" id=\"longestInput\" \
+              placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span> \
+              <button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
+
+      info += "<span id=\"longestError\"></span>"      
+
+      // Return a function which displays prepared text and adds event handlers to html elements
       return function() {
-        var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the name or, for more accurate \
-            results, the unique Enlighten numbers of the source and target authors. You can find out an author's identifier by checking their \
-            url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" \
-            placeholder=\"source\"/><br><br><span id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
-            <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
-            <span id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" id=\"shortestButton\">Submit</button><br>"
-
-        /*if(errorType == SHORTESTPATHERROR)
-          info += "<br>" + errorMessage + "<br>";*/
-          info += "<span id=\"shortestError\"></span>"
-
-        info += "<br>You can also find the longest shortest path for an author. How far do their connections go?<br> \
-                <br><input type=\"text\" id=\"longestInput\" \
-                placeholder=\"source\"/><br><br><span id=\"longestCandidates\" data-input=\"longestInput\"></span> \
-                <button type=\"button\" id=\"longestButton\">Submit</button><br><br>"
-
-        /*if(errorType == LONGESTPATHERROR)
-          info += errorMessage*/
-        info += "<span id=\"longestError\"></span>"
-
         displayInfoBox(info);
         d3.select("#shortestButton").on("click", getShortest);
         d3.select("#sourceInput").on("keyup", function() {
@@ -1711,24 +1561,26 @@
       }
     }
 
+    // Event handler for single author graph menu option
     d3.select("#single").on("click", function() {
-      lastInfoBox  = singleAuthorBox();
-      lastInfoBox();
+      var showSingleText = singleAuthorBox();
+      showSingleText();
     })
 
-    singleAuthorBox = function(errorMessage) {
-      return function() {
-        var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please enter the name or, for more \
-            accurate results, the unique Enlighten number \
-            of the author whose graph you want to see. You can find out an author's identifier by checking their \
-            url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
-            placeholder=\"source\"/><br><br> \
-            <span id=\"singleCandidates\" data-input=\"singleInput\"></span> \
-            Choose how far you want the graph to reach (up to 3 hops)<br><br><input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
-            <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
+    singleAuthorBox = function() {
+      var info = "Display a graph where everyone is directly or indirectly connected to an author.<br> Please enter the name or, for more \
+        accurate results, the unique Enlighten number \
+        of the author whose graph you want to see. You can find out an author's identifier by checking their \
+        url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"singleInput\" \
+        placeholder=\"source\"/><br><br> \
+        <span id=\"singleCandidates\" data-input=\"singleInput\"></span> \
+        Choose how far you want the graph to reach (up to 3 hops)<br><br><input type=\"number\" id=\"cutoffInput\" min=\"0\" max=\"3\"/> \
+        <br><br><button type=\"button\" id=\"singleButton\">Submit</button><br><br>"
 
-        //if(errorMessage)
         info += "<span id=\"singleError\"></span>"
+
+      return function() {
+
 
         displayInfoBox(info);
         d3.select("#singleButton").on("click", getSingle);
@@ -1769,11 +1621,9 @@
     console.log(sourceInfo);
     console.log(targetInfo);
     if(!sourceInfo || !targetInfo)
-      //shortestPathBox(SHORTESTPATHERROR, "please enter both authors");
       d3.select("#shortestError").html("<br>please enter both authors<br>");
     else {
       $.get('shortest_path/', {source: sourceInfo, target: targetInfo}, function(data) {
-        //graph_data = JSON.parse(data);
         doShortestViz(data, SHORTESTPATHERROR);
       });
     }
@@ -1781,9 +1631,8 @@
 
   var getLongest = function() {
     var source = $("#longestInput").val().toLowerCase();
-    console.log(source)
     if(!source)
-      shortestPathBox(LONGESTPATHERROR, "please enter an author");
+      d3.select("#longestError").html("please enter an author");
     else {
       $.get('longest_path/', {source: source}, function(data) {
           doShortestViz(data, LONGESTPATHERROR);
@@ -1793,14 +1642,12 @@
 
   function doShortestViz(data, errorType) {
     if(data.error) {
-      //shortestPathBox(errorType, data.error);
       if(errorType == SHORTESTPATHERROR)
         d3.select("#shortestError").html("<br>" + data.error + "<br>");
       else if(errorType == LONGESTPATHERROR)
         d3.select("#longestError").html("<br>" + data.error + "<br>");
     }
     else if(data.candidates) {
-      //shortestPathBox(errorType, data.candidates[0][0])
       if(data.candidates.source_candidates) {
         var slctn = d3.select("#sourceCandidates");
         displayCandidates(slctn, data.candidates.source_candidates);
@@ -1831,16 +1678,9 @@
       typeText.text(targetName)
       lastInfoBox = shortestPathBox();
       lastInfoBox();
-     // metricView = true;
-
-    //  var metricsList = d3.select("#metricsList");
-     // metricsList.html("<li>No metrics available for shortest path graph</li>")
-    //  d3.select("#membersButton").style("visibility", "hidden");
+      
       // TODO in this case do not have to JSON.parse data - find out why
       startItUp(data);
-    }
-    else {
-      shortestPathBox(error);
     }
   }
 
@@ -1872,7 +1712,6 @@
   }
 
   var getSingle = function() {
-    //metricView = false;
     var authorInfo = $("#singleInput").val().toLowerCase();
     var cutoff = $("#cutoffInput").val()
     if(!authorInfo)
@@ -1908,11 +1747,6 @@
 
             lastInfoBox = singleAuthorBox();
             lastInfoBox();
-        //    metricView = true;
-            //d3.selectAll(".metricsMenu").style("visibility", "hidden");
-      //      var metricsList = d3.select("#metricsList");
-        //    metricsList.html("<li>No metrics available for single author graph</li>")
-     //       d3.select("#membersButton").style("visibility", "hidden");
             
           }
         // TODO do we need this else to catch other situations?
@@ -1938,7 +1772,6 @@
 
 
   d3.selectAll(".collabListItem").on("click", function() {
-  // metricView = false;
     var type = d3.select(this).attr("data-type");
     var name = d3.select(this).attr("data-name");
     var nmtext = d3.select(this).attr("data-nametext");
@@ -1957,13 +1790,6 @@
     //Get the new data
     getData(name, type);
 
-  //  d3.select("#metricsList").html(metricsHtml);
-  /*  if(currentViz == vizTypes.INTER)
-      d3.select("#membersButton").style("visibility", "hidden");
-    else
-      d3.select("#membersButton").style("visibility", "visible");*/
-
-    //d3.select("#infoArea").style("visibility", "hidden");
     lastInfoBox = function() {
       d3.select("#infoArea").style("visibility", "hidden");
     }
@@ -2010,7 +1836,6 @@
         nameText.text(query);
         typeText.text("keyword search");
         d3.select("#infoArea").style("visibility", "hidden");
-        d3.select("#membersButton").style("visibility", "hidden");
         d3.selectAll(".keyCircle").remove();
         d3.selectAll(".keyText").remove();
 
