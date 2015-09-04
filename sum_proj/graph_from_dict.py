@@ -12,7 +12,7 @@ class CollabGraphMaker(object):
 
 	def __init__(self, g=None):
 		#self.data_dict = dd
-		self.schl_names = []
+		#self.schl_name_urls = []
 		if g==None:
 			self.graph = nx.Graph()
 		else:
@@ -21,7 +21,7 @@ class CollabGraphMaker(object):
 
 
 	def populate_graph(self, data_dict, sn=None):
-		self.schl_names = sn
+		self.schl_name_urls = sn
 
 		for paper_id, info in data_dict.items():
 			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
@@ -39,7 +39,6 @@ class CollabGraphMaker(object):
 			paper_year = info['year']
 			self.add_links(title, paper_url, paper_year, authors)
 
-	# TODO consider using polymorphism here... having separate classes for data from scraper vs from oai
 	def add_vertex(self, author):
 		# author is either a (name, unique_url) pair or just a name string
 		# If just a string, the name is used as both the node identifier and the "name" attribute
@@ -50,7 +49,6 @@ class CollabGraphMaker(object):
 			name = author
 		else:
 			vertex_id = author[1]
-			#print "vertex id is ", vertex_id
 			name = author[0]
 
 		# TODO think graph.node can be replaced by just self.graph (also a dict)
@@ -86,11 +84,8 @@ class CollabGraphMaker(object):
 
 	def check_schl_status(self, author_id):
 		
-		if self.schl_names:
-			# do name abbreviation here to ensure we get everyone?
-			# TODO and lowercase to ensure consistency
-			# TODO nb now using url to check school membership, more accurate
-			for name_url in self.schl_names:
+		if self.schl_name_urls:
+			for name_url in self.schl_name_urls:
 				if author_id in name_url:
 					return True 
 			
@@ -104,17 +99,17 @@ class CollabGraphMaker(object):
 	def get_graph(self):
 		return self.graph
 
-	# TODO change this path later
-	def write_to_file(self, path):
-		graph_data = json_graph.node_link_data(self.graph)
-		with open(path, 'w') as f:
-			json.dump(graph_data, f)
+
+####End of class#####
 
 
+def write_to_file(g, path):
+	graph_data = json_graph.node_link_data(g)
+	with open(path, 'w') as f:
+		json.dump(graph_data, f)
 
 
 def add_metrics(g):
-	print "getting the metrics..."
 	deg_cent = nx.degree_centrality(g)
 	close_cent = nx.closeness_centrality(g)
 	between_cent = nx.betweenness_centrality(g)
@@ -128,7 +123,7 @@ def add_metrics(g):
 		g.node[vertex]["between_cent"] = between_cent[vertex]
 		if com[vertex] in sorted_coms:
 			new_com_num = sorted_coms.index(com[vertex])
-			#self.graph.node[vertex]["com"] = com[vertex]
+
 			g.node[vertex]["com"] = new_com_num + 1
 		else:
 			g.node[vertex]["com"] = False
@@ -136,7 +131,6 @@ def add_metrics(g):
 	return g
 
 def add_just_school_community(g):
-	print "adding just school community"
 	school_nodes = [node for node in g.node if g.node[node].get("in_school")]
 	just_school_graph = g.subgraph(school_nodes)
 	com = community.best_partition(just_school_graph)
@@ -203,3 +197,61 @@ def assign_com_keywords(g, comkwdict, attr_name):
 			g.graph[attr_name] = [[com, top_com_words],]
 
 	return g
+
+def make_sim_graph(akw, collab_graph_path):
+
+	with open(collab_graph_path) as f:
+		gdata = json.load(f)
+
+	col_graph = json_graph.node_link_graph(gdata)
+
+	sim_graph = nx.Graph()
+
+	authors = akw.keys()
+	values = akw.values()
+
+	for i in range (0, len(authors)):
+		author1 = authors[i]
+		keywords = values[i]["keywords"]
+		add_sim_graph_node(author1, keywords, sim_graph, col_graph)
+		
+		stemmed1 = set(tu.stem_word_list(keywords[:]))
+
+		for j in range(i+1, len(authors)):
+			author2 = authors[j]
+			keywords2 = values[j]["keywords"]
+			add_sim_graph_node(author2, keywords2, sim_graph, col_graph)
+		
+			stemmed2 = set(tu.stem_word_list(keywords2[:]))
+
+			sim = tu.check_sim(stemmed1, stemmed2)
+			ratio = sim[0]
+			indices = sim[1]
+			matched_words = []
+
+			if len(keywords) > len(keywords2):
+				longest = keywords
+			else:
+				longest = keywords2
+
+			for index in indices:
+				matched_words.append(longest[index])
+
+			if ratio > 0.2:
+				sim_graph.add_edge(author1, author2, {"num_collabs":ratio, "sim_kw": matched_words})
+				if col_graph.has_edge(author1, author2):
+					sim_graph[author1][author2]["areCoauthors"] = True
+
+	return sim_graph
+
+def add_sim_graph_node(node_id, keywords, sim_graph, col_graph):
+	sim_graph.add_node(author1, {
+									"name": col_graph.node[author1]["name"], 
+									"in_school":col_graph.node[author1]["in_school"],
+									"paper_count":col_graph.node[author1]["paper_count"],
+									"keywords":keywords
+									})
+
+
+
+
