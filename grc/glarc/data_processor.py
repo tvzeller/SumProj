@@ -101,9 +101,9 @@ if __name__ == "__main__":
 
 	just_data_dicts = [data[0] for data in school_data.values()]
 	
-	make_indices(just_data_dicts)
+	make_indices(just_data_dicts[:])
 
-	author_kw_dicts = get_author_kw_dicts(just_data_dicts)
+	author_kw_dicts = get_author_kw_dicts(just_data_dicts[:])
 
 	sim_graphs = make_sim_graphs(school_graphs, author_kw_dicts)
 
@@ -136,6 +136,8 @@ if __name__ == "__main__":
 	for schoolname, sim_graph in sim_graphs:
 		path = sim_graph_path + schoolname + ".json"
 		gu.write_to_file(sim_graph, path)
+
+
 
 
 

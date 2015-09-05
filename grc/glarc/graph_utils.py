@@ -2,7 +2,6 @@ import networkx as nx
 from networkx.readwrite import json_graph
 import json
 import tfidf
-#import rake
 import time
 import community
 import operator
@@ -11,60 +10,71 @@ import re
 import random
 
 class CollabGraphMaker(object):
+	"""
+	Class to deal with creating collaboration graphs from data provided
+	"""
 
 	def __init__(self, g=None):
-		#self.data_dict = dd
 		self.schl_name_urls = []
-		self.schoolname = ""
 		if g==None:
 			self.graph = nx.Graph()
 		else:
 			self.graph = g
-		#self.populate_graph()
 
 
-	def populate_graph(self, data_dict, snurls, schoolname):
+	def populate_graph(self, data_dict, snurls):
+		"""
+		Adds nodes and edges to graph based on information in data_dict.
+		snurls is a list of (name, enlighten urls) of authors in the relevant school, used
+		to check if a node in the graph is a member of the school or not (this info is added as a node attribute)
+		"""
 		self.schl_name_urls = snurls
 		self.schoolname = schoolname
 
 		for paper_id, info in data_dict.items():
-			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
-			# Or use subclasses with different implementations of add_vertices here
 			title = info["title"]
-			#print "title is " + title.encode("utf-8")
 			authors = info["authors"]
 			if not authors:
 				continue
 			
+			# Add a vertex in graph for each author
 			for author in authors:
 				self.add_vertex(author)
 			
 			paper_url = info['url']
 			paper_year = info['year']
+			# Add links between coauthors
 			self.add_links(title, paper_url, paper_year, authors)
 
 	def add_vertex(self, author):
-		# author is either a (name, unique_url) pair or just a name string
+		"""
+		Takes author info and adds author as a vertex in the graph
+		"""
+
+		# author may be either a (name, unique_url) pair or just a name string (if data comes from enlighten_scraper they are (name, urls))
 		# If just a string, the name is used as both the node identifier and the "name" attribute
 		# Otherwise access the (name, url) collection to get the url (to use as id) and the author name
 		if isinstance(author, basestring):
-			print "author is just a string!"
 			vertex_id = author
 			name = author
 		else:
 			vertex_id = author[1]
 			name = author[0]
 
-		# TODO think graph.node can be replaced by just self.graph (also a dict)
 		if vertex_id in self.graph.node:
+			# Vertex already exists, increase the paper count attribute
 			self.graph.node[vertex_id]["paper_count"] += 1
 		else:
+			# New vertex
 			self.graph.add_node(vertex_id, {"name": name, "paper_count": 1})
 			in_school = self.check_schl_status(vertex_id)
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school
 
 	def add_links(self, title, url, year, authors):
+		"""
+		Adds links between each author in given list of authors. Takes title, url and year of paper to add as link attributes.
+		"""
 		# Check if authors is a list of collections or just strings
 		# If collections, make new list out of element at index 1, which is the unique author url and the node id
 		if not isinstance(authors[0], basestring):
@@ -75,8 +85,10 @@ class CollabGraphMaker(object):
 			for j in range(i+1, num_authors):
 				author1 = authors[i]
 				author2 = authors[j]
-				# Check if edge already exists, update edge attributes
+				# Check if edge already exists, if so update edge attributes
 				if self.graph.has_edge(author1, author2):
+					# weight is the inverse of the total number of coauthors for the paper, so the weight of a collaboration
+					# with several other authors will be less (authors will likely have worked less closely together)
 					self.graph[author1][author2]["weight"] += 1.0 / num_authors
 					self.graph[author1][author2]["num_collabs"] += 1
 					self.graph[author1][author2]["collab_title_url_years"].append([title, url, year])
@@ -85,7 +97,10 @@ class CollabGraphMaker(object):
 					self.graph.add_edge(author1, author2, {'weight': 1.0 / num_authors, "num_collabs": 1, "collab_title_url_years": [[title, url, year],]})
 
 
-	def check_schl_status(self, author_id):		
+	def check_schl_status(self, author_id):
+		"""
+		Takes author id and checks if author is in the school to which this graph corresponds
+		"""		
 		if self.schl_name_urls:
 			for name_url in self.schl_name_urls:
 				if author_id in name_url:
@@ -99,6 +114,9 @@ class CollabGraphMaker(object):
 
 
 	def get_graph(self):
+		"""
+		Returns the graph
+		"""
 		return self.graph
 
 
@@ -106,43 +124,67 @@ class CollabGraphMaker(object):
 
 
 def write_to_file(g, path):
+	"""
+	Used to write the graph to a JSON file.
+	Serialises to JSON using NetworkX's node_link_data function.
+	"""
 	graph_data = json_graph.node_link_data(g)
 	with open(path, 'w') as f:
 		json.dump(graph_data, f)
 
 
 def add_metrics(g):
+	"""
+	Adds centrality metrics and community number attributes to each node in the given graph.
+	Returns the graph with new node attributes.
+	"""
+	# Each function returns a dict keyed by node id with the computed metric as value
 	deg_cent = nx.degree_centrality(g)
 	close_cent = nx.closeness_centrality(g)
 	between_cent = nx.betweenness_centrality(g)
 	com = community.best_partition(g)
-
+	# Only interested in communities with more than one member - get a list
+	# of multimember communities, sorted by community number
 	sorted_coms = get_sorted_multimember_coms(com)
 
+	# Loop through nodes in the graph and give them new attributes
 	for vertex in self.graph.node.keys():
 		g.node[vertex]["deg_cent"] = deg_cent[vertex]
 		g.node[vertex]["close_cent"] = close_cent[vertex]
 		g.node[vertex]["between_cent"] = between_cent[vertex]
-		if com[vertex] in sorted_coms:
-			new_com_num = sorted_coms.index(com[vertex])
 
-			g.node[vertex]["com"] = new_com_num + 1
+		# Only nodes in a multimember community get a community number
+		if com[vertex] in sorted_coms:
+			# So community numbers start at 1, change community numbers to their position in the sorted_coms
+			# list, plus 1
+			# e.g. first multimember community number may be 3, this makes it 0 (position in list) + 1
+			new_com_num = sorted_coms.index(com[vertex]) + 1
+			g.node[vertex]["com"] = new_com_num
+		# If node not in a multimember community, gets False as com number attribute
 		else:
 			g.node[vertex]["com"] = False
 
 	return g
 
 def add_just_school_community(g):
+	"""
+	Computes communities based on the subgraph containing just nodes that are members of the school which the
+	graph represents, and adds as node attributes.
+	Returns graph with new node attributes.
+	"""
+	# Get just the members of the school
 	school_nodes = [node for node in g.node if g.node[node].get("in_school")]
+	# Create subgraph from subset of nodes
 	just_school_graph = g.subgraph(school_nodes)
+	# Get node:com_number dict based on subgraph
 	com = community.best_partition(just_school_graph)
-
+	# Get just the multimember communities
 	sorted_coms = get_sorted_multimember_coms(com)
 
 	for vertex in just_school_graph.node.keys():
 		if com[vertex] in sorted_coms:
-			new_com_num = sorted_coms.index(com[vertex])
-			g.node[vertex]["school_com"] = new_com_num + 1
+			new_com_num = sorted_coms.index(com[vertex]) + 1
+			g.node[vertex]["school_com"] = new_com_num
 		else:
 			g.node[vertex]["school_com"] = False
 
@@ -150,28 +192,47 @@ def add_just_school_community(g):
 
 
 def get_sorted_multimember_coms(com_dict):
+	"""
+	Takes a {node:comnumber} dict and returns a list of just the communities with more
+	than one member, sorted by community number 
+	"""
+	# Set to hold communities with more than one member
 	multimember_coms = set()
 	for comnum in com_dict.values():
+		# Check if community occurs more than once in comdict values
 		if com_dict.values().count(comnum) > 1:
+			# If so, has more than one member, add to set
 			multimember_coms.add(comnum)
 
+	# Sort set by com number (making it a list) and return
 	sorted_coms = sorted(multimember_coms)
-
 	return sorted_coms
 
 
 def add_school_info(school_graphs, school_urls):
-	for graph in school_graphs.values():
+	"""
+	Takes two dicts - {school name: school collab_graph} and {school name: list of school urls} (where the school urls is a list of the urls
+	of the authors in that school) and adds the name of the author's school to each author's node as an attribute. If author not found in any
+	school's urls, gets False as a school attribute.
+	Returns {school: graph} dict with changed graphs
+	"""
+	# Loop through each node in each graph
+	for schl, graph in school_graphs.items():
 		for author in graph.nodes():
 			found = False
+			# node id is a url. Look for node id in urls of each school.
 			for school, urls in school_urls.items():
 				if author in urls:
+					# Once found, set node's school to that school and break
 					found = True
 					graph.node[author]['school'] = school
 					break
 
+			# Author not found in any school urls, set school to False
 			if not found:
 				g.node[author]['school'] = False
+
+		school_graphs[schl] = graph
 
 	return school_graphs
 

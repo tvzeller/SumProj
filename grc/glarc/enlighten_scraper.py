@@ -1,17 +1,7 @@
-# gets urls for enlighten author pages
-# visits urls and makes dict with author: ([all_titles][tagged_titles])
-
-# TODO consider making this a class to avoid passing around variables
-# e.g. the name of the School, stafflist base URL could be instance variables
-# ATTention school of humanities
-
-# TODO write tests for this
-# TODO refactor
-
 import requests
 import lxml
 from lxml import html
-## TODO try other lxml modules instead of html
+
 import time
 import re
 import json
