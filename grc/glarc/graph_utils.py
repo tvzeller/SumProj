@@ -360,22 +360,23 @@ def make_sim_graph(akw, col_graph):
 
 	for i in range (0, len(authors)):
 		author1 = authors[i]
-		keywords = values[i]["keywords"]
+		# make keywords into set to remove duplicates then back into list to maintain order
+		keywords = list(set(values[i]["keywords"]))
 		# Add the author to the similarity graph
 		add_sim_graph_node(author1, keywords, sim_graph, col_graph)
 		# Get a stemmed version of the author's keywords
-		stemmed1 = set(tu.stem_word_list(keywords[:]))
+		stemmed1 = (tu.stem_word_list(keywords[:]))
 
 		# Compare author against each other author in graph
 		for j in range(i+1, len(authors)):
 			author2 = authors[j]
-			keywords2 = values[j]["keywords"]
+			keywords2 = list(set(values[j]["keywords"]))
 			add_sim_graph_node(author2, keywords2, sim_graph, col_graph)
 		
-			stemmed2 = set(tu.stem_word_list(keywords2[:]))
+			stemmed2 = (tu.stem_word_list(keywords2[:]))
 
 			# Check similarity of keywords
-			sim = tu.check_sim(stemmed1, stemmed2)
+			sim = tu.check_kw_sim(stemmed1, stemmed2)
 			# the similarity score
 			ratio = sim[0]
 			# the indices (in the longest of the two author keyword lists) of the keywords that are similar
@@ -388,8 +389,8 @@ def make_sim_graph(akw, col_graph):
 				longest = keywords2
 
 			# Get the keywords in the indices returned from check_sim
-			for index in indices:
-				matched_words.append(longest[index])
+			for i in indices:
+				matched_words.append(longest[i])
 
 			# If similarity score greater than threshold, add edge between authors
 			if ratio > sim_threshold:
@@ -404,10 +405,10 @@ def add_sim_graph_node(node_id, keywords, sim_graph, col_graph):
 	"""
 	Adds a node to similarity graph, using some of the attributes the node has in the collaboration graph
 	"""
-	sim_graph.add_node(author1, {
-									"name": col_graph.node[author1]["name"], 
-									"in_school":col_graph.node[author1]["in_school"],
-									"paper_count":col_graph.node[author1]["paper_count"],
+	sim_graph.add_node(node_id, {
+									"name": col_graph.node[node_id]["name"], 
+									"in_school":col_graph.node[node_id]["in_school"],
+									"paper_count":col_graph.node[node_id]["paper_count"],
 									"keywords":keywords
 									})
 

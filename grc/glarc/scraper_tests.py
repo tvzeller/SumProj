@@ -3,6 +3,7 @@ import enlighten_scraper as es
 from lxml import html
 import lxml
 import graph_utils as gu
+import networkx as nx
 
 class ScraperTestCases(unittest.TestCase):
 	def test_get_name_url_matches(self):
@@ -54,7 +55,7 @@ class ScraperTestCases(unittest.TestCase):
 		self.assertEqual(es.get_paper_keywords(tree), expected)	
 
 
-class CollabGraphTest(unittest.TestCase):
+class GraphTestCases(unittest.TestCase):
 	def test_graph_making(self):
 		data_dict = {"123": {
 							'title': 'a paper',
@@ -88,6 +89,27 @@ class CollabGraphTest(unittest.TestCase):
 		self.assertFalse(graph.node["url2"]["in_school"] and graph.node["url3"]["in_school"])
 		self.assertEqual(graph['url1']['url2']["collab_title_url_years"], [['a paper', 'paperurl123', '1977']])
 		self.assertEqual(graph.node['url1']['paper_count'], 2)
+
+	def test_sim_graph_making(self):
+		akw = {
+				1: {"keywords": ["java", "python", "django"]},
+				2: {"keywords": ["java", "python", "graphs"]},
+				3: {"keywords": ["software", "graphs", "programming"]}
+			}
+
+		col_graph = nx.Graph()
+		col_graph.add_node(1, {"name": 'bob', 'in_school': True, 'paper_count': 12})
+		col_graph.add_node(2, {"name": 'alice', 'in_school': True, 'paper_count': 10})
+		col_graph.add_node(3, {"name": 'eve', 'in_school': True, 'paper_count': 20})
+		col_graph.add_edge(1, 3)
+
+		sim_graph = gu.make_sim_graph(akw, col_graph)
+		self.assertEqual(sim_graph.number_of_nodes(), 3)
+		self.assertEqual(sim_graph.number_of_edges(), 2)
+		self.assertTrue(sim_graph.has_edge(1, 2) and sim_graph.has_edge(2, 3))
+		self.assertTrue("java" in sim_graph[1][2]['sim_kw'] and "python" in sim_graph[1][2]['sim_kw'])
+
+
 
 if __name__ == '__main__':
 	unittest.main()
