@@ -122,7 +122,6 @@ class Search(object):
 	# NB query terms do not have to all appear in one paper - the AND is at the author level, not the paper level
 	def and_search(self, q):
 		paper_sets = self.get_paper_sets(q)
-		#print title_sets
 		author_sets = []
 		author_papers = {}
 		pkw_index = shelve.open(self.pkw_path)

@@ -1,16 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import os
 from django.conf import settings
 
+import os
 import json
 
-#import threading
-#import operator
-import random
 import search
-#import shelve
-#import re
 import graph_utils
 
 def index(request):
@@ -27,8 +22,6 @@ def index(request):
 	# Add other graphs to dict when available
 
 	return render(request, 'glarc/newindex.html', context_dict)
-
-
 
 
 def about(request):
@@ -50,8 +43,6 @@ def get_json(request):
 
 
 def shortest_path(request):
-	# TODO doing this with node id's rather than names - ask users to enter enlighten url?
-	# would make sure we get the right person
 	if request.method == 'GET':
 		source_info = request.GET.get('source')
 		target_info = request.GET.get('target')
@@ -91,22 +82,15 @@ def shortest_path(request):
 	if len(target_candidates) > 1:
 		candidates["target_candidates"] = target_candidates
 
-	print "PAST adding to candidates"
 
 	if candidates:
-		print candidates
 		return HttpResponse(json.dumps({"candidates": candidates}), content_type='application/json')
 
-	print "past all that"
-	#print source_candidates[0][1], target_candidates[0][1]
 	if not source_id:
-		print "don't have source id"
-		print source_candidates
 		source_id = source_candidates[0]["id"]
 	if not target_id:
 		target_id = target_candidates[0]["id"]
 
-	print "got past assigning ids"
 
 	# At this point we know we have just one matching author for source and target
 	return path_graph_from_ids(source_id, target_id, unigraph)
@@ -271,7 +255,6 @@ def kw_search(request):
 	newdata = json.dumps(graphdata)
 	
 	return HttpResponse(newdata, content_type='application/json')
-	#return HttpResponse("")
  
 
 def numerical(info):

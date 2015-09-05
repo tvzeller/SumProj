@@ -14,7 +14,8 @@ class CollabGraphMaker(object):
 
 	def __init__(self, g=None):
 		#self.data_dict = dd
-		#self.schl_name_urls = []
+		self.schl_name_urls = []
+		self.schoolname = ""
 		if g==None:
 			self.graph = nx.Graph()
 		else:
@@ -22,8 +23,9 @@ class CollabGraphMaker(object):
 		#self.populate_graph()
 
 
-	def populate_graph(self, data_dict, sn=None):
-		self.schl_name_urls = sn
+	def populate_graph(self, data_dict, snurls, schoolname):
+		self.schl_name_urls = snurls
+		self.schoolname = schoolname
 
 		for paper_id, info in data_dict.items():
 			# Check if authors is a list of tuples (data from scraping) or of strings (data from oai)
@@ -62,7 +64,6 @@ class CollabGraphMaker(object):
 			# G.node returns {node: {attributes}} dictionary, can use this to set new attributes after node is created
 			self.graph.node[vertex_id]["in_school"] = in_school
 
-
 	def add_links(self, title, url, year, authors):
 		# Check if authors is a list of collections or just strings
 		# If collections, make new list out of element at index 1, which is the unique author url and the node id
@@ -84,8 +85,7 @@ class CollabGraphMaker(object):
 					self.graph.add_edge(author1, author2, {'weight': 1.0 / num_authors, "num_collabs": 1, "collab_title_url_years": [[title, url, year],]})
 
 
-	def check_schl_status(self, author_id):
-		
+	def check_schl_status(self, author_id):		
 		if self.schl_name_urls:
 			for name_url in self.schl_name_urls:
 				if author_id in name_url:
@@ -159,6 +159,67 @@ def get_sorted_multimember_coms(com_dict):
 
 	return sorted_coms
 
+
+def add_school_info(school_graphs, school_urls):
+	for graph in school_graphs.values():
+		for author in graph.nodes():
+			found = False
+			for school, urls in school_urls.items():
+				if author in urls:
+					found = True
+					graph.node[author]['school'] = school
+					break
+
+			if not found:
+				g.node[author]['school'] = False
+
+	return school_graphs
+
+def make_unigraph(school_graphs):
+	all_graphs = school_graphs.values()
+	unigraph = nx.compose_all(all_graphs)
+	unigraph = add_metrics(unigraph)
+	return unigraph
+
+def make_interschool_graph(schoolnames, unigraph):
+
+	interschool_graph = nx.Graph(graphname="SchoolsGraph")
+
+	for schoolname in schoolnames:
+		# NB node gets school name as id, but we are giving it a name attribute as well to work better with the javascript code
+		interschool_graph.add_node(schoolname, {"name":schoolname})
+		print "added node", schoolname
+
+	for edge in unigraph.edges():
+		school1 = unigraph.node[edge[0]]['school']
+		school2 = unigraph.node[edge[1]]['school']
+
+		# Attention author may have school attribute as false if not associated to any school
+		if school1 == school2 or school1 == False or school2 == False:
+			continue
+		
+		edgeattribs = unigraph[edge[0]][edge[1]]
+		if interschool_graph.has_edge(school1, school2):
+			# Check if papers are already in title_urls to avoid repetition
+			for title_url in edgeattribs["collab_title_url_years"]:
+				if title_url not in schools_graph[school1][school2]["collab_title_url_years"]:
+					interschool_graph[school1][school2]["weight"] += 1
+					interschool_graph[school1][school2]["num_collabs"] += 1
+					interschool_graph[school1][school2]["collab_title_url_years"].append(title_url)
+
+		else:
+			interschool_graph.add_edge(school1, school2, {
+													"num_collabs": edgeattribs["num_collabs"], 
+													"weight": edgeattribs["num_collabs"],
+													"collab_title_url_years": edgeattribs["collab_title_url_years"]})
+
+
+	schools_graph = add_metrics(schools_graph)
+	
+	return interschool_graph
+
+
+
 def add_com_keywords(akw, g):
 	com_keywords = {}
 	school_com_keywords = {}
@@ -200,12 +261,12 @@ def assign_com_keywords(g, comkwdict, attr_name):
 
 	return g
 
-def make_sim_graph(akw, collab_graph_path):
+def make_sim_graph(akw, col_graph):
 
-	with open(collab_graph_path) as f:
-		gdata = json.load(f)
+	#with open(collab_graph_path) as f:
+	#	gdata = json.load(f)
 
-	col_graph = json_graph.node_link_graph(gdata)
+	#col_graph = json_graph.node_link_graph(gdata)
 
 	sim_graph = nx.Graph()
 
@@ -266,13 +327,13 @@ def graph_from_file(path):
 
 def get_matching_nodes(info, graph):
 	print "in get matching"
-	candidates = []
+	matching_nodes = []
 	for nodeid in graph.node:
 		if info in graph.node[nodeid]["name"].lower():
 			simpleid = re.search("[0-9]+", nodeid).group()
-			candidates.append({"name": graph.node[nodeid]["name"], "id": simpleid, "school": graph.node[nodeid]["school"]})
+			matching_nodes.append({"name": graph.node[nodeid]["name"], "id": simpleid, "school": graph.node[nodeid]["school"]})
 
-	return candidates
+	return matching_nodes
 
 def get_node_set(g):
 	return set(g.nodes())
@@ -320,19 +381,14 @@ def json_from_graph(g):
 
 def get_longest_path(g, source):
 	paths = nx.single_source_shortest_path(g, source)
-	#print "paths is"
-	#print paths
 	path_len = {}
 	for target, path in paths.items():
 		path_len[target] = len(path)
 
-	# Get the targests the longest path away from the source author
+	# Get the targets with the longest path away from the source author
 	furthest_targets = [target for target in path_len.keys() if path_len[target] == max(path_len.values())]
 	# Choose a random furthest target
 	chosen_target = random.choice(furthest_targets)
-
-	#sorted_targets = sorted(paths, key=lambda t: len(paths[t]))
-	#longest_path = paths[sorted_targets[-1]]
 	
 	longest_path = paths[chosen_target]
 	return longest_path
