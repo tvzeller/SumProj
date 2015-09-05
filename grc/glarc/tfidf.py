@@ -28,22 +28,6 @@ class Tfidf(object):
 			else:
 				self.idf_dict[word] = 1
 
-	def stem_words(self, words):
-		"""
-		Stems list of words
-		"""
-		prtr = stem.porter.PorterStemmer()
-		words_copy = words[:]
-		for index, word in enumerate(words_copy):
-			tokens = word.split()
-			stemmed_token = ""
-			for token in tokens:
-				stemmed_token = prtr.stem(token).lower()
-
-			if stemmed_token:
-				words[index] = stemmed_token.strip()
-
-		return words
 
 	def count_words(self, text):
 		"""

@@ -5,6 +5,7 @@ import os
 from networkx.readwrite import json_graph
 import networkx as nx
 from nltk import stem
+import operator
 
 
 def get_data_with_keywords(data_dicts):

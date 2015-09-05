@@ -4,6 +4,8 @@ from lxml import html
 import lxml
 import graph_utils as gu
 import networkx as nx
+import text_utils as tu
+import tfidf
 
 class ScraperTestCases(unittest.TestCase):
 	def test_get_name_url_matches(self):
@@ -108,7 +110,52 @@ class GraphTestCases(unittest.TestCase):
 		self.assertEqual(sim_graph.number_of_edges(), 2)
 		self.assertTrue(sim_graph.has_edge(1, 2) and sim_graph.has_edge(2, 3))
 		self.assertTrue("java" in sim_graph[1][2]['sim_kw'] and "python" in sim_graph[1][2]['sim_kw'])
+		self.assertTrue("graphs" in sim_graph[2][3]['sim_kw'])
 
+
+class TextUtilsTests(unittest.TestCase):
+	def test_check_sim(self):
+		kw1 = ["java", "python", "django"]
+		kw2 = ["python", "programming", "django", "graphs"]
+		result = tu.check_kw_sim(kw1, kw2)
+		self.assertEqual(result[0], 0.5)
+		self.assertEqual(result[1], [0, 2])
+
+	def test_get_most_frequent(self):
+		words = ['to', 'be', 'or', 'not', 'to', 'be']
+		top = tu.get_most_frequent(words, 2)
+		self.assertTrue(len(top) == 2)
+		self.assertTrue('to' in top and 'be' in top)
+
+class TfidfTests(unittest.TestCase):
+	def test_add_text(self):
+		tf = tfidf.Tfidf()
+		text1 = "the python unit tests python"
+		tf.add_text(text1)
+		
+		expected = {"the":1, "python":1, "unit":1, "tests":1}
+		self.assertEqual(tf.get_idf_dict(), expected)
+
+		text2 = "the java unit tests java"
+		tf.add_text(text2)
+
+		expected = {"the":2, "python":1, "unit":2, "tests":2, "java":1}
+		self.assertEqual(tf.get_idf_dict(), expected)
+
+	def test_count_words(self):
+		tf = tfidf.Tfidf()
+		text1 = "the python unit tests python"
+		expected = {"the":1, "python":2, "unit":1, "tests":1}
+		self.assertEqual(tf.count_words(text1), expected)
+
+	def test_get_keywords(self):
+		tf = tfidf.Tfidf()
+		text1 = "the python unit tests python"	
+		tf.add_text(text1)		
+		text2 = "the java unit tests java"
+		tf.add_text(text2)
+
+		self.assertEqual(tf.get_keywords(text1, 1), ['python'])	
 
 
 if __name__ == '__main__':
