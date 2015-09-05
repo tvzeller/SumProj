@@ -237,28 +237,41 @@ def add_school_info(school_graphs, school_urls):
 	return school_graphs
 
 def make_unigraph(all_graphs):
+	"""
+	Makes the collaboration graph for the full university, by composing the given list of all the school graphs.
+	Returns full university graph
+	"""
 	unigraph = nx.compose_all(all_graphs)
 	unigraph = add_metrics(unigraph)
 	return unigraph
 
 def make_interschool_graph(schoolnames, unigraph):
+	"""
+	Takes list of school names and full uni graph and makes graph where nodes are schools with links between them if
+	authors from those schools have coauthored a paper
+	Returns interschool graph
+	"""
 
 	interschool_graph = nx.Graph(graphname="SchoolsGraph")
 
 	for schoolname in schoolnames:
 		# NB node gets school name as id, but we are giving it a name attribute as well to work better with the javascript code
 		interschool_graph.add_node(schoolname, {"name":schoolname})
-		print "added node", schoolname
 
+	# Iterate through each edge (pair of coauthors) in full university graph
 	for edge in unigraph.edges():
+		# Get the schools of both authors
 		school1 = unigraph.node[edge[0]]['school']
 		school2 = unigraph.node[edge[1]]['school']
 
+		# Check if they are from different schools
 		# Attention author may have school attribute as false if not associated to any school
 		if school1 == school2 or school1 == False or school2 == False:
 			continue
 		
+		# Get the edge attributes for the co-author edge
 		edgeattribs = unigraph[edge[0]][edge[1]]
+		# Check if interschool graph already has edge between the 2 schools
 		if interschool_graph.has_edge(school1, school2):
 			# Check if papers are already in title_urls to avoid repetition
 			for title_url in edgeattribs["collab_title_url_years"]:
@@ -267,6 +280,7 @@ def make_interschool_graph(schoolnames, unigraph):
 					interschool_graph[school1][school2]["num_collabs"] += 1
 					interschool_graph[school1][school2]["collab_title_url_years"].append(title_url)
 
+		# New interschool edge
 		else:
 			interschool_graph.add_edge(school1, school2, {
 													"num_collabs": edgeattribs["num_collabs"], 
@@ -281,25 +295,30 @@ def make_interschool_graph(schoolnames, unigraph):
 
 
 def add_com_keywords(akw, g):
+	"""
+	Takes a school collaboration graph and an {author: author keywords} dict, gives keywords
+	to each community in the graph and adds this info as a graph attribute.
+	Does this for communities computed from full school graph and communities computed from
+	subgraph containing just school members
+	"""
 	com_keywords = {}
 	school_com_keywords = {}
+
 	for author in akw:
 		keywords = akw[author]["keywords"]
-		keywords = [kw[0] for kw in keywords]
 		com_num = g.node[author]["com"]
 		# Use get as author may not have school_com
 		school_com_num = g.node[author].get("school_com")
+		# (com_num may be false)
 		if com_num and com_num not in com_keywords:
 			com_keywords[com_num] = keywords
 		elif com_num in com_keywords:
 			com_keywords[com_num].extend(keywords)
 
-
 		if school_com_num and school_com_num not in school_com_keywords:
 			school_com_keywords[school_com_num] = keywords
 		elif school_com_num in school_com_keywords:
 			school_com_keywords[school_com_num].extend(keywords)
-
 
 	g = assign_com_keywords(com_keywords, 'com_keywords')
 	g = assign_com_keywords(school_com_keywords, 'school_com_keywords')
@@ -308,12 +327,17 @@ def add_com_keywords(akw, g):
 
 
 def assign_com_keywords(g, comkwdict, attr_name):
+	"""
+	Takes a graph, a {community number: keywords} dict and the name of the graph attribute to add and adds
+	the attribute to the graph
+	"""
+
 	g.graph[attr_name] = []
 	for com, keywords in comkwdict.items():
+		# Get the top keywords for this community
 		top_com_words = tu.get_most_frequent(keywords, 20)
-		print "appending " + attr_name
-		print top_com_words
 		
+		# Add this community's keywords to list of (com_num, keywords) pairs in graph attribute		
 		if attr_name in self.graph.graph: 
 			g.graph[attr_name].append([com, top_com_words])
 		else:
@@ -321,14 +345,16 @@ def assign_com_keywords(g, comkwdict, attr_name):
 
 	return g
 
+
 def make_sim_graph(akw, col_graph):
-
-	#with open(collab_graph_path) as f:
-	#	gdata = json.load(f)
-
-	#col_graph = json_graph.node_link_graph(gdata)
+	"""
+	Takes an {author: author keywords} dict and the collaboration graph for a school and creates a graph
+	where the nodes are authors linked if their keywords are similar.
+	Returns the similarity graph
+	"""
 
 	sim_graph = nx.Graph()
+	sim_threshold = 0.2
 
 	authors = akw.keys()
 	values = akw.values()
@@ -336,10 +362,12 @@ def make_sim_graph(akw, col_graph):
 	for i in range (0, len(authors)):
 		author1 = authors[i]
 		keywords = values[i]["keywords"]
+		# Add the author to the similarity graph
 		add_sim_graph_node(author1, keywords, sim_graph, col_graph)
-		
+		# Get a stemmed version of the author's keywords
 		stemmed1 = set(tu.stem_word_list(keywords[:]))
 
+		# Compare author against each other author in graph
 		for j in range(i+1, len(authors)):
 			author2 = authors[j]
 			keywords2 = values[j]["keywords"]
@@ -347,8 +375,11 @@ def make_sim_graph(akw, col_graph):
 		
 			stemmed2 = set(tu.stem_word_list(keywords2[:]))
 
+			# Check similarity of keywords
 			sim = tu.check_sim(stemmed1, stemmed2)
+			# the similarity score
 			ratio = sim[0]
+			# the indices (in the longest of the two author keyword lists) of the keywords that are similar
 			indices = sim[1]
 			matched_words = []
 
@@ -357,17 +388,23 @@ def make_sim_graph(akw, col_graph):
 			else:
 				longest = keywords2
 
+			# Get the keywords in the indices returned from check_sim
 			for index in indices:
 				matched_words.append(longest[index])
 
-			if ratio > 0.2:
+			# If similarity score greater than threshold, add edge between authors
+			if ratio > sim_threshold:
 				sim_graph.add_edge(author1, author2, {"num_collabs":ratio, "sim_kw": matched_words})
+				# Indicate whether authors are actual coauthors
 				if col_graph.has_edge(author1, author2):
 					sim_graph[author1][author2]["areCoauthors"] = True
 
 	return sim_graph
 
 def add_sim_graph_node(node_id, keywords, sim_graph, col_graph):
+	"""
+	Adds a node to similarity graph, using some of the attributes the node has in the collaboration graph
+	"""
 	sim_graph.add_node(author1, {
 									"name": col_graph.node[author1]["name"], 
 									"in_school":col_graph.node[author1]["in_school"],
@@ -377,28 +414,40 @@ def add_sim_graph_node(node_id, keywords, sim_graph, col_graph):
 
 
 def graph_from_file(path):
-	print "in graph from file"
+	"""
+	Given a file path, makes a NetworkX graph from the JSON data and returns
+	"""
 	with open(path) as f:
 		data = json.load(f)
-	print "opened"
 
 	g = json_graph.node_link_graph(data)
 	return g
 
-def get_matching_nodes(info, graph):
-	print "in get matching"
+def get_matching_nodes(name, graph):
+	"""
+	Takes an author name and returns a list of the nodes in the graph whose name attribute matches the given name
+	"""
 	matching_nodes = []
 	for nodeid in graph.node:
-		if info in graph.node[nodeid]["name"].lower():
+		# Check if queried name is contained in node's name attribute
+		if name in graph.node[nodeid]["name"].lower():
+			# If so, get the simplified id (just the number) from the full node id (a url)
 			simpleid = re.search("[0-9]+", nodeid).group()
+			# Add info dict to matching nodes list
 			matching_nodes.append({"name": graph.node[nodeid]["name"], "id": simpleid, "school": graph.node[nodeid]["school"]})
 
 	return matching_nodes
 
 def get_node_set(g):
+	"""
+	Given a graph, returns the set of nodes in the graph
+	"""
 	return set(g.nodes())
 
 def get_path(g, source, target):
+	"""
+	Given a graph and source and target nodes, returns a list of nodes that make up the shortest path between source and target
+	"""
 	try:
 		s_path = nx.shortest_path(g, source, target)
 		return s_path
@@ -406,24 +455,29 @@ def get_path(g, source, target):
 		return False
 
 def make_path_graph(path, full_graph):
-	print "make path graph"
+	"""
+	Given a list of nodes in a node to node path and the corresponding full graph, makes and returns a path graph
+	"""
 	path_graph = nx.Graph()
 	# Check if path is longer than 1 - author may not have any collaborators
 	if len(path) > 1:
 		for i in range(0, len(path)-1):
 			author1 = path[i]
 			author2 = path[i+1]
+			# Give the nodes and edges the relevant attributes taken from the full graph
 			path_graph.add_node(author1, {"name": full_graph.node[author1]["name"], "school": full_graph.node[author1]["school"]})
 			path_graph.add_node(author2, {"name": full_graph.node[author2]["name"], "school": full_graph.node[author2]["school"]})
 			path_graph.add_edge(author1, author2, {
 													"num_collabs": full_graph[author1][author2]["num_collabs"],
 													"collab_title_url_years": full_graph[author1][author2]["collab_title_url_years"]})
 
+			# Mark the source and target nodes within the path graph
 			if author1 == path[0]:
 				path_graph.node[author1]["isSource"] = 1
 			if author2 == path[-1]:
 				path_graph.node[author2]["isTarget"] = 1
 	
+	# For cases where node has no collaborators and path is a single node
 	elif len(path) == 1:
 		author = path[0]
 		path_graph.add_node(author, {
@@ -432,16 +486,25 @@ def make_path_graph(path, full_graph):
 									"isSource": 1,
 									"isTarget": 1})
 	
-	
-	print "GETTING HERE"
 	return path_graph
 
+
 def json_from_graph(g):
+	"""
+	Given a graph, returns the JSON data for the graph (which can be passed to JavaScript for D3 graph visualisation)
+	"""
 	return json_graph.node_link_data(g)
 
+
 def get_longest_path(g, source):
+	"""
+	Given a graph and a source node, returns a list of nodes comprising a path from the source to the furthest reachable node.
+	There may be several of these so this chooses one of them randomly.
+	"""
+	# Gets a {target node: path from source} dict
 	paths = nx.single_source_shortest_path(g, source)
 	path_len = {}
+	# Make a dict keyed by target node with the length of the path to it as a value
 	for target, path in paths.items():
 		path_len[target] = len(path)
 
@@ -449,48 +512,71 @@ def get_longest_path(g, source):
 	furthest_targets = [target for target in path_len.keys() if path_len[target] == max(path_len.values())]
 	# Choose a random furthest target
 	chosen_target = random.choice(furthest_targets)
-	
+	# Get the path from the source to the chosen target
 	longest_path = paths[chosen_target]
+
 	return longest_path
 
+
 def single_author_graph(full_graph, author, cutoff):
+	"""
+	Given a graph, a node and maximum distance, makes a subgraph made up of the nodes reachable by the central node,
+	up to the maximum distance
+	"""
 	nodes = [author,]
+	# Gets a dict where the keys are the target nodes and the values are the distance from the source node,
+	# only including target nodes up the maximum distance away
 	neighbours = nx.single_source_shortest_path_length(full_graph, author, cutoff)
 	
+	# Add the target nodes to the list of nodes
 	nodes.extend(neighbours.keys())
 	# Making a new subgraph out of the old graph so that changes in attributes are not reflected in full graph
 	author_graph = nx.Graph(full_graph.subgraph(nodes))
 
+	# Mark the source node
 	author_graph.node[author]["centre"] = 1
-
+	# Add the distance from the source node as a node attribute for each other node
 	for neighbour, hops in neighbours.items():
 		author_graph.node[neighbour]["hops"] = hops
 
 	return author_graph
 
+
 def make_search_graph(query, results, full_graph, max_authors):
-	
+	"""
+	Takes:
+	a query term
+	a dict where the keys are authors and the values are lists of papers (the results of searching for the query)
+	the full graph where the authors are nodes
+	the maximum number of authors to add to new graph
+
+	and makes a graph with the query term as a node linked to all other nodes (the authors in the results)
+	"""
+
+	# Filter down results to max_authors, by picking the ones with longest lists of papers
 	if len(results) > max_authors:
-		print "filtering results"
 		top_authors = sorted(results.keys(), key=lambda k: len(results[k]), reverse=True)[:max_authors]
+		
 		filtered_results = {}
 		for author in top_authors:
 			filtered_results[author] = results[author]
+		
 		results = filtered_results
 
+	# Make new graph and add query term as a node
 	term_graph = nx.Graph()
 	term_graph.add_node(query, {"name":query, "isTerm":True})
 
+	# Add each author as a node and add an edge between the author and the query term
 	for author, papers in results.items():
 		name, authorid = author
+		# Add relevant node and edge attributes
 		term_graph.add_node(authorid, {"name": name, "paper_count": 1, "school":full_graph.node[authorid]["school"]})
-
 		term_graph.add_edge(query, authorid, {
 											"num_collabs": len(papers),
 											"collab_title_url_years": papers
 											})
-
-
+		
 	return term_graph
 
 
