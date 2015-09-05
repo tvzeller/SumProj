@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Browse by Glasgow Author - Enlighten</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+
+<!-- From Glasgow -->
+
+<link rel="stylesheet" type="text/css" media="screen" href="/style/standard.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/form.css" />
+<link rel="stylesheet" type="text/css" media="print" href="https://www.gla.ac.uk/t4/generic/ss/print.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/us.css" />
+
+<!-- End from Glasgow -->
+
+    <link rel="Top" href="http://eprints.gla.ac.uk/" />
+    <link rel="Sword" href="https://eprints.gla.ac.uk/sword-app/servicedocument" />
+    <link rel="SwordDeposit" href="https://eprints.gla.ac.uk/id/contents" />
+    <link rel="Search" type="text/html" href="http://eprints.gla.ac.uk/cgi/search" />
+    <link rel="Search" type="application/opensearchdescription+xml" href="http://eprints.gla.ac.uk/cgi/opensearchdescription" />
+    <script type="text/javascript" src="http://www.google.com/jsapi"><!--padder--></script><script type="text/javascript">
+// <![CDATA[
+google.load("visualization", "1", {packages:["corechart", "geochart"]});
+// ]]></script><script type="text/javascript">
+// <![CDATA[
+var eprints_http_root = "http:\/\/eprints.gla.ac.uk";
+var eprints_http_cgiroot = "http:\/\/eprints.gla.ac.uk\/cgi";
+var eprints_oai_archive_id = "eprints.gla.ac.uk";
+var eprints_logged_in = false;
+// ]]></script>
+    <style type="text/css">.ep_logged_in { display: none }</style>
+    <link rel="stylesheet" type="text/css" href="/style/auto-3.3.10.css" />
+    <script type="text/javascript" src="/javascript/auto-3.3.10.js"><!--padder--></script>
+    <!--[if lte IE 6]>
+        <link rel="stylesheet" type="text/css" href="/style/ie6.css" />
+   <![endif]-->
+    <meta name="Generator" content="EPrints 3.3.10" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="en" />
+    
+
+  </head>
+  <body bgcolor="#ffffff" text="#000000">
+<div id="wrapper">
+
+<a name="top" id="top"></a> 
+
+<!-- Header Start -->
+
+
+<div class="ep_noprint"><noscript><style type="text/css">@import url(/style/nojs.css);</style></noscript></div>
+    
+    <div class="ep_tm_header ep_noprint">
+	<div id="headers_container">
+	<div id="toprow">
+		<a href="http://www.gla.ac.uk/"><img src="http://eprints.gla.ac.uk/images/180newlogotypeblack160x20.gif" alt="University of Glasgow" width="160" height="20" class="logotype" /></a>
+<form method="get" action="http://www.google.com/u/UofGlasgow">
+A-Z : <a href="http://www.gla.ac.uk/stafflist/">STAFF</a> | <a href="http://www.gla.ac.uk/departments/">ACADEMIC UNITS</a> | <a href="http://www.gla.ac.uk/degrees/">DEGREES</a> | <a href="http://www.gla.ac.uk/services/">SERVICES</a>  | 
+<input name="q" id="search" class="searchbox" value="search" onfocus="this.value=''" type="text" size="10" /><input name="imagefield" type="image" class="go" alt="go" src="http://eprints.gla.ac.uk/images/searcharrow.gif" />
+</form>
+</div>
+<div id="bannercontainercontainer">
+  <div id="bannercontainer">
+   <div id="bannerleft"><img src="http://eprints.gla.ac.uk/images/enlighten.gif" alt="Enlighten" /></div>
+   <div id="bannerright"></div>
+  </div> 
+</div>
+<div id="subhead">Research publications by members of the University of Glasgow</div>
+</div>
+</div>
+<!-- Header End -->
+
+<div id="container">   
+
+<div id="bread"><a href="http://www.gla.ac.uk/">home</a> &gt; <a href="http://www.gla.ac.uk/services/">services</a> &gt; Enlighten</div>
+
+<div id="navigation">
+<p><!-- navigation object : level two link to section --><a href="http://eprints.gla.ac.uk">Enlighten</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk">Enlighten Home</a></li>
+<li><a href="http://enlightenrepository.wordpress.com">Enlighten Blog</a></li>
+<li><a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/latest">Latest Additions</a></li>
+<!-- <li><a href="{$config{http_url}}/stats.html">Download Statistics</a></li> -->
+  <li><a href="http://researchdata.gla.ac.uk">Enlighten: Research Data</a></li>  
+</ul>
+<p><a href="http://eprints.gla.ac.uk/cgi/search">Search</a></p>
+
+<ul>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/simple/">Simple</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/advanced/">Advanced</a></li>
+<li><a href="http://theses.gla.ac.uk/cgi/search/advanced">Theses</a></li>
+<!-- <li><a href="http://www.lib.gla.ac.uk/enlighten/top100searches/">Top 100 Searches</a></li> -->
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/view/">Browse Papers by</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk/view/year/">Year</a></li>
+<!-- <li><a href="{$config{http_url}}/view/subjects/">Subject</a></li> -->
+<li><a href="http://eprints.gla.ac.uk/view/journal_volume/index.A.html">Journal</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/author/">Glasgow Author</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/funder/">Research Funder</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/divisions/">Colleges/Schools</a></li>
+</ul>
+  
+  <p><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">For Glasgow Authors</a></p>
+<ul>
+<li><a href="http://www.gla.ac.uk/services/openaccess/">Open Access</a></li>
+  <li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/publicationspolicy/">Publications Policy</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/depositguide/">How to Deposit</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=0">Benefits of Deposit</a></li>
+<!--	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/funders">Research Funders: Open Access Policies</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/copyright.html">Copyright Advice</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/openaccess.html">Open Access Publishing</a></li> -->
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">Training, Help and Advice</a></li>
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/cgi/users/home">MyEnlighten</a></p>
+<ul>
+<li><ul class="ep_tm_key_tools"><li><a href="http://eprints.gla.ac.uk/cgi/users/home">Login</a></li></ul></li>
+</ul>
+<p class="toptail"> </p>
+
+
+<div>
+<table width="100%">
+<tr><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS">RSS 1.0</a></span></div>
+<br />
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2">RSS 2.0</a></span></div>
+</td><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom">Atom</a></span></div>
+
+<br />
+<div><span class="ep_search_feed"><a href="http://twitter.com/uofg_enlighten"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/twitter-logo.png" border="0" /></a><a href="http://twitter.com/uofg_enlighten">Twitter</a></span></div>
+</td></tr></table>
+
+<div>
+</div>
+</div>
+</div>
+
+<div id="mainpage">
+<div id="mainpage_forbottom">
+<div class="links"></div>
+<div class="maincontent" style="margin-right:0">
+	
+
+	<div style="width:100%;float:right;">
+    <h1 class="ep_tm_pagetitle">Browse by Glasgow Author</h1>
+    <div class="ep_view_menu"><div class="ep_toolbox"><div class="ep_toolbox_content"><a href="index.A.html">A</a> | <a href="index.B.html">B</a> | <a href="index.C.html">C</a> | <a href="index.D.html">D</a> | <a href="index.E.html">E</a> | <a href="index.F.html">F</a> | <a href="index.G.html">G</a> | <a href="index.H.html">H</a> | <a href="index.I.html">I</a> | <a href="index.J.html">J</a> | <a href="index.K.html">K</a> | <a href="index.L.html">L</a> | <a href="index.M.html">M</a> | <a href="index.N.html">N</a> | <a href="index.O.html">O</a> | <a href="index.P.html">P</a> | <a href="index.Q.html">Q</a> | <a href="index.R.html">R</a> | <a href="index.S.html">S</a> | <a href="index.T.html">T</a> | <a href="index.U.html">U</a> | <a href="index.V.html">V</a> | <b>W</b> | <a href="index.X.html">X</a> | <a href="index.Y.html">Y</a> | <a href="index.Z.html">Z</a></div></div><h2>W...</h2><table cellpadding="0" cellspacing="0" border="0" class="ep_view_cols ep_view_cols_3"><tr><td valign="top" class="ep_view_col ep_view_col_1"><ul><li><a href="30406.html">Wade, Miss Helen</a> (1)</li><li><a href="26402.html">Wadsworth, Prof Roger</a> (1)</li><li><a href="14461.html">Waelde, Prof Charlotte</a> (2)</li><li><a href="7967.html">Waelde, Prof Klaus</a> (10)</li><li><a href="5450.html">Wager, Ms Fiona</a> (1)</li><li><a href="30892.html">Waghmare, Dr Sakharam</a> (1)</li><li><a href="15807.html">Wagner, Dr Richard</a> (1)</li><li><a href="30365.html">Wagner, Dr Richard</a> (1)</li><li><a href="8707.html">Wainman-Lefley, Ms Jessica</a> (4)</li><li><a href="10749.html">Wainwright, Dr Nicholas</a> (1)</li><li><a href="9973.html">Waites, Dr Matthew</a> (41)</li><li><a href="31199.html">Wakefield, Dr Ewan</a> (7)</li><li><a href="30992.html">Wakeham, Dr Katie</a> (13)</li><li><a href="23351.html">Walaron, Mr Kenneth</a> (3)</li><li><a href="12588.html">Waldron, Professor Susan</a> (48)</li><li><a href="2648.html">Walker, Dr Andrew</a> (44)</li><li><a href="3321.html">Walker, Dr Brian</a> (3)</li><li><a href="3872.html">Walker, Dr Daniel</a> (29)</li><li><a href="17006.html">Walker, Dr Eric</a> (2)</li><li><a href="5249.html">Walker, Mr Fraser</a> (6)</li><li><a href="21199.html">Walker, Mr Graeme</a> (1)</li><li><a href="5900.html">Walker, Dr Gregor</a> (1)</li><li><a href="6712.html">Walker, Prof Isobel</a> (1)</li><li><a href="6477.html">Walker, Prof Isobel</a> (2)</li><li><a href="8697.html">Walker, Ms Jennifer</a> (5)</li><li><a href="29463.html">Walker, Miss Laura</a> (3)</li><li><a href="10581.html">Walker, Ms Marjory</a> (2)</li><li><a href="10893.html">Walker, Mr Mark</a> (3)</li><li><a href="14928.html">Walker, Dr Nicola</a> (2)</li><li><a href="12880.html">Walker, Miss Wendy</a> (1)</li><li><a href="14707.html">Walkinshaw, Mr Malcolm</a> (6)</li><li><a href="5073.html">Wall, Dr Daniel</a> (7)</li><li><a href="11511.html">Wall, Dr Steven</a> (1)</li><li><a href="10964.html">Wallace, Dr Alan</a> (4)</li><li><a href="1959.html">Wallace, Ms Alison</a> (4)</li><li><a href="2636.html">Wallace, Dr Brendan</a> (1)</li><li><a href="15741.html">Wallace, Miss Emma</a> (3)</li><li><a href="29336.html">Wallace, Ms Evelyn</a> (1)</li><li><a href="8057.html">Wallace, Dr Lynsey</a> (6)</li><li><a href="13365.html">Wallace, Miss Sonia</a> (1)</li><li><a href="31698.html">Walls, Dr John</a> (19)</li><li><a href="15411.html">Walls, Miss Kirsty</a> (2)</li><li><a href="5431.html">Walsby, Mr Edward</a> (1)</li><li><a href="14975.html">Walsh, Mr David</a> (10)</li><li><a href="8903.html">Walsh, Dr Joanna</a> (1)</li><li><a href="10844.html">Walsh, Mrs Nicola</a> (2)</li><li><a href="18153.html">Walsham, Prof Alexandra</a> (1)</li><li><a href="10386.html">Walters, Professor Matthew</a> (117)</li><li><a href="6120.html">Walton, Professor Heather</a> (48)</li><li><a href="11636.html">Wan, Dr Ray</a> (1)</li><li><a href="5070.html">Wang, Mr Dai</a> (8)</li><li><a href="19988.html">Wang, Mr Dong</a> (1)</li><li><a href="30481.html">Wang, Ms Guan</a> (2)</li><li><a href="5204.html">Wang, Dr Guang Xing</a> (1)</li><li><a href="21204.html">Wang, Mr Guohui</a> (1)</li><li><a href="30404.html">Wang, Dr Harry Haoxiang</a> (24)</li><li><a href="6497.html">Wang, Dr Hong Fang</a> (5)</li><li><a href="15776.html">Wang, Mr HuiMing</a> (2)</li><li><a href="8160.html">Wang, Mrs Jing</a> (5)</li><li><a href="23005.html">Wang, Mr Jue</a> (10)</li><li><a href="9763.html">Wang, Dr Li-Shun</a> (1)</li><li><a href="16772.html">Wang, Dr Liping</a> (15)</li><li><a href="24127.html">Wang, Ms Liqiu</a> (5)</li><li><a href="23993.html">Wang, Mr Liquan</a> (2)</li><li><a href="28133.html">Wang, Mrs Wan-Chen</a> (3)</li><li><a href="12435.html">Wang, Dr Xingsheng</a> (51)</li><li><a href="29242.html">Wang, Professor Ya Ping</a> (79)</li><li><a href="12451.html">Wang, Dr Yanzhong</a> (2)</li><li><a href="12626.html">Wang, Dr Yaxing</a> (2)</li><li><a href="12868.html">Wang, Dr Ying-Ying</a> (8)</li><li><a href="30252.html">Wang, Mr Yizhou</a> (6)</li><li><a href="28289.html">Wang, Miss Zhujuan</a> (1)</li><li><a href="12774.html">Wanless, Dr Sarah</a> (5)</li><li><a href="3390.html">Ward, Dr Christopher</a> (1)</li><li><a href="31841.html">Ward, Professor Gary</a> (1)</li><li><a href="6063.html">Ward, Dr Henry</a> (109)</li><li><a href="9143.html">Ward, Prof Mark</a> (6)</li><li><a href="11492.html">Ward, Dr Richard</a> (20)</li><li><a href="27794.html">Ward, Prof Stephen</a> (1)</li><li><a href="27673.html">Ward, Prof Stephen</a> (1)</li><li><a href="1603.html">Wardlaw, Prof Alastair</a> (17)</li><li><a href="5408.html">Wardle, Dr Georgina</a> (9)</li><li><a href="4925.html">Warnock, Mr David</a> (3)</li><li><a href="5112.html">Warren, Mr Derek</a> (1)</li><li><a href="11682.html">Warren, Ms Rebecca</a> (3)</li><li><a href="26717.html">Warringham, Mr Robbie</a> (4)</li><li><a href="5317.html">Warwick, Dr Genevieve</a> (28)</li><li><a href="5397.html">Wasige, Dr Edward</a> (71)</li><li><a href="8106.html">Wason, Mrs Joyce</a> (2)</li><li><a href="2587.html">Wassermann, Dr Alexander</a> (3)</li><li><a href="22612.html">Wastling, Prof Jonathan</a> (12)</li><li><a href="2440.html">Waters, Professor Andrew</a> (51)</li><li><a href="33106.html">Waters, Professor Elizabeth</a> (3)</li><li><a href="9409.html">Waterston, Miss Mary</a> (4)</li><li><a href="19956.html">Watkins, Mr David</a> (11)</li><li><a href="6966.html">Watling, Dr Jeremy</a> (104)</li><li><a href="4242.html">Watson, Dr Carol</a> (2)</li><li><a href="19487.html">Watson, Dr David</a> (1)</li><li><a href="3814.html">Watson, Mr David</a> (2)</li><li><a href="4403.html">Watson, Mr David</a> (1)</li><li><a href="5448.html">Watson, Dr Eleanor</a> (1)</li><li><a href="5171.html">Watson, Mr Fraser</a> (1)</li><li><a href="14197.html">Watson, Miss Hannah</a> (2)</li><li><a href="6080.html">Watson, Dr Ian</a> (140)</li><li><a href="30161.html">Watson, Dr Liam</a> (16)</li><li><a href="10950.html">Watson, Dr Malcolm</a> (2)</li><li><a href="10312.html">Watson, Professor Nicholas</a> (65)</li><li><a href="26716.html">Watson, Miss Rebecca</a> (1)</li><li><a href="14756.html">Watson, Prof Robert</a> (4)</li><li><a href="27803.html">Watson, Mr Scott</a> (18)</li><li><a href="34051.html">Watson, Mr Sean</a> (1)</li><li><a href="12401.html">Watson, Dr Stephen</a> (10)</li><li><a href="2882.html">Watt, Dr Andy</a> (1)</li><li><a href="3538.html">Watt, Mrs Christine</a> (1)</li><li><a href="30858.html">Watt, Dr David</a> (2)</li><li><a href="3891.html">Watt, Professor David</a> (2)</li><li><a href="5801.html">Watt, Mr Gordon</a> (4)</li><li><a href="5386.html">Watt, Professor Graham</a> (167)</li><li><a href="6281.html">Watt, Mr Ian</a> (1)</li><li><a href="7051.html">Watt, Dr John</a> (53)</li><li><a href="9214.html">Watt, Dr Marie</a> (2)</li><li><a href="10100.html">Watt, Miss Pauline</a> (4)</li><li><a href="11190.html">Watters, Dr Natalie</a> (4)</li><li><a href="30554.html">Watterson, Dr Kenneth</a> (3)</li><li><a href="29679.html">Watton, Dr Paul</a> (1)</li><li><a href="17574.html">Watts, Mr Andrew</a> (1)</li><li><a href="14454.html">Watts, Mr Christopher</a> (2)</li><li><a href="32042.html">Watts, Dr Ciorsdaidh</a> (4)</li><li><a href="4619.html">Watts, Dr Daniel</a> (34)</li><li><a href="4902.html">Weaver, Mrs Elizabeth</a> (1)</li><li><a href="7062.html">Weaver, Professor Jonathan</a> (51)</li><li><a href="9170.html">Weaver, Professor Lawrence</a> (98)</li></ul></td><td valign="top" class="ep_view_col ep_view_col_2"><ul><li><a href="6818.html">Webb, Professor Jeffrey</a> (39)</li><li><a href="20806.html">Weber, Mr Florian</a> (2)</li><li><a href="5223.html">Webster, Dr David</a> (18)</li><li><a href="20471.html">Webster, Mrs Emma</a> (1)</li><li><a href="5677.html">Weeks, Mr George</a> (3)</li><li><a href="10082.html">Weetman, Professor Pauline</a> (20)</li><li><a href="28509.html">Weidt, Dr Stefan</a> (4)</li><li><a href="5910.html">Weiler-Mithoff, Mrs Eva-Maria</a> (1)</li><li><a href="1882.html">Weir, Professor Alan</a> (18)</li><li><a href="2780.html">Weir, Dr Andrew</a> (1)</li><li><a href="3435.html">Weir, Dr Christopher</a> (39)</li><li><a href="3798.html">Weir, Mr Clifford</a> (4)</li><li><a href="16988.html">Weir, Mr Daryl</a> (2)</li><li><a href="12817.html">Weir, Dr William</a> (35)</li><li><a href="33113.html">Weishaar, Dr Heide</a> (4)</li><li><a href="28987.html">Welburn, Dr Cassie</a> (1)</li><li><a href="11577.html">Welbury, Professor Richard</a> (56)</li><li><a href="5658.html">Welch, Mr George</a> (2)</li><li><a href="32035.html">Welden, Miss Natalie</a> (1)</li><li><a href="10166.html">Welland, Professor Raymond</a> (12)</li><li><a href="4473.html">Wells, Dr Cade</a> (4)</li><li><a href="30996.html">Wells, Dr Christine</a> (35)</li><li><a href="3253.html">Welsh, Dr Claire</a> (3)</li><li><a href="3942.html">Welsh, Dr David</a> (6)</li><li><a href="20117.html">Welsh, Miss Elizabeth</a> (2)</li><li><a href="8023.html">Welsh, Professor John</a> (8)</li><li><a href="15908.html">Welsh, Professor Louise</a> (2)</li><li><a href="10485.html">Welsh, Ms Margaret</a> (1)</li><li><a href="16894.html">Welsh, Dr Michelle</a> (20)</li><li><a href="10502.html">Welsh, Dr Paul</a> (77)</li><li><a href="15059.html">Welsh, Dr Peter</a> (1)</li><li><a href="27750.html">Welsh, Mr Stephen</a> (4)</li><li><a href="30749.html">Wen, Dr Yangmao</a> (1)</li><li><a href="8193.html">Wenell, Dr Karen</a> (12)</li><li><a href="33746.html">Werthmueller, Dr Dominik</a> (1)</li><li><a href="2816.html">Wessmann, Dr Annette</a> (15)</li><li><a href="2678.html">West, Dr Adam</a> (30)</li><li><a href="8174.html">West, Dr Katherine</a> (15)</li><li><a href="11155.html">West, Prof Patrick</a> (11)</li><li><a href="29227.html">Westaway, Dr Robert</a> (54)</li><li><a href="15723.html">Westoby, Ms Nina</a> (3)</li><li><a href="5471.html">Westrop, Mr Gareth</a> (8)</li><li><a href="30771.html">Wetherall, Miss Karen</a> (1)</li><li><a href="15461.html">Wethers, Dr Gavin</a> (1)</li><li><a href="18506.html">Whatley, Professor Christopher</a> (1)</li><li><a href="6676.html">Wheadon, Dr Helen</a> (18)</li><li><a href="3850.html">Wheatley, Professor David</a> (28)</li><li><a href="19229.html">Wheeler, Prof Colin</a> (1)</li><li><a href="11467.html">Wheeler, Professor Simon</a> (45)</li><li><a href="19231.html">Wheeler-Jones, Dr Caroline</a> (1)</li><li><a href="18083.html">Whetton, Prof Anthony</a> (4)</li><li><a href="5279.html">Whitaker, Mr Graham</a> (4)</li><li><a href="8645.html">Whitaker, Dr Lynn</a> (1)</li><li><a href="2781.html">White, Ms Aileen</a> (2)</li><li><a href="16545.html">White, Mr Andrew</a> (3)</li><li><a href="30962.html">White, Dr Anna</a> (1)</li><li><a href="15099.html">White, Dr Christopher</a> (30)</li><li><a href="33018.html">White, Dr Craig</a> (12)</li><li><a href="3191.html">White, Professor Craig</a> (2)</li><li><a href="16438.html">White, Dr David</a> (16)</li><li><a href="4170.html">White, Dr David</a> (1)</li><li><a href="4991.html">White, Mr Dominic</a> (1)</li><li><a href="5860.html">White, Dr Gary</a> (1)</li><li><a href="29029.html">White, Dr James</a> (11)</li><li><a href="6909.html">White, Professor James</a> (4)</li><li><a href="15996.html">White, Mrs Jane</a> (4)</li><li><a href="29691.html">White, Dr Jeffery</a> (3)</li><li><a href="7893.html">White, Miss Katie</a> (7)</li><li><a href="15587.html">White, Dr Kevin</a> (12)</li><li><a href="23452.html">White, Mr Kyle</a> (2)</li><li><a href="10750.html">White, Dr Madeleine</a> (1)</li><li><a href="11465.html">White, Prof Robert</a> (43)</li><li><a href="12300.html">White, Dr Ross</a> (19)</li><li><a href="11400.html">White, Professor Stephen</a> (493)</li><li><a href="11531.html">White, Dr Stewart</a> (5)</li><li><a href="12511.html">White, Dr Stuart</a> (27)</li><li><a href="25099.html">Whitehead, Prof M</a> (2)</li><li><a href="2910.html">Whitelaw, Dr Alan</a> (1)</li><li><a href="2661.html">Whitelaw, Dr Alexander</a> (11)</li><li><a href="3525.html">Whitelaw, Mrs Christine</a> (4)</li><li><a href="5718.html">Whitelaw, Miss Fiona</a> (2)</li><li><a href="14629.html">Whiteley, Miss Lucy</a> (2)</li><li><a href="5626.html">Whitfield, Dr Graeme</a> (6)</li><li><a href="27795.html">Whiting, Mr Stewart</a> (5)</li><li><a href="17290.html">Whitley, Dr Elise</a> (78)</li><li><a href="13005.html">Whitmarsh, Dr Thomas</a> (1)</li><li><a href="13419.html">Whitmer, Dr William</a> (8)</li><li><a href="14362.html">Whittaker, Dr Andrew</a> (1)</li><li><a href="2553.html">Whittaker, Dr Arthur</a> (15)</li><li><a href="34559.html">Whittaker, Dr Michael</a> (10)</li><li><a href="3636.html">Whitters, Dr John</a> (4)</li><li><a href="16820.html">Whittet, Mr Craig</a> (1)</li><li><a href="22995.html">Whitworth, Dr John</a> (1)</li><li><a href="15098.html">Whyte, Mr Bruce</a> (2)</li><li><a href="5302.html">Whyte, Mrs Fiona</a> (5)</li><li><a href="5500.html">Whyte, Mr Graeme</a> (1)</li><li><a href="5781.html">Whyte, Mr Griogair</a> (9)</li><li><a href="6486.html">Whyte, Mr Hamish</a> (12)</li><li><a href="12564.html">Whyte, Dr William</a> (23)</li><li><a href="5758.html">Wickman, Mr Grant</a> (3)</li><li><a href="28802.html">Wickramasinghe, Professor Danture</a> (27)</li><li><a href="13440.html">Wieber, Dr Sabine</a> (26)</li><li><a href="8781.html">Wiejak, Dr Jolanta</a> (5)</li><li><a href="33300.html">Wielewski, Dr Euan</a> (2)</li><li><a href="10463.html">Wiese, Dr Nils</a> (2)</li><li><a href="2554.html">Wiggins, Dr Alison</a> (21)</li><li><a href="4250.html">Wight, Professor Daniel</a> (135)</li><li><a href="8608.html">Wightwick, Mr James</a> (1)</li><li><a href="5481.html">Wigzell, Miss Fiona</a> (1)</li><li><a href="17844.html">Wilbur, Mr Andrew</a> (2)</li><li><a href="7862.html">Wilcken, Mr Klaus</a> (16)</li><li><a href="3830.html">Wilcox, Dr Douglas</a> (3)</li><li><a href="27807.html">Wild, Dr Sarah</a> (2)</li><li><a href="25240.html">Wildman, Mr Mark</a> (1)</li><li><a href="8241.html">Wilkes, Dr Jonathan</a> (6)</li><li><a href="19281.html">Wilkie, Mr Colin</a> (1)</li><li><a href="17220.html">Wilkie, Dr Gavin</a> (29)</li><li><a href="28551.html">Wilkinson, Dr Andrew</a> (2)</li><li><a href="19233.html">Wilkinson, Prof Caroline</a> (1)</li><li><a href="3213.html">Wilkinson, Professor Christopher</a> (54)</li><li><a href="6922.html">Wilkinson, Prof J</a> (8)</li><li><a href="8529.html">Wilkinson, Dr Jane</a> (2)</li><li><a href="10185.html">Wilkinson, Dr Mark</a> (1)</li><li><a href="10180.html">Wilkinson, Dr Michael</a> (4)</li><li><a href="13163.html">Wilkinson, Dr Simon</a> (9)</li><li><a href="15412.html">Willder, Dr Jennifer</a> (6)</li><li><a href="2657.html">Willett, Professor Brian</a> (71)</li><li><a href="18158.html">Williams, Dr Alistair</a> (2)</li><li><a href="4474.html">Williams, Mr Charles</a> (1)</li><li><a href="3469.html">Williams, Professor Christopher</a> (80)</li><li><a href="15410.html">Williams, Miss Claire</a> (3)</li><li><a href="4233.html">Williams, Dr Craig</a> (8)</li></ul></td><td valign="top" class="ep_view_col ep_view_col_3"><ul><li><a href="15811.html">Williams, Dr Graham</a> (1)</li><li><a href="22334.html">Williams, Dr Jamie</a> (2)</li><li><a href="15051.html">Williams, Dr Mark</a> (1)</li><li><a href="11134.html">Williams, Professor Mary</a> (1)</li><li><a href="12227.html">Williams, Dr Rhian</a> (23)</li><li><a href="10404.html">Williams, Mr Roderick</a> (4)</li><li><a href="31241.html">Williams, Dr Vivien</a> (6)</li><li><a href="1797.html">Williamson, Dr Andrea</a> (11)</li><li><a href="2783.html">Williamson, Ms Avril</a> (1)</li><li><a href="19130.html">Williamson, Miss Catherine</a> (2)</li><li><a href="16949.html">Williamson, Dr Eila</a> (13)</li><li><a href="8069.html">Williamson, Dr John</a> (8)</li><li><a href="8165.html">Williamson, Dr John</a> (51)</li><li><a href="16088.html">Williamson, Dr Julie</a> (16)</li><li><a href="9196.html">Williamson, Dr Laura</a> (6)</li><li><a href="12705.html">Williamson, Ms Shanti</a> (3)</li><li><a href="29349.html">Willis, Dr Diane</a> (25)</li><li><a href="24675.html">Willis, Miss Miranda</a> (1)</li><li><a href="6186.html">Willison, Professor Hugh</a> (167)</li><li><a href="26213.html">Willner, Prof Paul</a> (2)</li><li><a href="2976.html">Willsdon, Professor Clare</a> (16)</li><li><a href="3956.html">Wilson, Professor Charles</a> (128)</li><li><a href="19268.html">Wilson, Mr Christopher</a> (1)</li><li><a href="32950.html">Wilson, Dr Claire</a> (1)</li><li><a href="29348.html">Wilson, Dr David</a> (1)</li><li><a href="4671.html">Wilson, Mrs Delia</a> (5)</li><li><a href="5357.html">Wilson, Professor Fiona</a> (44)</li><li><a href="5916.html">Wilson, Mr George</a> (1)</li><li><a href="5842.html">Wilson, Mr Graham</a> (18)</li><li><a href="6747.html">Wilson, Dr Hilary</a> (1)</li><li><a href="6906.html">Wilson, Dr James</a> (9)</li><li><a href="6157.html">Wilson, Dr James</a> (7)</li><li><a href="6187.html">Wilson, Dr Joanna</a> (21)</li><li><a href="7222.html">Wilson, Mr John</a> (8)</li><li><a href="8924.html">Wilson, Ms Karen</a> (1)</li><li><a href="32329.html">Wilson, Dr Keith</a> (4)</li><li><a href="8303.html">Wilson, Mrs Kim</a> (2)</li><li><a href="9736.html">Wilson, Miss Lynn</a> (1)</li><li><a href="10640.html">Wilson, Miss Patricia</a> (3)</li><li><a href="10862.html">Wilson, Dr Paul</a> (1)</li><li><a href="10203.html">Wilson, Dr Philip</a> (87)</li><li><a href="11419.html">Wilson, Dr Richard</a> (17)</li><li><a href="11654.html">Wilson, Dr Robert</a> (23)</li><li><a href="29228.html">Wilson, Dr Sam</a> (21)</li><li><a href="11543.html">Wilson, Dr Sarah</a> (9)</li><li><a href="13061.html">Wilson, Dr Valerie</a> (19)</li><li><a href="27989.html">Wilson, Dr Valerie</a> (1)</li><li><a href="17015.html">Wilson, Dr William</a> (1)</li><li><a href="4957.html">Wilson-Davies, Dr Eleri</a> (3)</li><li><a href="4303.html">Wiltshire, Dr Carolyn</a> (1)</li><li><a href="12798.html">Wimperis, Professor Stephen</a> (95)</li><li><a href="31087.html">Wincenciak, Miss Joanna</a> (5)</li><li><a href="3432.html">Winchester, Dr Catherine</a> (4)</li><li><a href="6910.html">Winfield, Professor John</a> (34)</li><li><a href="1244.html">Wingrave, Dr Mary</a> (5)</li><li><a href="4985.html">Winn, Ms Dorothy</a> (1)</li><li><a href="13212.html">Winning, Ms Susan</a> (1)</li><li><a href="2640.html">Winter, Dr Alan</a> (12)</li><li><a href="8815.html">Winter, Dr Jack</a> (1)</li><li><a href="26714.html">Winter, Mr Ross</a> (3)</li><li><a href="32925.html">Wirz, Sister Angela</a> (1)</li><li><a href="14591.html">Wisbey, Mr Jamie</a> (1)</li><li><a href="9033.html">Wiseman, Dr Lesley</a> (1)</li><li><a href="2425.html">Wiseman, Mr Sam</a> (1)</li><li><a href="9127.html">Wiseman-Orr, Dr Margaret</a> (6)</li><li><a href="9323.html">Wisewell, Dr Laura</a> (3)</li><li><a href="33533.html">Wisnicki, Dr Adrian</a> (1)</li><li><a href="19275.html">Witte, Mr Christian</a> (6)</li><li><a href="13281.html">Wittek, Dr Thomas</a> (25)</li><li><a href="8979.html">Witteveldt, Dr Jeroen</a> (5)</li><li><a href="4530.html">Wlodkowic, Dr Donald</a> (8)</li><li><a href="5308.html">Woan, Professor Graham</a> (181)</li><li><a href="26137.html">Woisel, Prof Patrice</a> (4)</li><li><a href="12525.html">Woitek, Prof Ulrich</a> (22)</li><li><a href="22991.html">Wolfreys, Prof Julian</a> (1)</li><li><a href="16085.html">Wondimu, Mr Diresibachew</a> (1)</li><li><a href="19271.html">Wong, Prof Cecilia</a> (1)</li><li><a href="16122.html">Wong, Dr Eleanor</a> (8)</li><li><a href="6802.html">Wong, Dr Jarod</a> (1)</li><li><a href="8468.html">Wong, Mr Kit</a> (1)</li><li><a href="10045.html">Wong, Dr Pui Ee</a> (8)</li><li><a href="26866.html">Wong, Ms Sau</a> (1)</li><li><a href="3006.html">Wood, Dr Bethan</a> (12)</li><li><a href="5804.html">Wood, Mr Graham</a> (1)</li><li><a href="7785.html">Wood, Miss Jenifer</a> (2)</li><li><a href="29120.html">Wood, Miss Karen</a> (4)</li><li><a href="12867.html">Woodcock, Mr Stephen</a> (6)</li><li><a href="3302.html">Woods, Dr Brian</a> (2)</li><li><a href="6592.html">Woods, Dr Heather</a> (5)</li><li><a href="11055.html">Woodward, Professor Mark</a> (24)</li><li><a href="25207.html">Woodward, Prof Michael</a> (1)</li><li><a href="30441.html">Woodward, Miss Rosemary</a> (3)</li><li><a href="14409.html">Woolf, Mr Alex</a> (1)</li><li><a href="2941.html">Woolfson, Prof C</a> (22)</li><li><a href="3878.html">Woolhead, Dr Cheryl</a> (12)</li><li><a href="8115.html">Work, Dr Lorraine</a> (29)</li><li><a href="431.html">Workman, Dr Antony</a> (31)</li><li><a href="23024.html">Worrall, Dr Kevin</a> (6)</li><li><a href="6522.html">Wotherspoon, Mrs Irene</a> (3)</li><li><a href="6491.html">Wotherspoon, Mrs Irene</a> (4)</li><li><a href="10305.html">Wotton, Dr Paul</a> (12)</li><li><a href="14951.html">Wotton, Dr Sandra</a> (1)</li><li><a href="15703.html">Wraight, Mr Kenneth</a> (288)</li><li><a href="2840.html">Wray, Dr Alyson</a> (2)</li><li><a href="4599.html">Wray, Professor David</a> (24)</li><li><a href="27163.html">Wren-Lewis, Prof Simon</a> (2)</li><li><a href="28393.html">Wright, Dr Alison</a> (1)</li><li><a href="2867.html">Wright, Dr Amanda</a> (4)</li><li><a href="30883.html">Wright, Mrs Ann</a> (1)</li><li><a href="31296.html">Wright, Miss Audrey</a> (1)</li><li><a href="14079.html">Wright, Miss Catherine</a> (3)</li><li><a href="3483.html">Wright, Professor Charlotte</a> (79)</li><li><a href="11145.html">Wright, Mr Michael</a> (105)</li><li><a href="26188.html">Wright, Miss Pamela</a> (4)</li><li><a href="26066.html">Wright, Dr Robert</a> (9)</li><li><a href="31444.html">Wright, Dr Sharon</a> (42)</li><li><a href="28002.html">Wright, Dr Valerie</a> (6)</li><li><a href="12732.html">Wright, Mr William</a> (3)</li><li><a href="29346.html">Wu, Dr Hui-Ting</a> (2)</li><li><a href="10373.html">Wu, Professor Olivia</a> (54)</li><li><a href="15781.html">Wu, Dr Shunan</a> (6)</li><li><a href="29520.html">Wu, Dr Wenjie</a> (10)</li><li><a href="26035.html">Wyatt, Prof Paul</a> (1)</li><li><a href="2609.html">Wygant, Dr Amy</a> (12)</li><li><a href="21726.html">Wyke, Prof John</a> (1)</li><li><a href="16203.html">Wyke, Professor Sally</a> (126)</li><li><a href="5362.html">Wylie, Dr Fiona</a> (5)</li><li><a href="7047.html">Wylie, Miss Jeanette</a> (1)</li><li><a href="14908.html">Wynne, Dr David</a> (5)</li><li><a href="15668.html">Wynne, Professor Klaas</a> (30)</li><li><a href="4384.html">Wyper, Professor David</a> (11)</li><li><a href="30393.html">Wyse, Dr Cathy</a> (33)</li></ul></td></tr></table></div>
+</div>
+<div style="clear:both;"></div>
+</div>
+<div class="onecolclear"></div>
+</div>
+</div>
+</div>
+
+<div id="footer_container"> 
+
+<div class="ep_tm_footer ep_noprint">
+  <div id="footer1">
+<p>
+
+<!-- AddThis Button BEGIN -->
+
+<!--
+<script type="text/javascript">addthis_pub  = 'ticketinspector'; addthis_logo = 'http://www.gla.ac.uk/t4/generic/i/180newlogotypeblack160x20.gif';
+
+addthis_logo_background = '121212';
+
+addthis_logo_color      = 'ffffff'; addthis_brand = ' ';
+
+addthis_options         = 'email, digg, delicious, myspace, facebook, google, live, favorites, more';</script>
+
+<a href="http://www.addthis.com/bookmark.php" onmouseover="return addthis_open(this, '', '[URL]', '[TITLE]')" onmouseout="addthis_close()" onclick="return addthis_sendto()"><img style="margin-left: -5px;" src="http://www.gla.ac.uk/t4/generic/i/bookmarks.gif'" width="172" height="27" border="0" alt="" /></a><script type="text/javascript" src="http://s7.addthis.com/js/152/addthis_widget.js"></script>
+-->
+<!-- AddThis Button END -->
+
+
+
+</p>
+
+<p> <a href="#top">top</a> | <a href="http://www.gla.ac.uk/search">search</a> | <a href="http://www.gla.ac.uk/">home</a></p>
+
+</div>
+
+  <div id="footer2">
+<p>University of Glasgow, University Avenue, Glasgow G12 8QQ, United Kingdom<br />
+
+tel:  +44 (0)141 330 2000<br />
+
+The University of Glasgow is a registered Scottish charity: registration number SC004401<br />
+
+<a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></p>
+
+<p><a href="http://www.gla.ac.uk/about/accessibility/">Accessibility</a> | <a href="http://www.gla.ac.uk/legal/disclaimer/">Disclaimer</a> | <a href="http://www.gla.ac.uk/foi/">Freedom
+
+of Information </a> | <a href="http://www.gla.ac.uk/legal/freedomofinformation/foipublicationscheme/">FOI Publication Scheme</a> | <a href="http://www.gla.ac.uk/legal/privacy/">Privacy</a> | <a href="http://www.gla.ac.uk/legal/copyright/">© UofG</a></p>
+
+  </div>
+
+  </div>
+</div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-306447-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+    
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-9258834-1', 'auto');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');
+
+</script>
+    
+  </body>
+</html>

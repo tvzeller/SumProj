@@ -2,7 +2,13 @@ import englighten_scraper as es
 import text_utils as tu
 import graph_utils as gu
 
-def get_data_dicts():
+def get_enlighten_data():
+	"""
+	Gets data for each school from Enlighten using englighten_scraper.
+	Returns a list of tuples, one for each school; each tuple has the a data_dict
+	(dictionary keyed by paper id with paper metadata as values) and a list of (name, enlighten url) pairs
+	for the authors in the school
+	"""
 	data_dicts = []
 	author_name_urls_list = []
 	school_data = {}
@@ -18,6 +24,10 @@ def get_data_dicts():
 	return school_data
 
 def make_school_graphs(school_data):
+	"""
+	Takes the school data obtained from get_enlighten_data and makes a collaboration graph for each school using graph_utils.
+	Returns dict with school names as keys and school collab graphs as values
+	"""
 	school_graphs = {}
 	for schoolname, data in school_data.items():
 		data_dict = data[0]
@@ -33,6 +43,10 @@ def make_school_graphs(school_data):
 
 
 def make_indices(data_dicts):
+	"""
+	Takes list of data_dicts and makes inverted index and paper to paper data index and stores each 
+	using the shelve module for later use
+	"""
 	for dd in data_dicts:
 		dd_with_kw = tu.add_kw_to_data(dd)
 		index = tu.make_index(dd_with_kw)
@@ -52,6 +66,9 @@ def make_indices(data_dicts):
 		stored_pkw.close()
 
 def correct_author_names(dd):
+	"""
+	Takes a data_dict and reorders all the author names to title first name last name
+	"""
 	for paper_id, info in dd.items():
 		authors = info['authors']
 		newauthors = [(anu[0].split(", ")[1] + " " + anu[0].split(", ")[0], anu[1]) for anu in authors]
@@ -61,7 +78,10 @@ def correct_author_names(dd):
 	return dd
 
 def get_author_kw_dicts(data_dicts):
-	#akws = {}
+	"""
+	Takes list of data_dicts and for each one makes a dict keyed by author id with author name and keywords as values
+	Returns dict keyed by school name with author-keyword dict as value
+	"""
 	school_akws = {}
 	dds_with_kws = tu.get_data_with_keywords(data_dicts)
 	akws = tu.make_author_kw_dicts(dds_with_kws)
@@ -71,6 +91,10 @@ def get_author_kw_dicts(data_dicts):
 	return school_akws
 
 def make_sim_graphs(school_graphs, school_akws):
+	"""
+	Takes school graphs dict and school author-kw dict and makes a keyword similarity graph for each school.
+	Returns dict keyed by school name with sim graphs as values.
+	"""
 	school_simgraphs = {}
 	for school in school_graphs:
 		collab_graph = school_graphs[school]
@@ -81,6 +105,10 @@ def make_sim_graphs(school_graphs, school_akws):
 	return school_simgraphs
 
 def add_com_keywords_to_graphs(school_graphs, school_akws):
+	"""
+	Takes school graphs dict and school author-kw dict and adds community keywords as attributes
+	to each school graph
+	"""
 	for school, graph in school_graphs.items():
 		akw = school_akws[school]
 		graph_with_kw = gu.add_com_keywords(akw, graph)
@@ -90,7 +118,7 @@ def add_com_keywords_to_graphs(school_graphs, school_akws):
 
 
 if __name__ == "__main__":
-	school_data = get_data_dicts()
+	school_data = get_enlighten_data()
 	for school, data in school_data.items():
 		data_dict = data[0]
 		correct_names_dict = correct_author_names(data_dict)

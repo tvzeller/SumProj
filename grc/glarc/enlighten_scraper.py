@@ -46,7 +46,7 @@ def get_tree(url):
 
 	return tree
 
-def get school_name_urls():
+def get_school_name_urls():
 	"""
 	gets a list of (school name, url of staff page) tuples from the Glasgow University website
 	"""
@@ -90,7 +90,6 @@ def get_names(url):
 
 	return full_names
 
-	
 	
 def get_name_url_matches(author_name, html_tree):
 	"""
@@ -161,7 +160,7 @@ def check_if_in_dept(author_url, schl_name):
 
 	for a_elem in a_elems:
 		# For each paper, get the school info for that paper
-		schl_info = get_paper_school_info(a_elems.get("href"))
+		schl_info = get_paper_school_info(a_elem.get("href"))
 		# If the given school name is in the school info string, make in_dept True
 		# and exit loop
 		if schl_name in schl_info:

@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Browse by Glasgow Author - Enlighten</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+
+<!-- From Glasgow -->
+
+<link rel="stylesheet" type="text/css" media="screen" href="/style/standard.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/form.css" />
+<link rel="stylesheet" type="text/css" media="print" href="https://www.gla.ac.uk/t4/generic/ss/print.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/us.css" />
+
+<!-- End from Glasgow -->
+
+    <link rel="Top" href="http://eprints.gla.ac.uk/" />
+    <link rel="Sword" href="https://eprints.gla.ac.uk/sword-app/servicedocument" />
+    <link rel="SwordDeposit" href="https://eprints.gla.ac.uk/id/contents" />
+    <link rel="Search" type="text/html" href="http://eprints.gla.ac.uk/cgi/search" />
+    <link rel="Search" type="application/opensearchdescription+xml" href="http://eprints.gla.ac.uk/cgi/opensearchdescription" />
+    <script type="text/javascript" src="http://www.google.com/jsapi"><!--padder--></script><script type="text/javascript">
+// <![CDATA[
+google.load("visualization", "1", {packages:["corechart", "geochart"]});
+// ]]></script><script type="text/javascript">
+// <![CDATA[
+var eprints_http_root = "http:\/\/eprints.gla.ac.uk";
+var eprints_http_cgiroot = "http:\/\/eprints.gla.ac.uk\/cgi";
+var eprints_oai_archive_id = "eprints.gla.ac.uk";
+var eprints_logged_in = false;
+// ]]></script>
+    <style type="text/css">.ep_logged_in { display: none }</style>
+    <link rel="stylesheet" type="text/css" href="/style/auto-3.3.10.css" />
+    <script type="text/javascript" src="/javascript/auto-3.3.10.js"><!--padder--></script>
+    <!--[if lte IE 6]>
+        <link rel="stylesheet" type="text/css" href="/style/ie6.css" />
+   <![endif]-->
+    <meta name="Generator" content="EPrints 3.3.10" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="en" />
+    
+
+  </head>
+  <body bgcolor="#ffffff" text="#000000">
+<div id="wrapper">
+
+<a name="top" id="top"></a> 
+
+<!-- Header Start -->
+
+
+<div class="ep_noprint"><noscript><style type="text/css">@import url(/style/nojs.css);</style></noscript></div>
+    
+    <div class="ep_tm_header ep_noprint">
+	<div id="headers_container">
+	<div id="toprow">
+		<a href="http://www.gla.ac.uk/"><img src="http://eprints.gla.ac.uk/images/180newlogotypeblack160x20.gif" alt="University of Glasgow" width="160" height="20" class="logotype" /></a>
+<form method="get" action="http://www.google.com/u/UofGlasgow">
+A-Z : <a href="http://www.gla.ac.uk/stafflist/">STAFF</a> | <a href="http://www.gla.ac.uk/departments/">ACADEMIC UNITS</a> | <a href="http://www.gla.ac.uk/degrees/">DEGREES</a> | <a href="http://www.gla.ac.uk/services/">SERVICES</a>  | 
+<input name="q" id="search" class="searchbox" value="search" onfocus="this.value=''" type="text" size="10" /><input name="imagefield" type="image" class="go" alt="go" src="http://eprints.gla.ac.uk/images/searcharrow.gif" />
+</form>
+</div>
+<div id="bannercontainercontainer">
+  <div id="bannercontainer">
+   <div id="bannerleft"><img src="http://eprints.gla.ac.uk/images/enlighten.gif" alt="Enlighten" /></div>
+   <div id="bannerright"></div>
+  </div> 
+</div>
+<div id="subhead">Research publications by members of the University of Glasgow</div>
+</div>
+</div>
+<!-- Header End -->
+
+<div id="container">   
+
+<div id="bread"><a href="http://www.gla.ac.uk/">home</a> &gt; <a href="http://www.gla.ac.uk/services/">services</a> &gt; Enlighten</div>
+
+<div id="navigation">
+<p><!-- navigation object : level two link to section --><a href="http://eprints.gla.ac.uk">Enlighten</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk">Enlighten Home</a></li>
+<li><a href="http://enlightenrepository.wordpress.com">Enlighten Blog</a></li>
+<li><a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/latest">Latest Additions</a></li>
+<!-- <li><a href="{$config{http_url}}/stats.html">Download Statistics</a></li> -->
+  <li><a href="http://researchdata.gla.ac.uk">Enlighten: Research Data</a></li>  
+</ul>
+<p><a href="http://eprints.gla.ac.uk/cgi/search">Search</a></p>
+
+<ul>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/simple/">Simple</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/advanced/">Advanced</a></li>
+<li><a href="http://theses.gla.ac.uk/cgi/search/advanced">Theses</a></li>
+<!-- <li><a href="http://www.lib.gla.ac.uk/enlighten/top100searches/">Top 100 Searches</a></li> -->
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/view/">Browse Papers by</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk/view/year/">Year</a></li>
+<!-- <li><a href="{$config{http_url}}/view/subjects/">Subject</a></li> -->
+<li><a href="http://eprints.gla.ac.uk/view/journal_volume/index.A.html">Journal</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/author/">Glasgow Author</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/funder/">Research Funder</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/divisions/">Colleges/Schools</a></li>
+</ul>
+  
+  <p><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">For Glasgow Authors</a></p>
+<ul>
+<li><a href="http://www.gla.ac.uk/services/openaccess/">Open Access</a></li>
+  <li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/publicationspolicy/">Publications Policy</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/depositguide/">How to Deposit</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=0">Benefits of Deposit</a></li>
+<!--	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/funders">Research Funders: Open Access Policies</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/copyright.html">Copyright Advice</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/openaccess.html">Open Access Publishing</a></li> -->
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">Training, Help and Advice</a></li>
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/cgi/users/home">MyEnlighten</a></p>
+<ul>
+<li><ul class="ep_tm_key_tools"><li><a href="http://eprints.gla.ac.uk/cgi/users/home">Login</a></li></ul></li>
+</ul>
+<p class="toptail"> </p>
+
+
+<div>
+<table width="100%">
+<tr><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS">RSS 1.0</a></span></div>
+<br />
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2">RSS 2.0</a></span></div>
+</td><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom">Atom</a></span></div>
+
+<br />
+<div><span class="ep_search_feed"><a href="http://twitter.com/uofg_enlighten"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/twitter-logo.png" border="0" /></a><a href="http://twitter.com/uofg_enlighten">Twitter</a></span></div>
+</td></tr></table>
+
+<div>
+</div>
+</div>
+</div>
+
+<div id="mainpage">
+<div id="mainpage_forbottom">
+<div class="links"></div>
+<div class="maincontent" style="margin-right:0">
+	
+
+	<div style="width:100%;float:right;">
+    <h1 class="ep_tm_pagetitle">Browse by Glasgow Author</h1>
+    <table><tr><td><a href="./"><img src="/style/images/multi_up.png" border="0" /></a></td><td><a href="./">Up a level</a></td></tr></table><form method="get" accept-charset="utf-8" action="http://eprints.gla.ac.uk/cgi/exportview">
+<table width="100%"><tr>
+  <td align="left">Export as <select name="format"><option value="Text">ASCII Citation</option><option value="BibTeX">BibTeX</option><option value="Cerif_1_4">CERIF 1.4</option><option value="DC">Dublin Core</option><option value="EndNote">EndNote</option><option value="HTML">HTML Citation</option><option value="METS">METS</option><option value="Ids">Object IDs</option><option value="ContextObject">OpenURL ContextObject</option><option value="RDFNT">RDF+N-Triples</option><option value="RDFN3">RDF+N3</option><option value="RDFXML">RDF+XML</option><option value="RSSAllItems">RSS 1.0 (all items with abstracts)</option><option value="RefWorks">RefWorks</option><option value="Refer">Refer</option><option value="RIS">Reference Manager</option></select><input value="Export" name="_action_export_redir" type="submit" class="ep_form_action_button" /><input name="view" id="view" value="author" type="hidden" /><input name="values" id="values" value="30131" type="hidden" /></td>
+  <td align="right"> <span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/exportview/author/30131/Atom/30131.xml"><img src="/style/images/feed-icon-14x14.png" alt="[feed]" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/exportview/author/30131/Atom/30131.xml">Atom</a></span> <span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/exportview/author/30131/RSS/30131.rss"><img src="/style/images/feed-icon-14x14.png" alt="[feed]" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/exportview/author/30131/RSS/30131.rss">RSS 1.0</a></span> <span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/exportview/author/30131/RSS2/30131.xml"><img src="/style/images/feed-icon-14x14.png" alt="[feed]" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/exportview/author/30131/RSS2/30131.xml">RSS 2.0</a></span></td>
+</tr>
+<tr>
+  <td align="left" colspan="2">
+    
+  </td>
+</tr>
+</table>
+
+</form><div class="ep_view_page ep_view_page_view_author"><div class="ep_view_group_by">Group by: <span class="ep_view_group_by_current">Date</span> | <a href="30131.type.html">Item Type</a> | <a href="30131.keywords.html">Keywords</a> | <a href="30131.funding_funder_name.html">Funder's Name</a> | <a href="30131.default.html">No Grouping</a></div><div class="ep_view_jump ep_view_author_date_jump"><div class="ep_view_jump_to">Jump to: <a href="#group_2015">2015</a> | <a href="#group_2014">2014</a></div></div><div class="ep_view_blurb">Number of items: <strong>4</strong>.</div><a name="group_2015"></a><h2>2015</h2><p>
+
+
+    <span><a href="http://eprints.gla.ac.uk/view/author/30131.html">Evangelopoulou, M.</a>, and <a href="http://eprints.gla.ac.uk/view/author/3925.html">Johnson, C.</a></span>
+  
+
+(2015)
+  
+  
+<a href="http://eprints.gla.ac.uk/108658/">Empirical framework for situation awareness measurement techniques in network defense.</a>
+    
+    
+
+    In: CyberSA 2015, London, 8-9 June 2015 ,
+    
+    
+    <span class="id_number"> (doi:<a href="http://dx.doi.org/10.1109/CyberSA.2015.7166132 &lt;http://dx.doi.org/10.1109/CyberSA.2015.7166132&gt;"><a href="http://dx.doi.org/10.1109/CyberSA.2015.7166132">10.1109/CyberSA.2015.7166132</a></a>)</span>
+  
+
+
+  
+
+
+</p><a name="group_2014"></a><h2>2014</h2><p>
+
+
+    <span><a href="http://eprints.gla.ac.uk/view/author/30131.html">Evangelopoulou, M.</a>, and <a href="http://eprints.gla.ac.uk/view/author/3925.html">Johnson, C. W.</a></span>
+  
+
+(2014)
+  
+  
+<a href="http://eprints.gla.ac.uk/106712/">Implementation of Safety Techniques in a Cyber Domain.</a>
+    
+    
+
+    SIN 2014: 7th International Conference on Security of Information and Networks, Glasgow, UK, 09-11 Sep 2014.
+     pp. 261-263. 
+     ISBN 9781450330336
+    <span class="id_number"> (doi:<a href="http://dx.doi.org/10.1145/2659651.2659740 &lt;http://dx.doi.org/10.1145/2659651.2659740&gt;"><a href="http://dx.doi.org/10.1145/2659651.2659740">10.1145/2659651.2659740</a></a>)</span>
+  
+
+
+  
+
+
+</p><p>
+
+
+    <span><a href="http://eprints.gla.ac.uk/view/author/30131.html">Evangelopoulou, M.</a>, and <a href="http://eprints.gla.ac.uk/view/author/3925.html">Johnson, C.W.</a></span>
+  
+
+(2014)
+  
+  
+<a href="http://eprints.gla.ac.uk/106714/">Attack visualisation for cyber-security situation awareness.</a>
+    
+    
+
+    In: 9th IET International Conference on System Safety and Cyber Security, Manchester, England, 15-16 Oct 2014,
+     pp. 1-6. 
+     ISBN 9781849199407
+    
+  
+
+
+  
+
+
+</p><p>
+
+
+    <span><a href="http://eprints.gla.ac.uk/view/author/28314.html">He, Y.</a>, <a href="http://eprints.gla.ac.uk/view/author/3925.html">Johnson, C.</a>, <a href="http://eprints.gla.ac.uk/view/author/30131.html">Evangelopoulou, M.</a>, and Lin, Z.</span>
+  
+
+(2014)
+  
+  
+<a href="http://eprints.gla.ac.uk/98519/">Diagraming approach to structure the security lessons: evaluation using cognitive dimensions.</a>
+    
+    
+
+    <em><a href="http://eprints.gla.ac.uk/view/journal_volume/Lecture_Notes_in_Computer_Science.html">Lecture Notes in Computer Science</a></em>, 8564, 
+	  pp. 216-217.
+        
+    <span class="id_number">(doi:<a href="http://dx.doi.org/10.1007/978-3-319-08593-7_19 &lt;http://dx.doi.org/10.1007/978-3-319-08593-7_19&gt;"><a href="http://dx.doi.org/10.1007/978-3-319-08593-7_19">10.1007/978-3-319-08593-7_19</a></a>)</span>  
+     <!-- GLASGOW-40: [2015-04-09/drn] Changed from pubmed_id to euro_pubmed_id -->
+     <!-- [2015-04-22/wjn] PMCID added to citation -->
+  
+
+
+  
+
+
+</p><div class="ep_view_timestamp">This list was generated on <strong>Sat Sep  5 17:18:23 2015 BST</strong>.</div></div>
+</div>
+<div style="clear:both;"></div>
+</div>
+<div class="onecolclear"></div>
+</div>
+</div>
+</div>
+
+<div id="footer_container"> 
+
+<div class="ep_tm_footer ep_noprint">
+  <div id="footer1">
+<p>
+
+<!-- AddThis Button BEGIN -->
+
+<!--
+<script type="text/javascript">addthis_pub  = 'ticketinspector'; addthis_logo = 'http://www.gla.ac.uk/t4/generic/i/180newlogotypeblack160x20.gif';
+
+addthis_logo_background = '121212';
+
+addthis_logo_color      = 'ffffff'; addthis_brand = ' ';
+
+addthis_options         = 'email, digg, delicious, myspace, facebook, google, live, favorites, more';</script>
+
+<a href="http://www.addthis.com/bookmark.php" onmouseover="return addthis_open(this, '', '[URL]', '[TITLE]')" onmouseout="addthis_close()" onclick="return addthis_sendto()"><img style="margin-left: -5px;" src="http://www.gla.ac.uk/t4/generic/i/bookmarks.gif'" width="172" height="27" border="0" alt="" /></a><script type="text/javascript" src="http://s7.addthis.com/js/152/addthis_widget.js"></script>
+-->
+<!-- AddThis Button END -->
+
+
+
+</p>
+
+<p> <a href="#top">top</a> | <a href="http://www.gla.ac.uk/search">search</a> | <a href="http://www.gla.ac.uk/">home</a></p>
+
+</div>
+
+  <div id="footer2">
+<p>University of Glasgow, University Avenue, Glasgow G12 8QQ, United Kingdom<br />
+
+tel:  +44 (0)141 330 2000<br />
+
+The University of Glasgow is a registered Scottish charity: registration number SC004401<br />
+
+<a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></p>
+
+<p><a href="http://www.gla.ac.uk/about/accessibility/">Accessibility</a> | <a href="http://www.gla.ac.uk/legal/disclaimer/">Disclaimer</a> | <a href="http://www.gla.ac.uk/foi/">Freedom
+
+of Information </a> | <a href="http://www.gla.ac.uk/legal/freedomofinformation/foipublicationscheme/">FOI Publication Scheme</a> | <a href="http://www.gla.ac.uk/legal/privacy/">Privacy</a> | <a href="http://www.gla.ac.uk/legal/copyright/">© UofG</a></p>
+
+  </div>
+
+  </div>
+</div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-306447-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+    
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-9258834-1', 'auto');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');
+
+</script>
+    
+  </body>
+</html>
