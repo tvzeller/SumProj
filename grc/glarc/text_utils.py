@@ -8,35 +8,44 @@ from nltk import stem
 
 
 def get_data_with_keywords(data_dicts):
+	"""
+	Takes a list of paper metadata dicts and adds keywords to each one
+	"""
+	# New Tfidf object
 	tfidf_ext = tfidf.Tfidf()
 	dds_withkw = []
 
-	full_dict = {}
+	# For each data_dict, add text of papers to tfidf corpus
 	for dd in data_dicts:
 		add_the_text(dd, ex)
 
+	# For each data_dict, add keywords to the data
 	for dd in data_dicts:
 		dd = add_kw_to_data(dd, tfidf_ext)
 
 		dds_withkw.append(dd)
 
-		#with open("../data_with_keywords/" + data_file, 'w') as f:
-		#	json.dump(dd, f)
-
 	return dds_withkw
 
 
 def add_the_text(dd, ext):
+	"""
+	Adds the text of each paper in the given data dict to the corpus of the given Tfidf object
+	"""
 	for paper_id, info in dd.items():
 		text = get_paper_text(info)
 		ext.add_text(text)
 
 
 def get_paper_text(paper_info):
+	"""
+	Takes a value from data dict (a paper's metadata) and gets the text for a paper by
+	concatenating title and abstract 
+	"""
 	title = info['title']
 	# If paper does not already have associated keywords
 	if not info["keywords"]:
-		text = title + " " + title
+		text = title
 		abstract = info["abstract"]
 		if abstract:
 			if not isinstance(abstract, basestring):
@@ -46,17 +55,20 @@ def get_paper_text(paper_info):
 	return text
 
 
-
-# Paper may or may not have keywords (some Enlighten papers have keywords)
-# If they don't, extract keywords and add to data dict
 def add_kw_to_data(data_dict, extrctr=None, max_keywords=5):
+	"""
+	Given a data_dict, adds keywords to the metadata of each paper
+	May take an existing Tfidf object and maximum amount of keywords to add.
+	If no Tfidf object passed, uses Topia TermExtractor to extract keywords
+	"""
+
 	if(extrctr==None):
 		extrctr = extract.TermExtractor()
 		extrctr.filter = extract.permissiveFilter
 		topia_extraction = True
 
-	
 	for paper_id, info in data_dict.items():
+		# Paper may already have keywords from Enlighten
 		if not info["keywords"]:
 			text = get_paper_text(info)
 			# Title is already included in text, but add it again so the words in the title get extra weight
@@ -80,25 +92,19 @@ def add_kw_to_data(data_dict, extrctr=None, max_keywords=5):
 	return data_dict
 
 
-
-# TODO can record size of postings to optimise intersections - faster if start intersecting with smallest set; 
-# see Intro to IR pg.11
-# TODO also record amount of times author has this term 
-# TODO note takes data_dict with keywords
 def make_index(data_dict):
+	"""
+	Takes a data_dict and makes an inverted index, with terms as keys 
+	and the ids of papers containing the terms as values.
+	"""
+	
 	inv_index = defaultdict(set)
 	for paper_id in data_dict:
 		# Join keyword list and pass to process text
 		terms = set(self.process_text(" ".join(data_dict[paper_id]["keywords"])))
-		#terms = set(self.process_text(text))
-		# Authors is list of lists, we want second element in list (the unique identifier)
-		authors = [author[1] for author in data_dict[paper_id]["authors"]]
-		#authors = [(author[0], author[1]) for author in data_dict[title]["authors"]]
-		# For each keyword term in this paper, add authors to postings set
-		if "java" in terms:
-			print data_dict[paper_id]["title"]
+		# For each keyword term in this paper, add paper_id to postings set
 		for term in terms:
-			# Has to be encoded to work with shelve module
+			# Has to be utf encoded to work with shelve module
 			term = term.encode("utf-8")
 			inv_index[term].add(paper_id)
 
@@ -110,6 +116,7 @@ def process_text(text):
 	prtr = stem.porter.PorterStemmer()
 	# Tokenise
 	tokens = text.lower().split()
+	# Stem tokens and put back in list
 	tokens = [prtr.stem(token) for token in tokens]
 
 	return tokens
@@ -126,15 +133,18 @@ def make_paper_kw_index(data_dict):
 
 
 def make_author_kw_dicts(data_dicts):
-	tfidf_ext = tfidf.Tfidf()
+	"""
+	Takes list of data_dicts and makes, for each one, an dict mapping author ids to a dict containing their
+	name and their keywords. Returns list of all the author-keyword dicts
+	"""
 
+	tfidf_ext = tfidf.Tfidf()
 	akws = []
+
 	for dd in data_dicts:
-		
+		# For each paper, add it's keywords to a Tfidf object corpus	
 		for info in dd.values():
-			authors = info["authors"]
 			keywords = info["keywords"]
-			#TODOTODOTODO now tfidf just returning keywords
 			kw_string = " ".join(keywords)
 			tfidf_ext.add_text(kw_string)
 
@@ -146,6 +156,7 @@ def make_author_kw_dicts(data_dicts):
 			keywords = info["keywords"]
 
 			for author in authors:
+				# Add author as key and add name and keywords of the paper as values
 				name = author[0]
 				author_id = author[1]
 
@@ -154,16 +165,14 @@ def make_author_kw_dicts(data_dicts):
 				else:
 					authorkw[author_id]["keywords"].extend(keywords)
 
-		
+		# For each author in the new authorkw dict, calculate the tfidf scores of each of their
+		# keywords and take the highest scoring one as the final author keywords
 		for author, info in authorkw.items():
 			keywords = info["keywords"]
 			kw_string = " ".join(keywords)
 
 			new_kw = tfidf_ext.get_keywords(kw_string, 20)
 			authorkw[author]["keywords"] = new_kw
-
-		#with open("../author_kw/"+data_file, 'w') as f:
-		#	json.dump(authorkw, f)
 
 		akws.append(authorkw)
 
@@ -172,6 +181,11 @@ def make_author_kw_dicts(data_dicts):
 
 
 def get_most_frequent(wordlist, maxwords):
+	"""
+	Takes a list of words and a number maxwords and returns a list of the most frequent words,
+	up to maxwords
+	"""
+
 	wordcounts = {}
 	for word in wordlist:
 		if word not in wordcounts:
@@ -183,6 +197,10 @@ def get_most_frequent(wordlist, maxwords):
 
 
 def check_kw_sim(kw1, kw2):
+	"""
+	Gets the similarity ratio of two lists of keywords
+	"""
+	# Get longest of the two lists
 	if len(kw1) > len(kw2):
 		longest = kw1
 		shortest = kw2
@@ -190,7 +208,9 @@ def check_kw_sim(kw1, kw2):
 		longest = kw2
 		shortest = kw1
 
+	# Count to keep track of matching words
 	count = 0
+	# List of the indices of matching word in the keyword list 
 	match_indices = []
 	for index, word1 in enumerate(longest):
 		for word2 in shortest:
@@ -199,14 +219,16 @@ def check_kw_sim(kw1, kw2):
 				match_indices.append(index)
 				break
 
+	# Return the percentage of words with a match and the indices where they are found
 	ratio = (count*1.0) / len(longest)
 	return (ratio, match_indices)
 
 
 def stem_word_list(word_list):
-	# TODO initialise these somewhere else
+	"""
+	Takes a list of words and returns a list containing the stemmed versions of the words
+	"""
 	prtr = stem.porter.PorterStemmer()
-	# So as not to change original list... to be discussed
 	words_copy = word_list[:]
 	for index, word in enumerate(words_copy):
 		tokens = word.split()
@@ -218,26 +240,6 @@ def stem_word_list(word_list):
 			word_list[index] = stemmed_token.strip()
 
 	return word_list
-
-
-def make_all_sims():
-	simgraphs = []
-	data_path = ("../author_kw/")
-	data_files = os.listdir(data_path)
-	for data_file in data_files:
-		name = data_file.split(".")[0] + ".json"
-		with open(data_path+data_file) as f:
-			akw = json.load(f)
-
-		g = make_sim_graph(akw, name)
-		simgraphs.append(g)
-
-		gdata = json_graph.node_link_data(g)
-		name = data_file.split(".")[0] + ".json"
-		with open("../simgraphs/" + name, 'w') as f:
-			json.dump(gdata, f)
-
-	return simgraphs
 
 
 
