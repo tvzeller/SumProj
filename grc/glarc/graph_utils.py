@@ -175,8 +175,7 @@ def add_school_info(school_graphs, school_urls):
 
 	return school_graphs
 
-def make_unigraph(school_graphs):
-	all_graphs = school_graphs.values()
+def make_unigraph(all_graphs):
 	unigraph = nx.compose_all(all_graphs)
 	unigraph = add_metrics(unigraph)
 	return unigraph
