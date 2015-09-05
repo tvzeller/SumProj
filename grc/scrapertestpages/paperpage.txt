@@ -1,0 +1,374 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title> Programming Language Feature Agglomeration  - Enlighten</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+
+<!-- From Glasgow -->
+
+<link rel="stylesheet" type="text/css" media="screen" href="/style/standard.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/form.css" />
+<link rel="stylesheet" type="text/css" media="print" href="https://www.gla.ac.uk/t4/generic/ss/print.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/us.css" />
+
+<!-- End from Glasgow -->
+
+    <meta name="eprints.creators_name" content="Singer, Jeremy" />
+<meta name="eprints.creators_name" content="Cameron, Callum" />
+<meta name="eprints.creators_name" content="Alexander, Marc" />
+<meta name="eprints.creators_id" content="jeremy.singer@glasgow.ac.uk" />
+<meta name="eprints.creators_id" content="Callum.Cameron@glasgow.ac.uk" />
+<meta name="eprints.creators_id" content="Marc.Alexander@glasgow.ac.uk" />
+<meta name="eprints.type" content="conference_proceedings" />
+<meta name="eprints.datestamp" content="2015-03-24 11:13:17" />
+<meta name="eprints.lastmod" content="2015-08-14 15:23:52" />
+<meta name="eprints.metadata_visibility" content="show" />
+<meta name="eprints.title" content="Programming Language Feature Agglomeration" />
+<meta name="eprints.ispublished" content="pub" />
+<meta name="eprints.full_text_status" content="public" />
+<meta name="eprints.abstract" content="Feature-creep is a well-known phenomenon in software systems. In this paper, we argue that feature-creep also occurs in the domain of programming languages. Recent languages are more expressive than earlier languages. However recent languages generally extend rather than replace the syntax (sometimes) and semantics (almost always) of earlier languages. We demonstrate this trend of agglomeration in a sequence of languages comprising Pascal, C, Java, and Scala. These are all block-structured Algol-derived languages, with earlier languages providing explicit inspiration for later ones. We present empirical evidence from several language-specific sources, including grammar definitions and canonical manuals. The evidence suggests that there is a trend of increasing complexity in modern languages that have evolved from earlier languages." />
+<meta name="eprints.date" content="2014" />
+<meta name="eprints.date_type" content="published" />
+<meta name="eprints.pagerange" content="11-15" />
+<meta name="eprints.event_title" content="Workshop on Programming Language Evolution 2014 (PLE14)" />
+<meta name="eprints.event_location" content="Uppsala, Sweden" />
+<meta name="eprints.event_dates" content="28 Jul 2014" />
+<meta name="eprints.event_type" content="workshop" />
+<meta name="eprints.id_number" content="10.1145/2717124.2717128" />
+<meta name="eprints.refereed" content="TRUE" />
+<meta name="eprints.isbn" content="9781450328876" />
+<meta name="eprints.official_url" content="http://dl.acm.org/citation.cfm?doid=2717124.2717128" />
+<meta name="eprints.related_url_url" content="http://www.cl.cam.ac.uk/research/cprg/ple14/" />
+<meta name="eprints.related_url_type" content="org" />
+<meta name="eprints.citation" content="  Singer, J. &lt;http://eprints.gla.ac.uk/view/author/15034.html&gt;, Cameron, C. &lt;http://eprints.gla.ac.uk/view/author/31163.html&gt;, and Alexander, M. &lt;http://eprints.gla.ac.uk/view/author/9679.html&gt;  (2014)  Programming Language Feature Agglomeration.   In: Workshop on Programming Language Evolution 2014 (PLE14), Uppsala, Sweden, 28 Jul 2014,  pp. 11-15.   ISBN 9781450328876  (doi:10.1145/2717124.2717128 &lt;http://dx.doi.org/10.1145/2717124.2717128&gt;)     " />
+<meta name="eprints.document_url" content="http://eprints.gla.ac.uk/104349/1/104349.pdf" />
+<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />
+<meta name="DC.title" content="Programming Language Feature Agglomeration" />
+<meta name="DC.creator" content="Singer, Jeremy" />
+<meta name="DC.creator" content="Cameron, Callum" />
+<meta name="DC.creator" content="Alexander, Marc" />
+<meta name="DC.description" content="Feature-creep is a well-known phenomenon in software systems. In this paper, we argue that feature-creep also occurs in the domain of programming languages. Recent languages are more expressive than earlier languages. However recent languages generally extend rather than replace the syntax (sometimes) and semantics (almost always) of earlier languages. We demonstrate this trend of agglomeration in a sequence of languages comprising Pascal, C, Java, and Scala. These are all block-structured Algol-derived languages, with earlier languages providing explicit inspiration for later ones. We present empirical evidence from several language-specific sources, including grammar definitions and canonical manuals. The evidence suggests that there is a trend of increasing complexity in modern languages that have evolved from earlier languages." />
+<meta name="DC.date" content="2014" />
+<meta name="DC.type" content="Conference Proceedings" />
+<meta name="DC.type" content="PeerReviewed" />
+<meta name="DC.format" content="text" />
+<meta name="DC.identifier" content="http://eprints.gla.ac.uk/104349/1/104349.pdf" />
+<meta name="DC.relation" content="http://dl.acm.org/citation.cfm?doid=2717124.2717128" />
+<meta name="DC.identifier" content="  Singer, J. &lt;http://eprints.gla.ac.uk/view/author/15034.html&gt;, Cameron, C. &lt;http://eprints.gla.ac.uk/view/author/31163.html&gt;, and Alexander, M. &lt;http://eprints.gla.ac.uk/view/author/9679.html&gt;  (2014)  Programming Language Feature Agglomeration.   In: Workshop on Programming Language Evolution 2014 (PLE14), Uppsala, Sweden, 28 Jul 2014,  pp. 11-15.   ISBN 9781450328876  (doi:10.1145/2717124.2717128 &lt;http://dx.doi.org/10.1145/2717124.2717128&gt;)     " />
+<meta name="DC.relation" content="http://eprints.gla.ac.uk/104349/" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/RDFXML/enlighten-eprint-104349.rdf" type="application/rdf+xml" title="RDF+XML" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/BibTeX/enlighten-eprint-104349.bib" type="text/plain" title="BibTeX" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/RIOXX2/enlighten-eprint-104349.xml" type="text/xml; charset=utf-8" title="RIOXX2 XML" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/RDFNT/enlighten-eprint-104349.nt" type="text/plain" title="RDF+N-Triples" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/RefWorks/enlighten-eprint-104349.ref" type="text/plain" title="RefWorks" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/DC/enlighten-eprint-104349.txt" type="text/plain; charset=utf-8" title="Dublin Core" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/Atom/enlighten-eprint-104349.xml" type="application/atom+xml;charset=utf-8" title="Atom" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/Simple/enlighten-eprint-104349.txt" type="text/plain; charset=utf-8" title="Simple Metadata" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/Refer/enlighten-eprint-104349.refer" type="text/plain" title="Refer" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/METS/enlighten-eprint-104349.xml" type="text/xml; charset=utf-8" title="METS" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/HTML/enlighten-eprint-104349.html" type="text/html; charset=utf-8" title="HTML Citation" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/Text/enlighten-eprint-104349.txt" type="text/plain; charset=utf-8" title="ASCII Citation" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/Cerif_1_4/enlighten-eprint-104349.xml" type="text/xml; charset=utf-8" title="CERIF 1.4" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/ContextObject/enlighten-eprint-104349.xml" type="text/xml; charset=utf-8" title="OpenURL ContextObject" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/EndNote/enlighten-eprint-104349.enw" type="text/plain; charset=utf-8" title="EndNote" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/MODS/enlighten-eprint-104349.xml" type="text/xml; charset=utf-8" title="MODS" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/COinS/enlighten-eprint-104349.txt" type="text/plain; charset=utf-8" title="OpenURL ContextObject in Span" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/DIDL/enlighten-eprint-104349.xml" type="text/xml; charset=utf-8" title="MPEG-21 DIDL" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/RIS/enlighten-eprint-104349.ris" type="text/plain" title="Reference Manager" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/104349/RDFN3/enlighten-eprint-104349.n3" type="text/n3" title="RDF+N3" />
+<link rel="Top" href="http://eprints.gla.ac.uk/" />
+    <link rel="Sword" href="https://eprints.gla.ac.uk/sword-app/servicedocument" />
+    <link rel="SwordDeposit" href="https://eprints.gla.ac.uk/id/contents" />
+    <link rel="Search" type="text/html" href="http://eprints.gla.ac.uk/cgi/search" />
+    <link rel="Search" type="application/opensearchdescription+xml" href="http://eprints.gla.ac.uk/cgi/opensearchdescription" />
+    <script type="text/javascript" src="http://www.google.com/jsapi"><!--padder--></script><script type="text/javascript">
+// <![CDATA[
+google.load("visualization", "1", {packages:["corechart", "geochart"]});
+// ]]></script><script type="text/javascript">
+// <![CDATA[
+var eprints_http_root = "http:\/\/eprints.gla.ac.uk";
+var eprints_http_cgiroot = "http:\/\/eprints.gla.ac.uk\/cgi";
+var eprints_oai_archive_id = "eprints.gla.ac.uk";
+var eprints_logged_in = false;
+// ]]></script>
+    <style type="text/css">.ep_logged_in { display: none }</style>
+    <link rel="stylesheet" type="text/css" href="/style/auto-3.3.10.css" />
+    <script type="text/javascript" src="/javascript/auto-3.3.10.js"><!--padder--></script>
+    <!--[if lte IE 6]>
+        <link rel="stylesheet" type="text/css" href="/style/ie6.css" />
+   <![endif]-->
+    <meta name="Generator" content="EPrints 3.3.10" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="en" />
+    
+
+  </head>
+  <body bgcolor="#ffffff" text="#000000">
+<div id="wrapper">
+
+<a name="top" id="top"></a> 
+
+<!-- Header Start -->
+
+
+<div class="ep_noprint"><noscript><style type="text/css">@import url(/style/nojs.css);</style></noscript></div>
+    
+    <div class="ep_tm_header ep_noprint">
+	<div id="headers_container">
+	<div id="toprow">
+		<a href="http://www.gla.ac.uk/"><img src="http://eprints.gla.ac.uk/images/180newlogotypeblack160x20.gif" alt="University of Glasgow" width="160" height="20" class="logotype" /></a>
+<form method="get" action="http://www.google.com/u/UofGlasgow">
+A-Z : <a href="http://www.gla.ac.uk/stafflist/">STAFF</a> | <a href="http://www.gla.ac.uk/departments/">ACADEMIC UNITS</a> | <a href="http://www.gla.ac.uk/degrees/">DEGREES</a> | <a href="http://www.gla.ac.uk/services/">SERVICES</a>  | 
+<input name="q" id="search" class="searchbox" value="search" onfocus="this.value=''" type="text" size="10" /><input name="imagefield" type="image" class="go" alt="go" src="http://eprints.gla.ac.uk/images/searcharrow.gif" />
+</form>
+</div>
+<div id="bannercontainercontainer">
+  <div id="bannercontainer">
+   <div id="bannerleft"><img src="http://eprints.gla.ac.uk/images/enlighten.gif" alt="Enlighten" /></div>
+   <div id="bannerright"></div>
+  </div> 
+</div>
+<div id="subhead">Research publications by members of the University of Glasgow</div>
+</div>
+</div>
+<!-- Header End -->
+
+<div id="container">   
+
+<div id="bread"><a href="http://www.gla.ac.uk/">home</a> &gt; <a href="http://www.gla.ac.uk/services/">services</a> &gt; Enlighten</div>
+
+<div id="navigation">
+<p><!-- navigation object : level two link to section --><a href="http://eprints.gla.ac.uk">Enlighten</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk">Enlighten Home</a></li>
+<li><a href="http://enlightenrepository.wordpress.com">Enlighten Blog</a></li>
+<li><a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/latest">Latest Additions</a></li>
+<!-- <li><a href="{$config{http_url}}/stats.html">Download Statistics</a></li> -->
+  <li><a href="http://researchdata.gla.ac.uk">Enlighten: Research Data</a></li>  
+</ul>
+<p><a href="http://eprints.gla.ac.uk/cgi/search">Search</a></p>
+
+<ul>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/simple/">Simple</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/advanced/">Advanced</a></li>
+<li><a href="http://theses.gla.ac.uk/cgi/search/advanced">Theses</a></li>
+<!-- <li><a href="http://www.lib.gla.ac.uk/enlighten/top100searches/">Top 100 Searches</a></li> -->
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/view/">Browse Papers by</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk/view/year/">Year</a></li>
+<!-- <li><a href="{$config{http_url}}/view/subjects/">Subject</a></li> -->
+<li><a href="http://eprints.gla.ac.uk/view/journal_volume/index.A.html">Journal</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/author/">Glasgow Author</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/funder/">Research Funder</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/divisions/">Colleges/Schools</a></li>
+</ul>
+  
+  <p><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">For Glasgow Authors</a></p>
+<ul>
+<li><a href="http://www.gla.ac.uk/services/openaccess/">Open Access</a></li>
+  <li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/publicationspolicy/">Publications Policy</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/depositguide/">How to Deposit</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=0">Benefits of Deposit</a></li>
+<!--	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/funders">Research Funders: Open Access Policies</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/copyright.html">Copyright Advice</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/openaccess.html">Open Access Publishing</a></li> -->
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">Training, Help and Advice</a></li>
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/cgi/users/home">MyEnlighten</a></p>
+<ul>
+<li><ul class="ep_tm_key_tools"><li><a href="http://eprints.gla.ac.uk/cgi/users/home">Login</a></li></ul></li>
+</ul>
+<p class="toptail"> </p>
+
+
+<div>
+<table width="100%">
+<tr><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS">RSS 1.0</a></span></div>
+<br />
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2">RSS 2.0</a></span></div>
+</td><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom">Atom</a></span></div>
+
+<br />
+<div><span class="ep_search_feed"><a href="http://twitter.com/uofg_enlighten"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/twitter-logo.png" border="0" /></a><a href="http://twitter.com/uofg_enlighten">Twitter</a></span></div>
+</td></tr></table>
+
+<div>
+</div>
+</div>
+</div>
+
+<div id="mainpage">
+<div id="mainpage_forbottom">
+<div class="links"></div>
+<div class="maincontent" style="margin-right:0">
+	
+
+	<div style="width:100%;float:right;">
+    <h1 class="ep_tm_pagetitle">
+
+Programming Language Feature Agglomeration
+
+</h1>
+    <div class="ep_summary_content"><div class="ep_summary_content_left"></div><div class="ep_summary_content_right"></div><div class="ep_summary_content_top"></div><div class="ep_summary_content_main"><p class="ep_block" style="margin-bottom: 1em">
+
+
+    <span><a href="http://eprints.gla.ac.uk/view/author/15034.html">Singer, J.</a>, <a href="http://eprints.gla.ac.uk/view/author/31163.html">Cameron, C.</a>, and <a href="http://eprints.gla.ac.uk/view/author/9679.html">Alexander, M.</a></span>
+  
+
+(2014)
+  
+  
+Programming Language Feature Agglomeration.
+    
+    
+
+    In: Workshop on Programming Language Evolution 2014 (PLE14), Uppsala, Sweden, 28 Jul 2014,
+     pp. 11-15. 
+     ISBN 9781450328876
+    <span class="id_number"> (doi:<a href="http://dx.doi.org/10.1145/2717124.2717128 &lt;http://dx.doi.org/10.1145/2717124.2717128&gt;"><a href="http://dx.doi.org/10.1145/2717124.2717128">10.1145/2717124.2717128</a></a>)</span>
+  
+
+
+  
+
+
+</p><p class="ep_block" style="margin-bottom: 1em"></p><table class="ep_block" style="margin-bottom: 1em"><tr><td valign="top" style="text-align:center"><a onmouseover="EPJS_ShowPreview( event, 'doc_preview_68344' );" href="http://eprints.gla.ac.uk/104349/1/104349.pdf" onmouseout="EPJS_HidePreview( event, 'doc_preview_68344' );"><img class="ep_doc_icon" alt="[img]" src="http://eprints.gla.ac.uk/104349/1.hassmallThumbnailVersion/104349.pdf" border="0" /></a><div id="doc_preview_68344" class="ep_preview"><table><tr><td><img class="ep_preview_image" alt="" src="http://eprints.gla.ac.uk/104349/1.haspreviewThumbnailVersion/104349.pdf" border="0" /><div class="ep_preview_title">Preview</div></td></tr></table></div></td><td valign="top">
+
+<!-- document citation -->
+
+
+<span class="ep_document_citation">
+<a href="http://eprints.gla.ac.uk/104349/1/104349.pdf"><span class="document_format">Text</span></a>
+<br /><span class="document_filename">104349.pdf</span>
+ - Submitted Version
+
+
+</span>
+
+<br />188Kb</td></tr></table><p class="ep_block" style="margin-bottom: 1em">Publisher's URL: <a href="http://dl.acm.org/citation.cfm?doid=2717124.2717128">http://dl.acm.org/citation.cfm?doid=2717124.2717128</a></p><div class="ep_block"><h2>Abstract</h2><p style="text-align: left; margin: 1em auto 0em auto">Feature-creep is a well-known phenomenon in software systems. In this paper, we argue that feature-creep also occurs in the domain of programming languages. Recent languages are more expressive than earlier languages. However recent languages generally extend rather than replace the syntax (sometimes) and semantics (almost always) of earlier languages. We demonstrate this trend of agglomeration in a sequence of languages comprising Pascal, C, Java, and Scala. These are all block-structured Algol-derived languages, with earlier languages providing explicit inspiration for later ones. We present empirical evidence from several language-specific sources, including grammar definitions and canonical manuals. The evidence suggests that there is a trend of increasing complexity in modern languages that have evolved from earlier languages.</p></div><table class="ep_block" style="margin-bottom: 1em" border="0" cellpadding="3"><tr><th valign="top" class="ep_row">Item Type:</th><td valign="top" class="ep_row">Conference Proceedings</td></tr><tr><th valign="top" class="ep_row">Status:</th><td valign="top" class="ep_row">Published</td></tr><tr><th valign="top" class="ep_row">Refereed:</th><td valign="top" class="ep_row">Yes</td></tr><tr><th valign="top" class="ep_row">Glasgow Author(s) Enlighten ID:</th><td valign="top" class="ep_row"><a href="http://eprints.gla.ac.uk/view/author/15034.html">Singer, Dr Jeremy</a> and <a href="http://eprints.gla.ac.uk/view/author/9679.html">Alexander, Dr Marc</a> and <a href="http://eprints.gla.ac.uk/view/author/31163.html">Cameron, Mr Callum</a></td></tr><tr><th valign="top" class="ep_row">Authors:</th><td valign="top" class="ep_row">
+
+
+	<span><a href="http://eprints.gla.ac.uk/view/author/15034.html">Singer, J.</a>, <a href="http://eprints.gla.ac.uk/view/author/31163.html">Cameron, C.</a>, and <a href="http://eprints.gla.ac.uk/view/author/9679.html">Alexander, M.</a></span>	
+
+
+</td></tr><tr><th valign="top" class="ep_row">College/School:</th><td valign="top" class="ep_row"><a href="http://eprints.gla.ac.uk/view/divisions/10201000/">College of Arts &gt; School of Critical Studies  &gt; English Language</a><br /><a href="http://eprints.gla.ac.uk/view/divisions/30200000/">College of Science and Engineering &gt; School of Computing Science</a></td></tr><tr><th valign="top" class="ep_row">ISBN:</th><td valign="top" class="ep_row">9781450328876</td></tr><tr><th valign="top" class="ep_row">Copyright Holders:</th><td valign="top" class="ep_row">Copyright © 2014 The Authors</td></tr><tr><th valign="top" class="ep_row">Publisher Policy:</th><td valign="top" class="ep_row">Reproduced with the permission of the authors</td></tr><tr><th valign="top" class="ep_row">Related URLs:</th><td valign="top" class="ep_row"><ul><li><a href="http://www.cl.cam.ac.uk/research/cprg/ple14/">Organisation</a></li></ul></td></tr></table><p align="right">Enlighten Editors: <a href="http://eprints.gla.ac.uk/cgi/users/home?screen=EPrint::View&amp;eprintid=104349">Update this record</a></p></div><div class="ep_summary_content_bottom"><div class="ep_summary_box" id="ep_summary_box_1"><div class="ep_summary_box_title"><div class="ep_no_js">Altmetric</div><div class="ep_only_js" id="ep_summary_box_1_colbar"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_1_content',true,'ep_summary_box_1');EPJS_toggle('ep_summary_box_1_colbar',true);EPJS_toggle('ep_summary_box_1_bar',false);return false" href="#"><img alt="-" src="/style/images/minus.png" border="0" /> Altmetric</a></div><div class="ep_only_js" id="ep_summary_box_1_bar" style="display: none"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_1_content',false,'ep_summary_box_1');EPJS_toggle('ep_summary_box_1_colbar',true);EPJS_toggle('ep_summary_box_1_bar',false);return false" href="#"><img alt="+" src="/style/images/plus.png" border="0" /> Altmetric</a></div></div><div class="ep_summary_box_body" id="ep_summary_box_1_content"><div id="ep_summary_box_1_content_inner"><div id="altmetric_summary_page" data-doi="10.1145/2717124.2717128"></div><script type="text/javascript">
+// <![CDATA[
+new EP_Altmetric_Badge( 'altmetric_summary_page' );
+// ]]></script></div></div></div><div class="ep_summary_box" id="ep_summary_box_2"><div class="ep_summary_box_title"><div class="ep_no_js">Tools</div><div class="ep_only_js" id="ep_summary_box_2_colbar"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_2_content',true,'ep_summary_box_2');EPJS_toggle('ep_summary_box_2_colbar',true);EPJS_toggle('ep_summary_box_2_bar',false);return false" href="#"><img alt="-" src="/style/images/minus.png" border="0" /> Tools</a></div><div class="ep_only_js" id="ep_summary_box_2_bar" style="display: none"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_2_content',false,'ep_summary_box_2');EPJS_toggle('ep_summary_box_2_colbar',true);EPJS_toggle('ep_summary_box_2_bar',false);return false" href="#"><img alt="+" src="/style/images/plus.png" border="0" /> Tools</a></div></div><div class="ep_summary_box_body" id="ep_summary_box_2_content"><div id="ep_summary_box_2_content_inner"><div class="ep_block" style="margin-bottom: 1em"><form method="get" accept-charset="utf-8" action="http://eprints.gla.ac.uk/cgi/export_redirect">
+  <input name="eprintid" id="eprintid" value="104349" type="hidden" />
+  <select name="format">
+    <option value="RDFXML">RDF+XML</option>
+    <option value="BibTeX">BibTeX</option>
+    <option value="RIOXX2">RIOXX2 XML</option>
+    <option value="RDFNT">RDF+N-Triples</option>
+    <option value="RefWorks">RefWorks</option>
+    <option value="DC">Dublin Core</option>
+    <option value="Atom">Atom</option>
+    <option value="Simple">Simple Metadata</option>
+    <option value="Refer">Refer</option>
+    <option value="METS">METS</option>
+    <option value="HTML">HTML Citation</option>
+    <option value="Text">ASCII Citation</option>
+    <option value="Cerif_1_4">CERIF 1.4</option>
+    <option value="ContextObject">OpenURL ContextObject</option>
+    <option value="EndNote">EndNote</option>
+    <option value="MODS">MODS</option>
+    <option value="COinS">OpenURL ContextObject in Span</option>
+    <option value="DIDL">MPEG-21 DIDL</option>
+    <option value="RIS">Reference Manager</option>
+    <option value="RDFN3">RDF+N3</option>
+  </select>
+  <input type="submit" value="Export" class="ep_form_action_button" />
+</form></div><p class="ep_block" style="margin-bottom: 1em;"><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="enlightenpapers">Tweet</a><script src="http://platform.twitter.com/widgets.js">// <!-- No script --></script></p></div></div></div><div class="ep_summary_box" id="ep_summary_box_3"><div class="ep_summary_box_title"><div class="ep_no_js">Deposit and Record Details</div><div class="ep_only_js" id="ep_summary_box_3_colbar" style="display: none"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_3_content',true,'ep_summary_box_3');EPJS_toggle('ep_summary_box_3_colbar',true);EPJS_toggle('ep_summary_box_3_bar',false);return false" href="#"><img alt="-" src="/style/images/minus.png" border="0" /> Deposit and Record Details</a></div><div class="ep_only_js" id="ep_summary_box_3_bar"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_3_content',false,'ep_summary_box_3');EPJS_toggle('ep_summary_box_3_colbar',false);EPJS_toggle('ep_summary_box_3_bar',true);return false" href="#"><img alt="+" src="/style/images/plus.png" border="0" /> Deposit and Record Details</a></div></div><div class="ep_summary_box_body" id="ep_summary_box_3_content" style="display: none"><div id="ep_summary_box_3_content_inner"><table class="ep_block" style="margin-bottom: 1em" border="0" cellpadding="3"><tr><th valign="top" class="ep_row">ID Code:</th><td valign="top" class="ep_row">104349</td></tr><tr><th valign="top" class="ep_row">Unique ID:</th><td valign="top" class="ep_row">glaseprints:2014-104349</td></tr><tr><th valign="top" class="ep_row">Depositing User:</th><td valign="top" class="ep_row">
+
+<a href="http://eprints.gla.ac.uk/profile/8325"><span class="ep_name_citation"><span class="person_name">Miss Louise Annan</span></span></a>
+
+</td></tr><tr><th valign="top" class="ep_row">Deposited On:</th><td valign="top" class="ep_row">24 Mar 2015 11:13</td></tr><tr><th valign="top" class="ep_row">Last Modified:</th><td valign="top" class="ep_row">14 Aug 2015 15:23</td></tr></table></div></div></div></div><div class="ep_summary_content_after"></div></div>
+</div>
+<div style="clear:both;"></div>
+</div>
+<div class="onecolclear"></div>
+</div>
+</div>
+</div>
+
+<div id="footer_container"> 
+
+<div class="ep_tm_footer ep_noprint">
+  <div id="footer1">
+<p>
+
+<!-- AddThis Button BEGIN -->
+
+<!--
+<script type="text/javascript">addthis_pub  = 'ticketinspector'; addthis_logo = 'http://www.gla.ac.uk/t4/generic/i/180newlogotypeblack160x20.gif';
+
+addthis_logo_background = '121212';
+
+addthis_logo_color      = 'ffffff'; addthis_brand = ' ';
+
+addthis_options         = 'email, digg, delicious, myspace, facebook, google, live, favorites, more';</script>
+
+<a href="http://www.addthis.com/bookmark.php" onmouseover="return addthis_open(this, '', '[URL]', '[TITLE]')" onmouseout="addthis_close()" onclick="return addthis_sendto()"><img style="margin-left: -5px;" src="http://www.gla.ac.uk/t4/generic/i/bookmarks.gif'" width="172" height="27" border="0" alt="" /></a><script type="text/javascript" src="http://s7.addthis.com/js/152/addthis_widget.js"></script>
+-->
+<!-- AddThis Button END -->
+
+
+
+</p>
+
+<p> <a href="#top">top</a> | <a href="http://www.gla.ac.uk/search">search</a> | <a href="http://www.gla.ac.uk/">home</a></p>
+
+</div>
+
+  <div id="footer2">
+<p>University of Glasgow, University Avenue, Glasgow G12 8QQ, United Kingdom<br />
+
+tel:  +44 (0)141 330 2000<br />
+
+The University of Glasgow is a registered Scottish charity: registration number SC004401<br />
+
+<a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></p>
+
+<p><a href="http://www.gla.ac.uk/about/accessibility/">Accessibility</a> | <a href="http://www.gla.ac.uk/legal/disclaimer/">Disclaimer</a> | <a href="http://www.gla.ac.uk/foi/">Freedom
+
+of Information </a> | <a href="http://www.gla.ac.uk/legal/freedomofinformation/foipublicationscheme/">FOI Publication Scheme</a> | <a href="http://www.gla.ac.uk/legal/privacy/">Privacy</a> | <a href="http://www.gla.ac.uk/legal/copyright/">© UofG</a></p>
+
+  </div>
+
+  </div>
+</div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-306447-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+    
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-9258834-1', 'auto');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');
+
+</script>
+    
+  </body>
+</html>

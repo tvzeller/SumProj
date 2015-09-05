@@ -1,0 +1,374 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title> Crossmodal icons for information display  - Enlighten</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+
+<!-- From Glasgow -->
+
+<link rel="stylesheet" type="text/css" media="screen" href="/style/standard.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/form.css" />
+<link rel="stylesheet" type="text/css" media="print" href="https://www.gla.ac.uk/t4/generic/ss/print.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/style/us.css" />
+
+<!-- End from Glasgow -->
+
+    <meta name="eprints.creators_name" content="Hoggan, E.E." />
+<meta name="eprints.creators_name" content="Brewster, S.A." />
+<meta name="eprints.creators_id" content="" />
+<meta name="eprints.creators_id" content="stephen@dcs.gla.ac.uk" />
+<meta name="eprints.type" content="conference_proceedings" />
+<meta name="eprints.datestamp" content="2006-12-06" />
+<meta name="eprints.lastmod" content="2015-02-12 18:05:02" />
+<meta name="eprints.metadata_visibility" content="show" />
+<meta name="eprints.title" content="Crossmodal icons for information display" />
+<meta name="eprints.ispublished" content="pub" />
+<meta name="eprints.subjects" content="QA75" />
+<meta name="eprints.subjects" content="QA76" />
+<meta name="eprints.full_text_status" content="public" />
+<meta name="eprints.keywords" content="audio icons, crossmodal interaction, non-visual interaction, tactile icons 
+" />
+<meta name="eprints.note" content="This is the author's version of the work. It is posted here by permission of ACM for your personal use. Not for redistribution." />
+<meta name="eprints.abstract" content="This paper describes a novel form of display using crossmodal output. A crossmodal icon is an abstract icon that can be instantiated in one of two equivalent forms (auditory or tactile). These can be used in interfaces as a means of non-visual output. This paper discusses how crossmodal icons can be constructed and the potential benefits they bring to mobile human computer interfaces." />
+<meta name="eprints.date" content="2006" />
+<meta name="eprints.date_type" content="published" />
+<meta name="eprints.publisher" content="ACM Press" />
+<meta name="eprints.pagerange" content="857-862" />
+<meta name="eprints.event_title" content="Conference on Human Factors in Computing Systems" />
+<meta name="eprints.event_location" content="Montréal, Québec, Canada" />
+<meta name="eprints.event_dates" content="22-27 April 2006" />
+<meta name="eprints.id_number" content="10.1145/1125451.1125619" />
+<meta name="eprints.refereed" content="TRUE" />
+<meta name="eprints.isbn" content="1595932984" />
+<meta name="eprints.official_url" content="http://dx.doi.org/10.1145/1125451.1125619" />
+<meta name="eprints.citation" content="  Hoggan, E.E., and Brewster, S.A. &lt;http://eprints.gla.ac.uk/view/author/11463.html&gt;  (2006)  Crossmodal icons for information display.   In: Conference on Human Factors in Computing Systems, Montréal, Québec, Canada, 22-27 April 2006,  pp. 857-862.   ISBN 1595932984  (doi:10.1145/1125451.1125619 &lt;http://dx.doi.org/10.1145/1125451.1125619&gt;)     " />
+<meta name="eprints.document_url" content="http://eprints.gla.ac.uk/3269/1/CHI2006_hoggan.pdf" />
+<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />
+<meta name="DC.title" content="Crossmodal icons for information display" />
+<meta name="DC.creator" content="Hoggan, E.E." />
+<meta name="DC.creator" content="Brewster, S.A." />
+<meta name="DC.subject" content="QA75 Electronic computers. Computer science" />
+<meta name="DC.subject" content="QA76 Computer software" />
+<meta name="DC.description" content="This paper describes a novel form of display using crossmodal output. A crossmodal icon is an abstract icon that can be instantiated in one of two equivalent forms (auditory or tactile). These can be used in interfaces as a means of non-visual output. This paper discusses how crossmodal icons can be constructed and the potential benefits they bring to mobile human computer interfaces." />
+<meta name="DC.publisher" content="ACM Press" />
+<meta name="DC.date" content="2006" />
+<meta name="DC.type" content="Conference Proceedings" />
+<meta name="DC.type" content="PeerReviewed" />
+<meta name="DC.format" content="text" />
+<meta name="DC.identifier" content="http://eprints.gla.ac.uk/3269/1/CHI2006_hoggan.pdf" />
+<meta name="DC.relation" content="http://dx.doi.org/10.1145/1125451.1125619" />
+<meta name="DC.identifier" content="  Hoggan, E.E., and Brewster, S.A. &lt;http://eprints.gla.ac.uk/view/author/11463.html&gt;  (2006)  Crossmodal icons for information display.   In: Conference on Human Factors in Computing Systems, Montréal, Québec, Canada, 22-27 April 2006,  pp. 857-862.   ISBN 1595932984  (doi:10.1145/1125451.1125619 &lt;http://dx.doi.org/10.1145/1125451.1125619&gt;)     " />
+<meta name="DC.relation" content="http://eprints.gla.ac.uk/3269/" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/RDFXML/enlighten-eprint-3269.rdf" type="application/rdf+xml" title="RDF+XML" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/BibTeX/enlighten-eprint-3269.bib" type="text/plain" title="BibTeX" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/RIOXX2/enlighten-eprint-3269.xml" type="text/xml; charset=utf-8" title="RIOXX2 XML" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/RDFNT/enlighten-eprint-3269.nt" type="text/plain" title="RDF+N-Triples" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/RefWorks/enlighten-eprint-3269.ref" type="text/plain" title="RefWorks" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/DC/enlighten-eprint-3269.txt" type="text/plain; charset=utf-8" title="Dublin Core" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/Atom/enlighten-eprint-3269.xml" type="application/atom+xml;charset=utf-8" title="Atom" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/Simple/enlighten-eprint-3269.txt" type="text/plain; charset=utf-8" title="Simple Metadata" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/Refer/enlighten-eprint-3269.refer" type="text/plain" title="Refer" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/METS/enlighten-eprint-3269.xml" type="text/xml; charset=utf-8" title="METS" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/HTML/enlighten-eprint-3269.html" type="text/html; charset=utf-8" title="HTML Citation" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/Text/enlighten-eprint-3269.txt" type="text/plain; charset=utf-8" title="ASCII Citation" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/Cerif_1_4/enlighten-eprint-3269.xml" type="text/xml; charset=utf-8" title="CERIF 1.4" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/ContextObject/enlighten-eprint-3269.xml" type="text/xml; charset=utf-8" title="OpenURL ContextObject" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/EndNote/enlighten-eprint-3269.enw" type="text/plain; charset=utf-8" title="EndNote" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/MODS/enlighten-eprint-3269.xml" type="text/xml; charset=utf-8" title="MODS" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/COinS/enlighten-eprint-3269.txt" type="text/plain; charset=utf-8" title="OpenURL ContextObject in Span" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/DIDL/enlighten-eprint-3269.xml" type="text/xml; charset=utf-8" title="MPEG-21 DIDL" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/RIS/enlighten-eprint-3269.ris" type="text/plain" title="Reference Manager" />
+<link rel="alternate" href="http://eprints.gla.ac.uk/cgi/export/eprint/3269/RDFN3/enlighten-eprint-3269.n3" type="text/n3" title="RDF+N3" />
+<link rel="Top" href="http://eprints.gla.ac.uk/" />
+    <link rel="Sword" href="https://eprints.gla.ac.uk/sword-app/servicedocument" />
+    <link rel="SwordDeposit" href="https://eprints.gla.ac.uk/id/contents" />
+    <link rel="Search" type="text/html" href="http://eprints.gla.ac.uk/cgi/search" />
+    <link rel="Search" type="application/opensearchdescription+xml" href="http://eprints.gla.ac.uk/cgi/opensearchdescription" />
+    <script type="text/javascript" src="http://www.google.com/jsapi"><!--padder--></script><script type="text/javascript">
+// <![CDATA[
+google.load("visualization", "1", {packages:["corechart", "geochart"]});
+// ]]></script><script type="text/javascript">
+// <![CDATA[
+var eprints_http_root = "http:\/\/eprints.gla.ac.uk";
+var eprints_http_cgiroot = "http:\/\/eprints.gla.ac.uk\/cgi";
+var eprints_oai_archive_id = "eprints.gla.ac.uk";
+var eprints_logged_in = false;
+// ]]></script>
+    <style type="text/css">.ep_logged_in { display: none }</style>
+    <link rel="stylesheet" type="text/css" href="/style/auto-3.3.10.css" />
+    <script type="text/javascript" src="/javascript/auto-3.3.10.js"><!--padder--></script>
+    <!--[if lte IE 6]>
+        <link rel="stylesheet" type="text/css" href="/style/ie6.css" />
+   <![endif]-->
+    <meta name="Generator" content="EPrints 3.3.10" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="en" />
+    
+
+  </head>
+  <body bgcolor="#ffffff" text="#000000">
+<div id="wrapper">
+
+<a name="top" id="top"></a> 
+
+<!-- Header Start -->
+
+
+<div class="ep_noprint"><noscript><style type="text/css">@import url(/style/nojs.css);</style></noscript></div>
+    
+    <div class="ep_tm_header ep_noprint">
+	<div id="headers_container">
+	<div id="toprow">
+		<a href="http://www.gla.ac.uk/"><img src="http://eprints.gla.ac.uk/images/180newlogotypeblack160x20.gif" alt="University of Glasgow" width="160" height="20" class="logotype" /></a>
+<form method="get" action="http://www.google.com/u/UofGlasgow">
+A-Z : <a href="http://www.gla.ac.uk/stafflist/">STAFF</a> | <a href="http://www.gla.ac.uk/departments/">ACADEMIC UNITS</a> | <a href="http://www.gla.ac.uk/degrees/">DEGREES</a> | <a href="http://www.gla.ac.uk/services/">SERVICES</a>  | 
+<input name="q" id="search" class="searchbox" value="search" onfocus="this.value=''" type="text" size="10" /><input name="imagefield" type="image" class="go" alt="go" src="http://eprints.gla.ac.uk/images/searcharrow.gif" />
+</form>
+</div>
+<div id="bannercontainercontainer">
+  <div id="bannercontainer">
+   <div id="bannerleft"><img src="http://eprints.gla.ac.uk/images/enlighten.gif" alt="Enlighten" /></div>
+   <div id="bannerright"></div>
+  </div> 
+</div>
+<div id="subhead">Research publications by members of the University of Glasgow</div>
+</div>
+</div>
+<!-- Header End -->
+
+<div id="container">   
+
+<div id="bread"><a href="http://www.gla.ac.uk/">home</a> &gt; <a href="http://www.gla.ac.uk/services/">services</a> &gt; Enlighten</div>
+
+<div id="navigation">
+<p><!-- navigation object : level two link to section --><a href="http://eprints.gla.ac.uk">Enlighten</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk">Enlighten Home</a></li>
+<li><a href="http://enlightenrepository.wordpress.com">Enlighten Blog</a></li>
+<li><a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/latest">Latest Additions</a></li>
+<!-- <li><a href="{$config{http_url}}/stats.html">Download Statistics</a></li> -->
+  <li><a href="http://researchdata.gla.ac.uk">Enlighten: Research Data</a></li>  
+</ul>
+<p><a href="http://eprints.gla.ac.uk/cgi/search">Search</a></p>
+
+<ul>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/simple/">Simple</a></li>
+<li><a href="http://eprints.gla.ac.uk/cgi/search/advanced/">Advanced</a></li>
+<li><a href="http://theses.gla.ac.uk/cgi/search/advanced">Theses</a></li>
+<!-- <li><a href="http://www.lib.gla.ac.uk/enlighten/top100searches/">Top 100 Searches</a></li> -->
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/view/">Browse Papers by</a></p>
+<ul>
+<li><a href="http://eprints.gla.ac.uk/view/year/">Year</a></li>
+<!-- <li><a href="{$config{http_url}}/view/subjects/">Subject</a></li> -->
+<li><a href="http://eprints.gla.ac.uk/view/journal_volume/index.A.html">Journal</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/author/">Glasgow Author</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/funder/">Research Funder</a></li>
+<li><a href="http://eprints.gla.ac.uk/view/divisions/">Colleges/Schools</a></li>
+</ul>
+  
+  <p><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">For Glasgow Authors</a></p>
+<ul>
+<li><a href="http://www.gla.ac.uk/services/openaccess/">Open Access</a></li>
+  <li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/publicationspolicy/">Publications Policy</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/depositguide/">How to Deposit</a></li>
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=0">Benefits of Deposit</a></li>
+<!--	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/funders">Research Funders: Open Access Policies</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/copyright.html">Copyright Advice</a></li>
+	<li><a href="http://www.lib.gla.ac.uk/enlighten/openaccess.html">Open Access Publishing</a></li> -->
+	<li><a href="http://www.gla.ac.uk/services/openaccess/managingyourresearchpublications/#tabs=5">Training, Help and Advice</a></li>
+</ul>
+
+<p><a href="http://eprints.gla.ac.uk/cgi/users/home">MyEnlighten</a></p>
+<ul>
+<li><ul class="ep_tm_key_tools"><li><a href="http://eprints.gla.ac.uk/cgi/users/home">Login</a></li></ul></li>
+</ul>
+<p class="toptail"> </p>
+
+
+<div>
+<table width="100%">
+<tr><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS">RSS 1.0</a></span></div>
+<br />
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=RSS2">RSS 2.0</a></span></div>
+</td><td>
+<div><span class="ep_search_feed"><a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/feed-icon-14x14.png" border="0" /></a> <a href="http://eprints.gla.ac.uk/cgi/latest_tool?output=Atom">Atom</a></span></div>
+
+<br />
+<div><span class="ep_search_feed"><a href="http://twitter.com/uofg_enlighten"><img alt="[feed]" src="http://eprints.gla.ac.uk/style/images/twitter-logo.png" border="0" /></a><a href="http://twitter.com/uofg_enlighten">Twitter</a></span></div>
+</td></tr></table>
+
+<div>
+</div>
+</div>
+</div>
+
+<div id="mainpage">
+<div id="mainpage_forbottom">
+<div class="links"></div>
+<div class="maincontent" style="margin-right:0">
+	
+
+	<div style="width:100%;float:right;">
+    <h1 class="ep_tm_pagetitle">
+
+Crossmodal icons for information display
+
+</h1>
+    <div class="ep_summary_content"><div class="ep_summary_content_left"></div><div class="ep_summary_content_right"></div><div class="ep_summary_content_top"></div><div class="ep_summary_content_main"><p class="ep_block" style="margin-bottom: 1em">
+
+
+    <span>Hoggan, E.E., and <a href="http://eprints.gla.ac.uk/view/author/11463.html">Brewster, S.A.</a></span>
+  
+
+(2006)
+  
+  
+Crossmodal icons for information display.
+    
+    
+
+    In: Conference on Human Factors in Computing Systems, Montréal, Québec, Canada, 22-27 April 2006,
+     pp. 857-862. 
+     ISBN 1595932984
+    <span class="id_number"> (doi:<a href="http://dx.doi.org/10.1145/1125451.1125619 &lt;http://dx.doi.org/10.1145/1125451.1125619&gt;"><a href="http://dx.doi.org/10.1145/1125451.1125619">10.1145/1125451.1125619</a></a>)</span>
+  
+
+
+  
+
+
+</p><p class="ep_block" style="margin-bottom: 1em"></p><table class="ep_block" style="margin-bottom: 1em"><tr><td valign="top" style="text-align:center"><a onmouseover="EPJS_ShowPreview( event, 'doc_preview_1083' );" href="http://eprints.gla.ac.uk/3269/1/CHI2006_hoggan.pdf" onmouseout="EPJS_HidePreview( event, 'doc_preview_1083' );"><img class="ep_doc_icon" alt="[img]" src="http://eprints.gla.ac.uk/style/images/fileicons/text.png" border="0" /></a><div id="doc_preview_1083" class="ep_preview"><table><tr><td><img class="ep_preview_image" alt="" src="http://eprints.gla.ac.uk/3269/1.haspreviewThumbnailVersion/CHI2006_hoggan.pdf" border="0" /><div class="ep_preview_title">Preview</div></td></tr></table></div></td><td valign="top">
+
+<!-- document citation -->
+
+
+<span class="ep_document_citation">
+<a href="http://eprints.gla.ac.uk/3269/1/CHI2006_hoggan.pdf"><span class="document_format">Text</span></a>
+<br /><span class="document_filename">CHI2006_hoggan.pdf</span>
+
+
+
+</span>
+
+<br />714Kb</td></tr></table><p class="ep_block" style="margin-bottom: 1em">Publisher's URL: <a href="http://dx.doi.org/10.1145/1125451.1125619">http://dx.doi.org/10.1145/1125451.1125619</a></p><div class="ep_block"><h2>Abstract</h2><p style="text-align: left; margin: 1em auto 0em auto">This paper describes a novel form of display using crossmodal output. A crossmodal icon is an abstract icon that can be instantiated in one of two equivalent forms (auditory or tactile). These can be used in interfaces as a means of non-visual output. This paper discusses how crossmodal icons can be constructed and the potential benefits they bring to mobile human computer interfaces.</p></div><table class="ep_block" style="margin-bottom: 1em" border="0" cellpadding="3"><tr><th valign="top" class="ep_row">Item Type:</th><td valign="top" class="ep_row">Conference Proceedings</td></tr><tr><th valign="top" class="ep_row">Additional Information:</th><td valign="top" class="ep_row">This is the author's version of the work. It is posted here by permission of ACM for your personal use. Not for redistribution.</td></tr><tr><th valign="top" class="ep_row">Keywords:</th><td valign="top" class="ep_row">audio icons, crossmodal interaction, non-visual interaction, tactile icons 
+</td></tr><tr><th valign="top" class="ep_row">Status:</th><td valign="top" class="ep_row">Published</td></tr><tr><th valign="top" class="ep_row">Refereed:</th><td valign="top" class="ep_row">Yes</td></tr><tr><th valign="top" class="ep_row">Glasgow Author(s) Enlighten ID:</th><td valign="top" class="ep_row"><a href="http://eprints.gla.ac.uk/view/author/11463.html">Brewster, Professor Stephen</a></td></tr><tr><th valign="top" class="ep_row">Authors:</th><td valign="top" class="ep_row">
+
+
+	<span>Hoggan, E.E., and <a href="http://eprints.gla.ac.uk/view/author/11463.html">Brewster, S.A.</a></span>	
+
+
+</td></tr><tr><th valign="top" class="ep_row">Subjects:</th><td valign="top" class="ep_row"><a href="http://eprints.gla.ac.uk/view/subjects/QA75.html">Q Science &gt; QA Mathematics &gt; QA75 Electronic computers. Computer science</a><br /><a href="http://eprints.gla.ac.uk/view/subjects/QA76.html">Q Science &gt; QA Mathematics &gt; QA76 Computer software</a></td></tr><tr><th valign="top" class="ep_row">College/School:</th><td valign="top" class="ep_row"><a href="http://eprints.gla.ac.uk/view/divisions/30200000/">College of Science and Engineering &gt; School of Computing Science</a></td></tr><tr><th valign="top" class="ep_row">Publisher:</th><td valign="top" class="ep_row">ACM Press</td></tr><tr><th valign="top" class="ep_row">ISBN:</th><td valign="top" class="ep_row">1595932984</td></tr><tr><th valign="top" class="ep_row">Copyright Holders:</th><td valign="top" class="ep_row">Copyright © 2006 ACM Press</td></tr><tr><th valign="top" class="ep_row">First Published:</th><td valign="top" class="ep_row">First published in CHI '06 Extended Abstracts on Human Factors in Computing Systems</td></tr><tr><th valign="top" class="ep_row">Publisher Policy:</th><td valign="top" class="ep_row">Reproduced in accordance with the copyright policy of the publisher</td></tr></table><p align="right">Enlighten Editors: <a href="http://eprints.gla.ac.uk/cgi/users/home?screen=EPrint::View&amp;eprintid=3269">Update this record</a></p></div><div class="ep_summary_content_bottom"><div class="ep_summary_box" id="ep_summary_box_1"><div class="ep_summary_box_title"><div class="ep_no_js">Altmetric</div><div class="ep_only_js" id="ep_summary_box_1_colbar"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_1_content',true,'ep_summary_box_1');EPJS_toggle('ep_summary_box_1_colbar',true);EPJS_toggle('ep_summary_box_1_bar',false);return false" href="#"><img alt="-" src="/style/images/minus.png" border="0" /> Altmetric</a></div><div class="ep_only_js" id="ep_summary_box_1_bar" style="display: none"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_1_content',false,'ep_summary_box_1');EPJS_toggle('ep_summary_box_1_colbar',true);EPJS_toggle('ep_summary_box_1_bar',false);return false" href="#"><img alt="+" src="/style/images/plus.png" border="0" /> Altmetric</a></div></div><div class="ep_summary_box_body" id="ep_summary_box_1_content"><div id="ep_summary_box_1_content_inner"><div id="altmetric_summary_page" data-doi="10.1145/1125451.1125619"></div><script type="text/javascript">
+// <![CDATA[
+new EP_Altmetric_Badge( 'altmetric_summary_page' );
+// ]]></script></div></div></div><div class="ep_summary_box" id="ep_summary_box_2"><div class="ep_summary_box_title"><div class="ep_no_js">Tools</div><div class="ep_only_js" id="ep_summary_box_2_colbar"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_2_content',true,'ep_summary_box_2');EPJS_toggle('ep_summary_box_2_colbar',true);EPJS_toggle('ep_summary_box_2_bar',false);return false" href="#"><img alt="-" src="/style/images/minus.png" border="0" /> Tools</a></div><div class="ep_only_js" id="ep_summary_box_2_bar" style="display: none"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_2_content',false,'ep_summary_box_2');EPJS_toggle('ep_summary_box_2_colbar',true);EPJS_toggle('ep_summary_box_2_bar',false);return false" href="#"><img alt="+" src="/style/images/plus.png" border="0" /> Tools</a></div></div><div class="ep_summary_box_body" id="ep_summary_box_2_content"><div id="ep_summary_box_2_content_inner"><div class="ep_block" style="margin-bottom: 1em"><form method="get" accept-charset="utf-8" action="http://eprints.gla.ac.uk/cgi/export_redirect">
+  <input name="eprintid" id="eprintid" value="3269" type="hidden" />
+  <select name="format">
+    <option value="RDFXML">RDF+XML</option>
+    <option value="BibTeX">BibTeX</option>
+    <option value="RIOXX2">RIOXX2 XML</option>
+    <option value="RDFNT">RDF+N-Triples</option>
+    <option value="RefWorks">RefWorks</option>
+    <option value="DC">Dublin Core</option>
+    <option value="Atom">Atom</option>
+    <option value="Simple">Simple Metadata</option>
+    <option value="Refer">Refer</option>
+    <option value="METS">METS</option>
+    <option value="HTML">HTML Citation</option>
+    <option value="Text">ASCII Citation</option>
+    <option value="Cerif_1_4">CERIF 1.4</option>
+    <option value="ContextObject">OpenURL ContextObject</option>
+    <option value="EndNote">EndNote</option>
+    <option value="MODS">MODS</option>
+    <option value="COinS">OpenURL ContextObject in Span</option>
+    <option value="DIDL">MPEG-21 DIDL</option>
+    <option value="RIS">Reference Manager</option>
+    <option value="RDFN3">RDF+N3</option>
+  </select>
+  <input type="submit" value="Export" class="ep_form_action_button" />
+</form></div><p class="ep_block" style="margin-bottom: 1em;"><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="enlightenpapers">Tweet</a><script src="http://platform.twitter.com/widgets.js">// <!-- No script --></script></p></div></div></div><div class="ep_summary_box" id="ep_summary_box_3"><div class="ep_summary_box_title"><div class="ep_no_js">Deposit and Record Details</div><div class="ep_only_js" id="ep_summary_box_3_colbar" style="display: none"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_3_content',true,'ep_summary_box_3');EPJS_toggle('ep_summary_box_3_colbar',true);EPJS_toggle('ep_summary_box_3_bar',false);return false" href="#"><img alt="-" src="/style/images/minus.png" border="0" /> Deposit and Record Details</a></div><div class="ep_only_js" id="ep_summary_box_3_bar"><a class="ep_box_collapse_link" onclick="EPJS_blur(event); EPJS_toggleSlideScroll('ep_summary_box_3_content',false,'ep_summary_box_3');EPJS_toggle('ep_summary_box_3_colbar',false);EPJS_toggle('ep_summary_box_3_bar',true);return false" href="#"><img alt="+" src="/style/images/plus.png" border="0" /> Deposit and Record Details</a></div></div><div class="ep_summary_box_body" id="ep_summary_box_3_content" style="display: none"><div id="ep_summary_box_3_content_inner"><table class="ep_block" style="margin-bottom: 1em" border="0" cellpadding="3"><tr><th valign="top" class="ep_row">ID Code:</th><td valign="top" class="ep_row">3269</td></tr><tr><th valign="top" class="ep_row">Unique ID:</th><td valign="top" class="ep_row">glaseprints:2006-3269</td></tr><tr><th valign="top" class="ep_row">Depositing User:</th><td valign="top" class="ep_row"><i>Users 157 not found.</i></td></tr><tr><th valign="top" class="ep_row">Deposited On:</th><td valign="top" class="ep_row">06 Dec 2006</td></tr><tr><th valign="top" class="ep_row">Last Modified:</th><td valign="top" class="ep_row">12 Feb 2015 18:05</td></tr></table></div></div></div></div><div class="ep_summary_content_after"></div></div>
+</div>
+<div style="clear:both;"></div>
+</div>
+<div class="onecolclear"></div>
+</div>
+</div>
+</div>
+
+<div id="footer_container"> 
+
+<div class="ep_tm_footer ep_noprint">
+  <div id="footer1">
+<p>
+
+<!-- AddThis Button BEGIN -->
+
+<!--
+<script type="text/javascript">addthis_pub  = 'ticketinspector'; addthis_logo = 'http://www.gla.ac.uk/t4/generic/i/180newlogotypeblack160x20.gif';
+
+addthis_logo_background = '121212';
+
+addthis_logo_color      = 'ffffff'; addthis_brand = ' ';
+
+addthis_options         = 'email, digg, delicious, myspace, facebook, google, live, favorites, more';</script>
+
+<a href="http://www.addthis.com/bookmark.php" onmouseover="return addthis_open(this, '', '[URL]', '[TITLE]')" onmouseout="addthis_close()" onclick="return addthis_sendto()"><img style="margin-left: -5px;" src="http://www.gla.ac.uk/t4/generic/i/bookmarks.gif'" width="172" height="27" border="0" alt="" /></a><script type="text/javascript" src="http://s7.addthis.com/js/152/addthis_widget.js"></script>
+-->
+<!-- AddThis Button END -->
+
+
+
+</p>
+
+<p> <a href="#top">top</a> | <a href="http://www.gla.ac.uk/search">search</a> | <a href="http://www.gla.ac.uk/">home</a></p>
+
+</div>
+
+  <div id="footer2">
+<p>University of Glasgow, University Avenue, Glasgow G12 8QQ, United Kingdom<br />
+
+tel:  +44 (0)141 330 2000<br />
+
+The University of Glasgow is a registered Scottish charity: registration number SC004401<br />
+
+<a href="http://www.lib.gla.ac.uk/enlighten/aboutenlighten.html">About Enlighten</a></p>
+
+<p><a href="http://www.gla.ac.uk/about/accessibility/">Accessibility</a> | <a href="http://www.gla.ac.uk/legal/disclaimer/">Disclaimer</a> | <a href="http://www.gla.ac.uk/foi/">Freedom
+
+of Information </a> | <a href="http://www.gla.ac.uk/legal/freedomofinformation/foipublicationscheme/">FOI Publication Scheme</a> | <a href="http://www.gla.ac.uk/legal/privacy/">Privacy</a> | <a href="http://www.gla.ac.uk/legal/copyright/">© UofG</a></p>
+
+  </div>
+
+  </div>
+</div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-306447-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+    
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-9258834-1', 'auto');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');
+
+</script>
+    
+  </body>
+</html>

@@ -494,11 +494,11 @@ def get_paper_keywords(tree):
 	"""
 	path = '//table/tr/th[text() = "Keywords:"]/following-sibling::td/text()'
 	keywords = tree.xpath(path)
-	# xpath returns a list with the keywords as a single string element separated by whitespace, commas or semi-colons
+	# xpath returns a list with the keywords as a single string element separated by new lines, commas or semi-colons
 	# Make this into a list of keywords
 	if keywords:
-		# Split on white space, commas and semi-colons
-		keywords = re.split('[\s,;]', keywords[0])
+		# Split on new lines, commas and semi-colons
+		keywords = re.split('[\\n,;]', keywords[0])
 		# Remove trailing white space and empty strings
 		keywords = [kw.strip() for kw in keywords if kw]
 
