@@ -270,8 +270,6 @@ def get_tagged_titles(ttls_lnks):
 	"""
 	tagged_titles = []
 	for title, link in ttls_lnks:
-		# TODO for testing, remove this later
-		print "checking" + title.encode("utf-8")
 		# get the html tree for the paper's page
 		paper_tree = get_tree(link)
 		path = '//table/tr/th[text() = "Subjects:"]'

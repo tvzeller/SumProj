@@ -289,8 +289,8 @@ def kw_search(request):
 		query = request.GET.get('query')
 
 	# Paths for the indices
-	path = os.path.join(settings.INDICES_PATH + "\invindex10.db")
-	tkw_path = os.path.join(settings.INDICES_PATH + "\paperkwindex3.db")
+	path = os.path.join(settings.INDICES_PATH + "\invindex.db")
+	tkw_path = os.path.join(settings.INDICES_PATH + "\paperkwindex.db")
 	# Make search object, passing index paths
 	srch = search.Search(path, tkw_path)
 

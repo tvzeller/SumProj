@@ -16,33 +16,22 @@ class Search(object):
 	"""
 	
 	def __init__(self, index_path=None, pkw_path=None):
-		#print "in init, index_path is", index_path
-		if index_path == None:
-			self.index_path = defaultdict(set)
-		else:
-			self.index_path = index_path
-			self.pkw_path = pkw_path
-
-
-	def get_index(self):
-		return self.index
+		self.index = shelve.open(index_path)
+		self.pkw_index = shelve.open(pkw_path)
 
 
 	def get_paper_sets(self, q):
-		# Open the stored inverted index
-		data = shelve.open(self.index_path)
 		# Get individual and processed terms in query
 		q = [term.encode("utf-8") for term in tu.process_text(q)]
 		paper_sets = []
 		# Get the postings list of paper ids for each term and add to outer list
 		for term in q:
-			if term in data:
-				paper_sets.append(data[term])
+			if term in self.index:
+				paper_sets.append(self.index[term])
 
-		data.close()
+		self.index.close()
 
 		return paper_sets
-
 
 
 	def and_search(self, q):
@@ -58,7 +47,7 @@ class Search(object):
 		# A dict mapping author ids to their papers which contain the query term
 		author_papers = {}
 		# Open index mapping paper titles to authors and keywords
-		pkw_index = shelve.open(self.pkw_path)
+		#pkw_index = shelve.open(self.pkw_path)
 		# For each postings list
 		for index, paper_set in enumerate(paper_sets):
 			# Add empty set to list of author_sets
@@ -66,10 +55,10 @@ class Search(object):
 			for paper_id in paper_set:
 				# For each paper, add the paper's info to the results (author_papers)
 				paper_id = paper_id.encode("utf-8")			
-				if paper_id in pkw_index:
-					self.add_authors_to_results(author_papers, pkw_index, paper_id, author_sets, index)
+				if paper_id in self.pkw_index:
+					self.add_authors_to_results(author_papers, self.pkw_index, paper_id, author_sets, index)
 					
-		pkw_index.close()
+		self.pkw_index.close()
 
 		matching_authors = set()
 		# Get intersection of author sets - only authors who are in the author sets for all of the postings lists
@@ -95,12 +84,15 @@ class Search(object):
 			papers = set.union(*paper_sets)
 		authors = []
 		author_papers = {}
-		pkw_index = shelve.open(self.pkw_path)
+		#pkw_index = shelve.open(self.pkw_path)
 		for paper_id in papers:
 			paper_id = paper_id.encode("utf-8")
-			if paper_id in pkw_index:
+			if paper_id in self.pkw_index:
 				# Add authors of each paper as keys to the results, with paper info as values
-				self.add_authors_to_results(author_papers, pkw_index, paper_id)
+				self.add_authors_to_results(author_papers, self.pkw_index, paper_id)
+
+
+		self.pkw_index.close()
 
 		return author_papers
 
@@ -116,16 +108,18 @@ class Search(object):
 		if paper_sets:
 			papers = set.intersection(*paper_sets)
 		
-		pkw_index = shelve.open(self.pkw_path)
+		#pkw_index = shelve.open(self.pkw_path)
 		author_papers = {}
 		
 		for paper_id in papers:
 			paper_id = paper_id.encode("utf-8")
-			if paper_id in pkw_index:
+			if paper_id in self.pkw_index:
 				# For each paper, add the authors to the results if the full phrase is found in the papers keywords
 				# Paper keywords are joined into a string to facilitate searching for a phrase
-				if q in "|".join(pkw_index[paper_id]["keywords"]):
-					self.add_authors_to_results(author_papers, pkw_index, paper_id)
+				if q in "|".join(self.pkw_index[paper_id]["keywords"]):
+					self.add_authors_to_results(author_papers, self.pkw_index, paper_id)
+
+		self.pkw_index.close()
 
 		return author_papers
 
