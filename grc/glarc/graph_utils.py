@@ -29,7 +29,6 @@ class CollabGraphMaker(object):
 		to check if a node in the graph is a member of the school or not (this info is added as a node attribute)
 		"""
 		self.schl_name_urls = snurls
-		self.schoolname = schoolname
 
 		for paper_id, info in data_dict.items():
 			title = info["title"]
@@ -576,7 +575,7 @@ def make_search_graph(query, results, full_graph, max_authors):
 											"num_collabs": len(papers),
 											"collab_title_url_years": papers
 											})
-		
+
 	return term_graph
 
 

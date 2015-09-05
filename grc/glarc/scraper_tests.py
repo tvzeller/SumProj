@@ -2,6 +2,7 @@ import unittest
 import enlighten_scraper as es
 from lxml import html
 import lxml
+import graph_utils as gu
 
 class ScraperTestCases(unittest.TestCase):
 	def test_get_name_url_matches(self):
@@ -52,6 +53,41 @@ class ScraperTestCases(unittest.TestCase):
 		expected = ['audio icons', 'crossmodal interaction', 'non-visual interaction', 'tactile icons']
 		self.assertEqual(es.get_paper_keywords(tree), expected)	
 
+
+class CollabGraphTest(unittest.TestCase):
+	def test_graph_making(self):
+		data_dict = {"123": {
+							'title': 'a paper',
+							'authors': [('Albert Einstein', "url1"), ("Donald Knuth", "url2"), ("Cristiano Ronaldo", "url3")],
+							'abstract': "this paper is about paper",
+							"url": 'paperurl123',
+							"keywords": [],
+							"year": "1977"
+							},
+					"456": {
+							'title': 'another paper',
+							'authors': [('Albert Einstein', "url1"), ("Ada Lovelace", "url4")],
+							'abstract': "abstractions about abstracts",
+							"url": 'paperurl456',
+							"keywords": [],
+							"year": "1799"
+							}
+					}
+
+		name_urls = [('Albert Einstein', "url1"), ("Ada Lovelace", "url4")]
+
+		cgm = gu.CollabGraphMaker()
+		cgm.populate_graph(data_dict, name_urls)
+		graph = cgm.get_graph()
+
+		self.assertEqual(graph.number_of_nodes(), 4)
+		self.assertEqual(graph.number_of_edges(), 4)
+		self.assertTrue("url1" in graph.nodes() and "url2" in graph.nodes() and "url3" in graph.nodes() and "url4" in graph.nodes())
+		self.assertTrue(graph.has_edge("url1", "url2") and graph.has_edge("url1", "url3") and graph.has_edge("url2", "url3") and graph.has_edge("url1", "url4"))
+		self.assertTrue(graph.node["url1"]["in_school"] and graph.node["url4"]["in_school"])
+		self.assertFalse(graph.node["url2"]["in_school"] and graph.node["url3"]["in_school"])
+		self.assertEqual(graph['url1']['url2']["collab_title_url_years"], [['a paper', 'paperurl123', '1977']])
+		self.assertEqual(graph.node['url1']['paper_count'], 2)
 
 if __name__ == '__main__':
 	unittest.main()
