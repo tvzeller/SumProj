@@ -1556,9 +1556,8 @@
 
     shortestPathBox = function() {
       // HTML for shortest path text, including text input boxes to enter author names/ids
-      var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the name or, for more accurate \
-          results, the unique Enlighten numbers of the source and target authors. You can find out an author's identifier by checking their \
-          url <a href=\"http://eprints.gla.ac.uk/view/author/\" target=\"_blank\">here</a><br><br><input type=\"text\" id=\"sourceInput\" \
+      var info = "Find the shortest path between two authors anywhere within the university.<br> Please enter the names or the unique Enlighten numbers \
+          of the source and target authors.<br><br><input type=\"text\" id=\"sourceInput\" \
           placeholder=\"source\"/><br><br><span class=\"candidates\" id=\"sourceCandidates\" data-input=\"sourceInput\"></span> \
           <input type=\"text\" id=\"targetInput\" placeholder=\"target\"/><br><br> \
           <span class=\"candidates\" id=\"targetCandidates\" data-input=\"targetInput\"></span><button type=\"button\" \
@@ -1795,7 +1794,7 @@
 
     // Otherwise, make request to server passing info
     else {
-        $.get('author_search/', {author: authorInfo, cutoff: cutoff}, function(data) {
+        $.get('single_author/', {author: authorInfo, cutoff: cutoff}, function(data) {
           // If response has error, display it
           if(data.error)
             d3.select("#singleError").html(data.error);

@@ -1,7 +1,5 @@
-# Inverted index experimentation
-# Using dict but need to think about how to persist this
-# TODO refactor, think about how querying will work
-# clear up responsibilities between modules/classes
+# Module used to support searching for terms within the application.
+# Used within the Django views.
 
 from collections import defaultdict
 import json

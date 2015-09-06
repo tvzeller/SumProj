@@ -113,6 +113,42 @@ class GraphTestCases(unittest.TestCase):
 		self.assertTrue("graphs" in sim_graph[2][3]['sim_kw'])
 
 
+	def test_get_path(self):
+		g = nx.Graph()
+		g.add_nodes_from([1, 2, 3, 4])
+		g.add_edge(1, 3)
+		g.add_edge(3, 4)
+		expected = [1, 3, 4]
+		self.assertEqual(gu.get_path(g, 1, 4), expected)
+
+	def test_make_path_graph(self):
+		g = nx.Graph()
+		g.add_node(1, {"name":"alice", "school": "a school"})
+		g.add_node(2, {"name":"bob", "school": "a school"})
+		g.add_node(3, {"name":"eve", "school": "a school"})
+		g.add_edge(1, 2, {"num_collabs": 1, "collab_title_url_years": ["a paper", "url1", "1999"]})
+		g.add_edge(2, 3, {"num_collabs": 1, "collab_title_url_years": ["a paper", "url1", "1999"]})
+		path_graph = gu.make_path_graph([1, 2, 3], g)
+		self.assertEqual(path_graph.number_of_nodes(), 3)
+		self.assertEqual(path_graph.number_of_edges(), 2)
+		self.assertEqual(g[1][2], {"num_collabs": 1, "collab_title_url_years": ["a paper", "url1", "1999"]})
+
+	def test_single_author_graph(self):
+		g = nx.Graph()
+		g.add_nodes_from([1, 2, 3, 4, 5])
+		g.add_edge(1, 2)
+		g.add_edge(1, 3)
+		g.add_edge(3, 5)
+		g.add_edge(5, 4)
+		cutoff = 2
+		single = gu.single_author_graph(g, 1, cutoff)
+		self.assertEqual(single.number_of_nodes(), 4)
+		self.assertEqual(single.number_of_edges(), 3)
+		self.assertTrue(1 in single.nodes() and 2 in single.nodes() and 3 in single.nodes() and 5 in single.nodes())
+		self.assertFalse(4 in single.nodes())
+
+
+
 class TextUtilsTests(unittest.TestCase):
 	def test_check_sim(self):
 		kw1 = ["java", "python", "django"]
@@ -156,6 +192,8 @@ class TfidfTests(unittest.TestCase):
 		tf.add_text(text2)
 
 		self.assertEqual(tf.get_keywords(text1, 1), ['python'])	
+
+
 
 
 if __name__ == '__main__':

@@ -1,3 +1,5 @@
+# Module to scrape data from Enlighten.
+
 import requests
 import lxml
 from lxml import html

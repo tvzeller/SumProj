@@ -1,4 +1,7 @@
-import englighten_scraper as es
+# Module that acts as a controller - makes use of other modules to scrape data from Enlighten
+# and create necessary data structures
+
+import enlighten_scraper as es
 import text_utils as tu
 import graph_utils as gu
 
@@ -149,7 +152,7 @@ if __name__ == "__main__":
 	
 	school_graphs = add_com_keywords_to_graphs(school_graphs, school_akws)
 
-	collab_graph_path = "../graphs/collab/"
+	collab_graph_path = "../graphs/collab2/"
 	for schoolname, graph in school_graphs.items():
 		path = collab_graph_path + schoolname + ".json"
 		gu.write_to_file(graph, path)
@@ -160,7 +163,7 @@ if __name__ == "__main__":
 	interpath = collab_graph_path + "Inter School.json"
 	gu.write_to_file(interschool_graph, interpath)
 
-	sim_graph_path = "../graphs/simiilarity/"
+	sim_graph_path = "../graphs/simiilarity3/"
 	for schoolname, sim_graph in sim_graphs:
 		path = sim_graph_path + schoolname + ".json"
 		gu.write_to_file(sim_graph, path)

@@ -1,3 +1,7 @@
+# Module to deal with the creation of graphs and graph analysis.
+# Used by data_processor and also within the Django views, to create shortest path and
+# single author graphs on demand.
+
 import networkx as nx
 from networkx.readwrite import json_graph
 import json

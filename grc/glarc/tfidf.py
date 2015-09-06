@@ -1,5 +1,6 @@
 # Implementation of TF-IDF
 # Some ideas inspired by code at https://code.google.com/p/tfidf/
+# Used by the text_utils module to extract keywords from paper titles + abstracts
 
 import re
 import operator

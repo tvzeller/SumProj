@@ -1,3 +1,6 @@
+# Module to assist in text related functionality - creating indices to use for search,
+# adding keywords to data, processing text for search etc.
+
 import json
 from topia.termextract import extract
 import tfidf
